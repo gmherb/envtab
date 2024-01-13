@@ -34,10 +34,8 @@ func TestInitEnvtab(t *testing.T) {
 		}
 	}
 
-	// Run function
+	// Run function and then test
 	output := InitEnvtab()
-
-	// Run tests
 	if _, err = os.Stat(envtabPath); os.IsNotExist(err) {
 		t.Errorf("Expected %s to exist", envtabPath)
 	}
