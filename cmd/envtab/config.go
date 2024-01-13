@@ -73,7 +73,7 @@ func ListEnvtabEntries() []string {
 	return nil
 }
 
-func readEntry(name string) (*EnvTable, error) {
+func ReadEntry(name string) (*EnvTable, error) {
 
 	filePath := filepath.Join(InitEnvtab(), name)
 
@@ -92,12 +92,12 @@ func readEntry(name string) (*EnvTable, error) {
 
 }
 
-func writeEntryToFile(name, key, value string, tags []string) error {
+func WriteEntryToFile(name, key, value string, tags []string) error {
 
 	filePath := filepath.Join(InitEnvtab(), name)
 
 	// Read the existing entries if file exists
-	content, err := readEntry(name)
+	content, err := ReadEntry(name)
 	if err != nil && !os.IsNotExist(err) {
 		return err
 
@@ -130,7 +130,7 @@ func writeEntryToFile(name, key, value string, tags []string) error {
 		return err
 	}
 
-	err = os.WriteFile(filePath, data, 0577)
+	err = os.WriteFile(filePath, data, 0700)
 	if err != nil {
 		return err
 	}

@@ -6,6 +6,7 @@ package cmd
 import (
 	"fmt"
 
+	"github.com/gmherb/envtab/cmd/envtab"
 	"github.com/spf13/cobra"
 )
 
@@ -21,6 +22,17 @@ This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("add called")
+
+		if len(args) < 3 {
+			fmt.Println("Usage: envtab add <name> <key> <value> [tags]")
+			return
+		}
+
+		err := envtab.WriteEntryToFile(args[0], args[1], args[2], args[3:])
+		if err != nil {
+			fmt.Printf("Error writing entry to file: %s\n", err)
+		}
+
 	},
 }
 

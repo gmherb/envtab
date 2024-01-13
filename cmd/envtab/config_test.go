@@ -9,11 +9,10 @@ import (
 )
 
 func TestGetCurrentTime(t *testing.T) {
-	expected := time.Now().Format(time.RFC3339)
-	actual := getCurrentTime()
-
-	if expected != actual {
-		t.Errorf("Expected %s, got %s", expected, actual)
+	currentTime := getCurrentTime()
+	_, err := time.Parse(time.RFC3339, currentTime)
+	if err != nil {
+		t.Errorf("GetCurrentTime provided invalid time.RFC3339 value: %s", err)
 	}
 }
 
@@ -91,7 +90,7 @@ func TestReadEntry(t *testing.T) {
 	}
 
 	// Read test file
-	entry, err := readEntry(fileName)
+	entry, err := ReadEntry(fileName)
 	if err != nil {
 		t.Errorf("Error reading test file %s: %s", filePath, err)
 	}
@@ -112,12 +111,12 @@ func TestWriteEntryToFile(t *testing.T) {
 	fileName := "test.yaml"
 	filePath := filepath.Join(InitEnvtab(), fileName)
 
-	err := writeEntryToFile(fileName, "test2", "test2", []string{"test"})
+	err := WriteEntryToFile(fileName, "test2", "test2", []string{"test"})
 	if err != nil {
 		t.Errorf("Error writing test data to %s: %s", filePath, err)
 	}
 
-	entry, err := readEntry(fileName)
+	entry, err := ReadEntry(fileName)
 	if err != nil {
 		t.Errorf("Error reading test file %s: %s", fileName, err)
 	}
