@@ -21,40 +21,44 @@ func TestGetEnvtabPath(t *testing.T) {
 	}
 }
 
-func TestCreateEnvtab(t *testing.T) {
-	envtabPath := getEnvtabPath()
-
-	if _, err := os.Stat(envtabPath); os.IsNotExist(err) {
-		os.Rename(envtabPath, envtabPath+".bak")
-		defer os.Rename(envtabPath+".bak", envtabPath)
-	}
-
-	createEnvtabDir()
-
-	if _, err := os.Stat(envtabPath); os.IsNotExist(err) {
-		t.Errorf("Expected %s to exist", envtabPath)
-	}
-}
-
 func TestInitEnvtab(t *testing.T) {
 	envtabPath := getEnvtabPath()
 
-	if _, err := os.Stat(envtabPath); os.IsNotExist(err) {
-		os.Rename(envtabPath, envtabPath+".bak")
-		defer os.Rename(envtabPath+".bak", envtabPath)
+	var err error
+
+	// Prepare for tests
+	if _, err = os.Stat(envtabPath); err == nil {
+		err = os.Rename(envtabPath, envtabPath+".bak")
+		if err != nil {
+			t.Errorf("Error renaming %s to %s: %s", envtabPath, envtabPath+".bak", err)
+		}
 	}
 
+	// Run function
 	output := InitEnvtab()
 
-	if _, err := os.Stat(envtabPath); os.IsNotExist(err) {
+	// Run tests
+	if _, err = os.Stat(envtabPath); os.IsNotExist(err) {
 		t.Errorf("Expected %s to exist", envtabPath)
 	}
 
 	if output != envtabPath {
 		t.Errorf("Expected %s, got %s", envtabPath, output)
 	}
+
+	// Cleanup
+	err = os.Remove(envtabPath)
+	if err != nil {
+		t.Errorf("Error removing %s: %s", envtabPath, err)
+	}
+
+	err = os.Rename(envtabPath+".bak", envtabPath)
+	if err != nil {
+		t.Errorf("Error renaming %s to %s: %s", envtabPath, envtabPath+".bak", err)
+	}
+
 }
 
 func TestListEnvtabEntries(t *testing.T) {
-	listEnvtabEntries()
+	ListEnvtabEntries()
 }

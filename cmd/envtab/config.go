@@ -38,19 +38,15 @@ func getEnvtabPath() string {
 	return filepath.Join(usr.HomeDir, ENVTAB_DIR)
 }
 
-func createEnvtabDir() {
+func InitEnvtab() string {
 	envtabPath := getEnvtabPath()
 	if _, err := os.Stat(envtabPath); os.IsNotExist(err) {
 		os.Mkdir(envtabPath, 0700)
 	}
-}
-
-func InitEnvtab() string {
-	envtabPath := getEnvtabPath()
 	return envtabPath
 }
 
-func listEnvtabEntries() []string {
+func ListEnvtabEntries() []string {
 	envtabPath := InitEnvtab()
 
 	err := filepath.Walk(envtabPath, func(path string, info os.FileInfo, err error) error {
