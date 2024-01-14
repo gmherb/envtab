@@ -5,47 +5,78 @@ package cmd
 
 import (
 	"fmt"
+	"os"
+	"strings"
 
 	"github.com/gmherb/envtab/cmd/envtab"
+	tagz "github.com/gmherb/envtab/pkg/tags"
 	"github.com/spf13/cobra"
 )
 
 // addCmd represents the add command
 var addCmd = &cobra.Command{
 	Use:   "add",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
+	Short: "Add an envtab entry",
+	Long: `Add an environment variable and its value, KEY=VALUE, as an entry in
+	an envtab backend table.
 
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	Usage: envtab add <name> <KEY>=<value> [tag1 tag2 ...]
+
+	The first argument is the name of the entry followed by the key and value
+	of the environment variable. Optionally, you can add tags to the envtab
+	table by adding them after the key value pair (multiple can be provided
+	using space as a separator). By default, the table is a	YAML file in the
+	envtab directory which resides in the user's home directory (~/.envtab).`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("add called")
+		fmt.Println("DEBUG: add command called")
 
-		if len(args) < 3 {
-			fmt.Println("Usage: envtab add <name> <key> <value> [tags]")
-			return
+		var (
+			name  string   // Envtab entry name
+			key   string   // Environment variable key
+			value string   // Environment variable value
+			tags  []string // Tags for the envtab entry
+
+		)
+
+		if len(args) < 2 {
+			fmt.Println("DEBUG: Insufficient number of arguments provided")
+			fmt.Println("Usage: envtab add <name> <KEY>=<value> [tag1 tag2 ...]")
+			os.Exit(1)
 		}
 
-		err := envtab.WriteEntryToFile(args[0], args[1], args[2], args[3:])
+		if len(args) == 2 && !strings.Contains(args[1], "=") {
+			fmt.Println("DEBUG: No value provided for your envtab entry. No equal sign detected and only 2 args provided.")
+			fmt.Println("Usage: envtab add <name> <KEY>=<value> [tag1 tag2 ...]")
+			os.Exit(1)
+		}
+
+		name = args[0]
+
+		if strings.Contains(args[1], "=") {
+			fmt.Println("DEBUG: Equal sign detected in second argument. Splitting into key and value.")
+			key, value = strings.Split(args[1], "=")[0], strings.Split(args[1], "=")[1]
+			tags = args[2:]
+
+		} else {
+			fmt.Println("DEBUG: No equal sign detected in second argument. Assigning second argument as key.")
+			key = args[1]
+			value = args[2]
+			tags = args[3:]
+		}
+
+		tags = tagz.SplitTags(tags)
+		tags = tagz.RemoveEmptyTags(tags)
+
+		fmt.Printf("DEBUG: Name: %s, Key: %s, Value: %s, tags: %s.", name, key, value, tags)
+
+		err := envtab.WriteEntryToFile(name, key, value, tags)
 		if err != nil {
-			fmt.Printf("Error writing entry to file: %s\n", err)
+			fmt.Printf("Error writing entry to file [%s]: %s\n", name, err)
+			os.Exit(1)
 		}
-
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(addCmd)
-
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// addCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// addCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }

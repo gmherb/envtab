@@ -1,5 +1,7 @@
 package tags
 
+import "strings"
+
 func ContainsTag(tags []string, tag string) bool {
 	for _, t := range tags {
 		if t == tag {
@@ -29,6 +31,34 @@ func MergeTags(existingTags []string, newTags []string) []string {
 	}
 
 	return result
+}
+
+// Split all tags containing a comma and remove all commas
+func SplitTags(tags []string) []string {
+	var splitTags []string
+
+	for _, tag := range tags {
+		if strings.Contains(tag, ",") {
+			splitTags = append(splitTags, strings.Split(tag, ",")...)
+		} else {
+			splitTags = append(splitTags, tag)
+		}
+	}
+
+	return splitTags
+}
+
+// Remove tags containing only whitespace
+func RemoveEmptyTags(tags []string) []string {
+	var nonEmptyTags []string
+
+	for _, tag := range tags {
+		if tag != "" {
+			nonEmptyTags = append(nonEmptyTags, tag)
+		}
+	}
+
+	return nonEmptyTags
 }
 
 //func searchByTag(tag string) ([]string, error) {
