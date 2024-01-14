@@ -33,7 +33,7 @@ func MergeTags(existingTags []string, newTags []string) []string {
 	return result
 }
 
-// Split all tags containing a comma and remove all commas
+// Split all tags containing a comma
 func SplitTags(tags []string) []string {
 	var splitTags []string
 
