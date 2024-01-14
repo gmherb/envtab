@@ -23,13 +23,10 @@ type EnvMetadata struct {
 	Tags      []string `json:"tags" yaml:"tags"`
 }
 
+// EnvTable represents the structure of an envtab loadout
 type EnvTable struct {
 	Metadata EnvMetadata       `json:"metadata" yaml:"metadata"`
 	Entries  map[string]string `json:"entries" yaml:"entries"`
-}
-
-func (c *EnvTable) Save() error {
-	return nil
 }
 
 func getCurrentTime() string {
@@ -54,28 +51,38 @@ func InitEnvtab() string {
 	return envtabPath
 }
 
-func ListEnvtabEntries() []string {
+// Find all YAML files in the envtab directory, remove the extension, and return them as a slice
+func getEnvtabSlice() []string {
 	envtabPath := InitEnvtab()
 
+	var entries []string
 	err := filepath.Walk(envtabPath, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
 		}
-		if !info.IsDir() {
-			fmt.Println(info.Name())
+		if filepath.Ext(path) == ".yaml" {
+			entries = append(entries, filepath.Base(path[:len(path)-5]))
 		}
 		return nil
 	})
 	if err != nil {
-		fmt.Printf("Error listing entries in the cache directory: %s\n", err)
+		fmt.Printf("Error reading envtab loadout %s: %s\n", envtabPath, err)
 		os.Exit(1)
 	}
-	return nil
+
+	return entries
 }
 
-func ReadEntry(name string) (*EnvTable, error) {
+func PrintEnvtabLoadouts() {
+	entries := getEnvtabSlice()
+	for _, entry := range entries {
+		fmt.Println(entry)
+	}
+}
 
-	filePath := filepath.Join(InitEnvtab(), name)
+func ReadLoadout(name string) (*EnvTable, error) {
+
+	filePath := filepath.Join(InitEnvtab(), name+".yaml")
 
 	content, err := os.ReadFile(filePath)
 	if err != nil {
@@ -92,12 +99,12 @@ func ReadEntry(name string) (*EnvTable, error) {
 
 }
 
-func WriteEntryToFile(name, key, value string, tags []string) error {
+func WriteEntryToLoadout(name, key, value string, tags []string) error {
 
-	filePath := filepath.Join(InitEnvtab(), name)
+	filePath := filepath.Join(InitEnvtab(), name+".yaml")
 
 	// Read the existing entries if file exists
-	content, err := ReadEntry(name)
+	content, err := ReadLoadout(name)
 	if err != nil && !os.IsNotExist(err) {
 		return err
 

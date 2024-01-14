@@ -34,7 +34,7 @@ to quickly create a Cobra application.`,
 			e.Populate()
 			e.Print()
 		} else {
-			content, err := ioutil.ReadFile(envtabPath + "/" + args[0])
+			content, err := ioutil.ReadFile(envtabPath + "/" + args[0] + ".yaml")
 			if err != nil {
 				fmt.Printf("Error reading %s: %s\n", envtabPath, err)
 				os.Exit(1)

@@ -13,14 +13,18 @@ import (
 	"github.com/spf13/cobra"
 )
 
+const (
+	USAGE = `Usage: envtab add <name> <key>=<value> [tag1 tag2 ...]`
+)
+
 // addCmd represents the add command
 var addCmd = &cobra.Command{
 	Use:   "add",
-	Short: "Add an envtab entry",
-	Long: `Add an environment variable and its value, KEY=VALUE, as an entry in
-	an envtab backend table.
+	Short: "Add an envtab entry to a loadout",
+	Long: `Add an environment variable and its value, KEY=value, as an entry in
+	an envtab .
 
-	Usage: envtab add <name> <KEY>=<value> [tag1 tag2 ...]
+	Usage: envtab add <name> <key>=<value> [tag1 tag2 ...]
 
 	The first argument is the name of the entry followed by the key and value
 	of the environment variable. Optionally, you can add tags to the envtab
@@ -40,13 +44,13 @@ var addCmd = &cobra.Command{
 
 		if len(args) < 2 {
 			fmt.Println("DEBUG: Insufficient number of arguments provided")
-			fmt.Println("Usage: envtab add <name> <KEY>=<value> [tag1 tag2 ...]")
+			fmt.Println(USAGE)
 			os.Exit(1)
 		}
 
 		if len(args) == 2 && !strings.Contains(args[1], "=") {
 			fmt.Println("DEBUG: No value provided for your envtab entry. No equal sign detected and only 2 args provided.")
-			fmt.Println("Usage: envtab add <name> <KEY>=<value> [tag1 tag2 ...]")
+			fmt.Println(USAGE)
 			os.Exit(1)
 		}
 
@@ -69,7 +73,7 @@ var addCmd = &cobra.Command{
 
 		fmt.Printf("DEBUG: Name: %s, Key: %s, Value: %s, tags: %s.", name, key, value, tags)
 
-		err := envtab.WriteEntryToFile(name, key, value, tags)
+		err := envtab.WriteEntryToLoadout(name, key, value, tags)
 		if err != nil {
 			fmt.Printf("Error writing entry to file [%s]: %s\n", name, err)
 			os.Exit(1)

@@ -24,7 +24,7 @@ to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("list called")
 
-		envtab.ListEnvtabEntries()
+		envtab.PrintEnvtabLoadouts()
 	},
 }
 

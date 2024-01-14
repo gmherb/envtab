@@ -68,13 +68,13 @@ func TestInitEnvtab(t *testing.T) {
 
 }
 
-func TestListEnvtabEntries(t *testing.T) {
-	ListEnvtabEntries()
+func TestPrintEnvtabLoadouts(t *testing.T) {
+	PrintEnvtabLoadouts()
 }
 
-func TestReadEntry(t *testing.T) {
-	fileName := "test.yaml"
-	filePath := filepath.Join(InitEnvtab(), fileName)
+func TestReadLoadout(t *testing.T) {
+	name := "TestReadLoadout"
+	filePath := filepath.Join(InitEnvtab(), name+".yaml")
 
 	// Create test file
 	f, err := os.Create(filePath)
@@ -90,7 +90,7 @@ func TestReadEntry(t *testing.T) {
 	}
 
 	// Read test file
-	entry, err := ReadEntry(fileName)
+	entry, err := ReadLoadout(name)
 	if err != nil {
 		t.Errorf("Error reading test file %s: %s", filePath, err)
 	}
@@ -107,18 +107,18 @@ func TestReadEntry(t *testing.T) {
 	}
 }
 
-func TestWriteEntryToFile(t *testing.T) {
-	fileName := "test.yaml"
-	filePath := filepath.Join(InitEnvtab(), fileName)
+func TestWriteEntryToLoadout(t *testing.T) {
+	name := "TestWriteEntryToLoadout"
+	filePath := filepath.Join(InitEnvtab(), name+".yaml")
 
-	err := WriteEntryToFile(fileName, "test2", "test2", []string{"test"})
+	err := WriteEntryToLoadout(name, "test2", "test2", []string{"test"})
 	if err != nil {
 		t.Errorf("Error writing test data to %s: %s", filePath, err)
 	}
 
-	entry, err := ReadEntry(fileName)
+	entry, err := ReadLoadout(name)
 	if err != nil {
-		t.Errorf("Error reading test file %s: %s", fileName, err)
+		t.Errorf("Error reading test file %s: %s", filePath, err)
 	}
 
 	if entry.Entries["test2"] != "test2" {
@@ -127,6 +127,6 @@ func TestWriteEntryToFile(t *testing.T) {
 
 	err = os.Remove(filePath)
 	if err != nil {
-		t.Errorf("Error removing %s: %s", fileName, err)
+		t.Errorf("Error removing %s: %s", filePath, err)
 	}
 }
