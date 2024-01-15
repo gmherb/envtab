@@ -22,15 +22,15 @@ var addCmd = &cobra.Command{
 	Use:   "add",
 	Short: "Add an envtab entry to a loadout",
 	Long: `Add an environment variable and its value, KEY=value, as an entry in
-	an envtab .
+an envtab .
 
-	Usage: envtab add <name> <key>=<value> [tag1 tag2 ...]
+` + USAGE + `
 
-	The first argument is the name of the entry followed by the key and value
-	of the environment variable. Optionally, you can add tags to the envtab
-	table by adding them after the key value pair (multiple can be provided
-	using space as a separator). By default, the table is a	YAML file in the
-	envtab directory which resides in the user's home directory (~/.envtab).`,
+The first argument is the name of the entry followed by the key and value
+of the environment variable. Optionally, you can add tags to the envtab
+table by adding them after the key value pair (multiple can be provided
+using space as a separator). By default, the table is a	YAML file in the
+envtab directory which resides in the user's home directory (~/.envtab).`,
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("DEBUG: add command called")
 
