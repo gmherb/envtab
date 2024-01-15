@@ -11,19 +11,13 @@ import (
 	"github.com/spf13/cobra"
 )
 
-const (
-	CAT_USAGE = `Usage: envtab cat <name>`
-)
+const CAT_USAGE = `Usage: envtab cat <name>`
 
 var catCmd = &cobra.Command{
-	Use:   "cat",
+	Use:   "cat <name>",
 	Short: "Print an envtab loadout",
 	Long: `Print the YAML file which contains the envtab loadout with the name
-the provided argument.
-
-` + CAT_USAGE + `
-
-`,
+the provided argument.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("DEBUG: cat called")
 

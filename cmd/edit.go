@@ -10,16 +10,15 @@ import (
 )
 
 var editCmd = &cobra.Command{
-	Use:   "edit",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
+	Use:   "edit [loadout]",
+	Short: "Edit a envtab loadout",
+	Long: `Enter configured user editor to manually edit a envtab loadout.
 
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+If no loadout is specified, the active loadout with the most matching entries
+will be edited.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("edit called")
+		fmt.Println("DEBUG: edit called")
+
 	},
 }
 

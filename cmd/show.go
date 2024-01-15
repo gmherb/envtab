@@ -13,8 +13,8 @@ import (
 
 var showCmd = &cobra.Command{
 	Use:   "show",
-	Short: "Display environment and highlight active envtab entries",
-	Long: `Print each environment variable currently set in the environment
+	Short: "Show active environment variable",
+	Long: `Show each environment variable currently set in the environment
 	and highlight those that match an entry in the active envtab file.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("show called")
