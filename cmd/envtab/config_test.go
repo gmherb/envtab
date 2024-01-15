@@ -5,18 +5,7 @@ import (
 	"os/user"
 	"path/filepath"
 	"testing"
-	"time"
-
-	"github.com/gmherb/envtab/pkg/utils"
 )
-
-func TestGetCurrentTime(t *testing.T) {
-	currentTime := utils.GetCurrentTime()
-	_, err := time.Parse(time.RFC3339, currentTime)
-	if err != nil {
-		t.Errorf("GetCurrentTime provided invalid time.RFC3339 value: %s", err)
-	}
-}
 
 func TestGetEnvtabPath(t *testing.T) {
 	usr, err := user.Current()

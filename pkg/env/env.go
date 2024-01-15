@@ -33,17 +33,3 @@ func (e *Env) Print() {
 func (e *Env) Get(key string) string {
 	return e.Env[key]
 }
-
-//func displayMatchingEnvVars(entries map[string]string) {
-//	currentEnv := os.Environ()
-//
-//	println("\nEnvironment variables with entries in the cache:")
-//	for _, envVar := range currentEnv {
-//		parts := strings.SplitN(envVar, "=", 2)
-//		key := parts[0]
-//
-//		if value, exists := entries[key]; exists {
-//			println(key, "=", value)
-//		}
-//	}
-//}
