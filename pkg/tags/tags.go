@@ -61,6 +61,18 @@ func RemoveEmptyTags(tags []string) []string {
 	return nonEmptyTags
 }
 
+func RemoveDuplicateTags(tags []string) []string {
+	var uniqueTags []string
+
+	for _, tag := range tags {
+		if !ContainsTag(uniqueTags, tag) {
+			uniqueTags = append(uniqueTags, tag)
+		}
+	}
+
+	return uniqueTags
+}
+
 //func searchByTag(tag string) ([]string, error) {
 //
 //	envtabPath := InitEnvtab()

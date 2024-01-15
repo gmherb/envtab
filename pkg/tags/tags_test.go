@@ -113,3 +113,47 @@ func TestMergeTags(t *testing.T) {
 		}
 	}
 }
+
+func TestRemoveDuplicateTags(t *testing.T) {
+	type args struct {
+		tags []string
+	}
+
+	tests := []struct {
+		name string
+		args []string
+		want []string
+	}{
+		{
+			name: "test1",
+			args: []string{"tag1", "tag2", "tag3"},
+			want: []string{"tag1", "tag2", "tag3"},
+		},
+		{
+			name: "test2",
+			args: []string{"tag1", "tag2", "tag3", "tag1", "tag2", "tag3"},
+			want: []string{"tag1", "tag2", "tag3"},
+		},
+		{
+			name: "test3",
+			args: []string{"tag1", "tag2", "tag3", "tag1", "tag2", "tag3", "tag4", "tag5", "tag6"},
+			want: []string{"tag1", "tag2", "tag3", "tag4", "tag5", "tag6"},
+		},
+		{
+			name: "test4",
+			args: []string{"tag1", "tag2", "tag3", "tag1", "tag2", "tag3", "tag4", "tag5", "tag6", "tag4", "tag5", "tag6"},
+			want: []string{"tag1", "tag2", "tag3", "tag4", "tag5", "tag6"},
+		},
+		{
+			name: "test5",
+			args: []string{"tag1", "tag2", "tag3", "tag1", "tag2", "tag3", "tag4", "tag5", "tag6", "tag4", "tag5", "tag6", "tag7", "tag8", "tag9"},
+			want: []string{"tag1", "tag2", "tag3", "tag4", "tag5", "tag6", "tag7", "tag8", "tag9"},
+		},
+	}
+
+	for _, tt := range tests {
+		if got := RemoveDuplicateTags(tt.args); !assert.ElementsMatch(t, got, tt.want) {
+			t.Errorf("%q. RemoveDuplicateTags() = %v, want %v", tt.name, got, tt.want)
+		}
+	}
+}

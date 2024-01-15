@@ -21,11 +21,10 @@ var addCmd = &cobra.Command{
 	Use:   "add <name> <key>=<value> [tag1 tag2 ...]",
 	Short: "Add an envtab entry to a loadout",
 	Long: `Add an environment variable and its value, KEY=value, as an entry in
-an envtab loadout. The first argument is the name of the entry followed by the
-key and value of the environment variable. Optionally, you can add tags to the
-envtab loadout by adding them after the key value pair (multiple can be
-provided using space as a separator). By default, the table is a YAML file in
-the envtab directory which resides in the user's home directory (~/.envtab).`,
+an envtab loadout.
+
+Optionally, you can add tags to the envtab loadout by adding them after the key
+and value. Multiple tags can be provided using space as a separator.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("DEBUG: add command called")
 
@@ -65,12 +64,13 @@ the envtab directory which resides in the user's home directory (~/.envtab).`,
 
 		tags = tagz.SplitTags(tags)
 		tags = tagz.RemoveEmptyTags(tags)
+		tags = tagz.RemoveDuplicateTags(tags)
 
 		fmt.Printf("DEBUG: Name: %s, Key: %s, Value: %s, tags: %s.", name, key, value, tags)
 
 		err := envtab.WriteEntryToLoadout(name, key, value, tags)
 		if err != nil {
-			fmt.Printf("Error writing entry to file [%s]: %s\n", name, err)
+			fmt.Printf("ERROR: Error writing entry to file [%s]: %s\n", name, err)
 			os.Exit(1)
 		}
 	},
