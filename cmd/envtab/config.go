@@ -5,9 +5,9 @@ import (
 	"os"
 	"os/user"
 	"path/filepath"
-	"time"
 
 	tagz "github.com/gmherb/envtab/pkg/tags"
+	"github.com/gmherb/envtab/pkg/utils"
 	yaml "gopkg.in/yaml.v2"
 )
 
@@ -29,10 +29,7 @@ type EnvTable struct {
 	Entries  map[string]string `json:"entries" yaml:"entries"`
 }
 
-func getCurrentTime() string {
-	return fmt.Sprintf("%s", time.Now().Format(time.RFC3339))
-}
-
+// Get the path to the envtab directory
 func getEnvtabPath() string {
 	usr, err := user.Current()
 	if err != nil {
@@ -43,6 +40,7 @@ func getEnvtabPath() string {
 	return filepath.Join(usr.HomeDir, ENVTAB_DIR)
 }
 
+// Create the envtab directory if it doesn't exist and return the path
 func InitEnvtab() string {
 	envtabPath := getEnvtabPath()
 	if _, err := os.Stat(envtabPath); os.IsNotExist(err) {
@@ -73,6 +71,7 @@ func getEnvtabSlice() []string {
 	return entries
 }
 
+// Print all envtab loadouts
 func PrintEnvtabLoadouts() {
 	entries := getEnvtabSlice()
 	for _, entry := range entries {
@@ -80,6 +79,7 @@ func PrintEnvtabLoadouts() {
 	}
 }
 
+// Print all envtab entries in a loadout and its metadata
 func ReadLoadout(name string) (*EnvTable, error) {
 
 	filePath := filepath.Join(InitEnvtab(), name+".yaml")
@@ -99,6 +99,7 @@ func ReadLoadout(name string) (*EnvTable, error) {
 
 }
 
+// Write a key-value pair to a loadout (and optionally add tags) and update the metadata
 func WriteEntryToLoadout(name, key, value string, tags []string) error {
 
 	filePath := filepath.Join(InitEnvtab(), name+".yaml")
@@ -112,9 +113,9 @@ func WriteEntryToLoadout(name, key, value string, tags []string) error {
 	} else if os.IsNotExist(err) {
 		content = &EnvTable{
 			Metadata: EnvMetadata{
-				CreatedAt: getCurrentTime(),
-				LoadedAt:  getCurrentTime(),
-				UpdatedAt: getCurrentTime(),
+				CreatedAt: utils.GetCurrentTime(),
+				LoadedAt:  utils.GetCurrentTime(),
+				UpdatedAt: utils.GetCurrentTime(),
 				Login:     false,
 				Tags:      []string{},
 			},
@@ -129,7 +130,7 @@ func WriteEntryToLoadout(name, key, value string, tags []string) error {
 	content.Metadata.Tags = tagz.MergeTags(content.Metadata.Tags, tags)
 
 	// Update metadata
-	content.Metadata.UpdatedAt = getCurrentTime()
+	content.Metadata.UpdatedAt = utils.GetCurrentTime()
 
 	// Write the updated entries to the file
 	data, err := yaml.Marshal(content)
