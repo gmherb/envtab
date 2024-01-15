@@ -114,6 +114,38 @@ func TestMergeTags(t *testing.T) {
 	}
 }
 
+func TestSplitTags(t *testing.T) {
+	type args struct {
+		tags []string
+	}
+	tests := []struct {
+		name string
+		args args
+		want []string
+	}{
+		{
+			name: "test1",
+			args: args{
+				tags: []string{"tag1,tag2", "tag3,tag4,tag5", "tag6,"},
+			},
+			want: []string{"tag1", "tag2", "tag3", "tag4", "tag5", "tag6", ""},
+		},
+		{
+			name: "test2",
+			args: args{
+				tags: []string{"tag1", "tag2", "tag3", "tag4,tag5,tag6"},
+			},
+			want: []string{"tag1", "tag2", "tag3", "tag4", "tag5", "tag6"},
+		},
+	}
+
+	for _, tt := range tests {
+		if got := SplitTags(tt.args.tags); !assert.ElementsMatch(t, got, tt.want) {
+			t.Errorf("%q. SplitTags() = %v, want %v", tt.name, got, tt.want)
+		}
+	}
+}
+
 func TestRemoveDuplicateTags(t *testing.T) {
 	type args struct {
 		tags []string
