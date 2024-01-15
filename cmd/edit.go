@@ -9,7 +9,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// editCmd represents the edit command
 var editCmd = &cobra.Command{
 	Use:   "edit",
 	Short: "A brief description of your command",

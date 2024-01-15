@@ -14,7 +14,7 @@ import (
 )
 
 const (
-	USAGE = `Usage: envtab add <name> <key>=<value> [tag1 tag2 ...]`
+	ADD_USAGE = `Usage: envtab add <name> <key>=<value> [tag1 tag2 ...]`
 )
 
 // addCmd represents the add command
@@ -24,7 +24,7 @@ var addCmd = &cobra.Command{
 	Long: `Add an environment variable and its value, KEY=value, as an entry in
 an envtab .
 
-` + USAGE + `
+` + ADD_USAGE + `
 
 The first argument is the name of the entry followed by the key and value
 of the environment variable. Optionally, you can add tags to the envtab
@@ -44,13 +44,13 @@ envtab directory which resides in the user's home directory (~/.envtab).`,
 
 		if len(args) < 2 {
 			fmt.Println("DEBUG: Insufficient number of arguments provided")
-			fmt.Println(USAGE)
+			fmt.Println(ADD_USAGE)
 			os.Exit(1)
 		}
 
 		if len(args) == 2 && !strings.Contains(args[1], "=") {
 			fmt.Println("DEBUG: No value provided for your envtab entry. No equal sign detected and only 2 args provided.")
-			fmt.Println(USAGE)
+			fmt.Println(ADD_USAGE)
 			os.Exit(1)
 		}
 

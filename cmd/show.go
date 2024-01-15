@@ -19,9 +19,9 @@ var showCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("show called")
 
-		e := env.NewEnv()
-		e.Populate()
-		e.Print()
+		environment := env.NewEnv()
+		environment.Populate()
+		environment.Print()
 	},
 }
 
