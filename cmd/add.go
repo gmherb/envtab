@@ -17,7 +17,6 @@ const (
 	ADD_USAGE = `Usage: envtab add <name> <key>=<value> [tag1 tag2 ...]`
 )
 
-// addCmd represents the add command
 var addCmd = &cobra.Command{
 	Use:   "add",
 	Short: "Add an envtab entry to a loadout",
