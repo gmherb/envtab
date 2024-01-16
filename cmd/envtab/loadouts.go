@@ -3,6 +3,7 @@ package envtab
 import (
 	"fmt"
 	"os"
+	"os/exec"
 	"path/filepath"
 
 	tagz "github.com/gmherb/envtab/pkg/tags"
@@ -83,4 +84,21 @@ func WriteEntryToLoadout(name, key, value string, tags []string) error {
 	}
 
 	return nil
+}
+
+func EditLoadout(name string) error {
+
+	filePath := filepath.Join(InitEnvtab(), name+".yaml")
+
+	editor := os.Getenv("EDITOR")
+	if editor == "" {
+		editor = "vim"
+	}
+
+	cmd := exec.Command(editor, filePath)
+	cmd.Stdin = os.Stdin
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+
+	return cmd.Run()
 }

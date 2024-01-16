@@ -13,18 +13,23 @@ import (
 
 var exportCmd = &cobra.Command{
 	Use:   "export <loadout>",
-	Short: "Export loadout",
+	Short: "Export a loadout",
 	Long: `Print export statements for provided loadout to be sourced into your
 environment`,
 	Run: func(cmd *cobra.Command, args []string) {
 		println("DEBUG: export called")
+
+		if len(args) != 1 {
+			fmt.Printf("ERROR: export requires a loadout name\n")
+			os.Exit(1)
+		}
 
 		envtabPath := envtab.InitEnvtab()
 
 		loadoutName := args[0]
 		loadoutPath := envtabPath + `/` + loadoutName + `.yaml`
 
-		println("DEBUG: loadoutName:" + loadoutPath + " loadoutName: " + loadoutPath)
+		println("DEBUG: loadoutPath:" + loadoutPath + ", loadoutName: " + loadoutPath)
 
 		if _, err := os.Stat(loadoutPath); os.IsNotExist(err) {
 			fmt.Printf("ERROR: Loadout [%s] does not exist\n", loadoutName)
