@@ -5,6 +5,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"time"
 
 	tagz "github.com/gmherb/envtab/pkg/tags"
 	"github.com/gmherb/envtab/pkg/utils"
@@ -13,9 +14,9 @@ import (
 
 // Print all envtab loadouts
 func PrintEnvtabLoadouts() {
-	entries := getEnvtabSlice()
-	for _, entry := range entries {
-		fmt.Println(entry)
+	loadouts := getEnvtabSlice()
+	for _, loadouts := range loadouts {
+		fmt.Println(loadouts)
 	}
 }
 
@@ -29,13 +30,13 @@ func ReadLoadout(name string) (*EnvTable, error) {
 		return nil, err
 	}
 
-	var entry EnvTable
-	err = yaml.Unmarshal(content, &entry)
+	var loadout EnvTable
+	err = yaml.Unmarshal(content, &loadout)
 	if err != nil {
 		return nil, err
 	}
 
-	return &entry, nil
+	return &loadout, nil
 
 }
 
@@ -101,4 +102,51 @@ func EditLoadout(name string) error {
 	cmd.Stderr = os.Stderr
 
 	return cmd.Run()
+}
+
+func DeleteLoadout(name string) error {
+
+	filePath := filepath.Join(InitEnvtab(), name+".yaml")
+
+	err := os.Remove(filePath)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func ListEnvtabLoadouts() {
+	envtabSlice := getEnvtabSlice()
+
+	fmt.Println("UpdatedAt    LoadedAt    Login   Name                 Tags")
+	for _, loadout := range envtabSlice {
+
+		lo, err := ReadLoadout(loadout)
+		if err != nil {
+			fmt.Printf("Error reading loadout %s: %s\n", lo, err)
+			os.Exit(1)
+		}
+
+		updatedAt, err := time.Parse(time.RFC3339, lo.Metadata.UpdatedAt)
+		if err != nil {
+			fmt.Printf("Error parsing time %s: %s\n", lo.Metadata.UpdatedAt, err)
+			os.Exit(1)
+		}
+
+		loadedAt, err := time.Parse(time.RFC3339, lo.Metadata.LoadedAt)
+		if err != nil {
+			fmt.Printf("Error parsing time %s: %s\n", lo.Metadata.UpdatedAt, err)
+			os.Exit(1)
+		}
+
+		// TODO: Determine if time is under 24 hours and print time only
+		// instead of date
+
+		// Support column length of 20 characters for loadout name
+		paddedLoadout := utils.PadString(loadout, 20)
+
+		fmt.Println(updatedAt.Format(time.DateOnly), " ", loadedAt.Format(time.DateOnly), "", lo.Metadata.Login, " ", paddedLoadout, lo.Metadata.Tags)
+
+	}
 }

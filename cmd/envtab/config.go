@@ -49,13 +49,13 @@ func InitEnvtab() string {
 func getEnvtabSlice() []string {
 	envtabPath := InitEnvtab()
 
-	var entries []string
+	var loadouts []string
 	err := filepath.Walk(envtabPath, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
 		}
 		if filepath.Ext(path) == ".yaml" {
-			entries = append(entries, filepath.Base(path[:len(path)-5]))
+			loadouts = append(loadouts, filepath.Base(path[:len(path)-5]))
 		}
 		return nil
 	})
@@ -64,5 +64,5 @@ func getEnvtabSlice() []string {
 		os.Exit(1)
 	}
 
-	return entries
+	return loadouts
 }

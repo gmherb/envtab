@@ -20,10 +20,14 @@ metadata.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("DEBUG: list called")
 
-		envtab.PrintEnvtabLoadouts()
+		if cmd.Flag("long").Value.String() == "true" {
+			fmt.Println("DEBUG: long listing format")
+			envtab.ListEnvtabLoadouts()
 
-		// TODO: Add support for long listing format
-
+		} else {
+			fmt.Println("DEBUG: short listing format")
+			envtab.PrintEnvtabLoadouts()
+		}
 	},
 }
 
