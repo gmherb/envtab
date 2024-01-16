@@ -124,7 +124,7 @@ func ListEnvtabLoadouts() {
 
 		lo, err := ReadLoadout(loadout)
 		if err != nil {
-			fmt.Printf("Error reading loadout %s: %s\n", lo, err)
+			fmt.Printf("Error reading loadout %s: %s\n", loadout, err)
 			os.Exit(1)
 		}
 
