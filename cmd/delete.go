@@ -10,11 +10,10 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// deleteCmd represents the delete command
 var deleteCmd = &cobra.Command{
-	Use:   "delete",
-	Short: "Delete a loadout",
-	Long:  `Delete an envtab loadout`,
+	Use:   "delete <loadout> [loadout]...",
+	Short: "Delete loadout(s)",
+	Long:  `Delete loadout(s)`,
 	Run: func(cmd *cobra.Command, args []string) {
 		println("DEBUG: delete called")
 
