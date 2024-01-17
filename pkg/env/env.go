@@ -33,3 +33,15 @@ func (e *Env) Print() {
 func (e *Env) Get(key string) string {
 	return e.Env[key]
 }
+
+func (e *Env) Compare(key string, value string) bool {
+	match := false
+
+	for k, v := range e.Env {
+		if k == key && v == value {
+			match = true
+			break
+		}
+	}
+	return match
+}

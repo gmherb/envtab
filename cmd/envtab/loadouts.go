@@ -5,8 +5,10 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strings"
 	"time"
 
+	"github.com/gmherb/envtab/pkg/env"
 	tagz "github.com/gmherb/envtab/pkg/tags"
 	"github.com/gmherb/envtab/pkg/utils"
 	yaml "gopkg.in/yaml.v2"
@@ -14,7 +16,7 @@ import (
 
 // Print all envtab loadouts
 func PrintEnvtabLoadouts() {
-	loadouts := getEnvtabSlice()
+	loadouts := GetEnvtabSlice()
 	for _, loadouts := range loadouts {
 		fmt.Println(loadouts)
 	}
@@ -54,11 +56,12 @@ func WriteEntryToLoadout(name, key, value string, tags []string) error {
 	} else if os.IsNotExist(err) {
 		content = &EnvTable{
 			Metadata: EnvMetadata{
-				CreatedAt: utils.GetCurrentTime(),
-				LoadedAt:  utils.GetCurrentTime(),
-				UpdatedAt: utils.GetCurrentTime(),
-				Login:     false,
-				Tags:      []string{},
+				CreatedAt:   utils.GetCurrentTime(),
+				LoadedAt:    utils.GetCurrentTime(),
+				UpdatedAt:   utils.GetCurrentTime(),
+				Login:       false,
+				Tags:        []string{},
+				Description: "",
 			},
 			Entries: map[string]string{},
 		}
@@ -117,9 +120,11 @@ func DeleteLoadout(name string) error {
 }
 
 func ListEnvtabLoadouts() {
-	envtabSlice := getEnvtabSlice()
+	envtabSlice := GetEnvtabSlice()
+	environment := env.NewEnv()
+	environment.Populate()
 
-	fmt.Println("UpdatedAt    LoadedAt    Login   Name                 Tags")
+	fmt.Println("UpdatedAt LoadedAt  Login  Active Total  Name               Tags")
 	for _, loadout := range envtabSlice {
 
 		lo, err := ReadLoadout(loadout)
@@ -130,23 +135,36 @@ func ListEnvtabLoadouts() {
 
 		updatedAt, err := time.Parse(time.RFC3339, lo.Metadata.UpdatedAt)
 		if err != nil {
-			fmt.Printf("Error parsing time %s: %s\n", lo.Metadata.UpdatedAt, err)
+			fmt.Printf("Error parsing updatedAt time %s: %s\n", lo.Metadata.UpdatedAt, err)
 			os.Exit(1)
 		}
 
 		loadedAt, err := time.Parse(time.RFC3339, lo.Metadata.LoadedAt)
 		if err != nil {
-			fmt.Printf("Error parsing time %s: %s\n", lo.Metadata.UpdatedAt, err)
+			fmt.Printf(
+				"Error parsing loadedAt time %s: %s\n",
+				lo.Metadata.UpdatedAt, err,
+			)
 			os.Exit(1)
 		}
 
-		// TODO: Determine if time is under 24 hours and print time only
-		// instead of date
+		var activeEntries = []string{}
+		for key, value := range lo.Entries {
 
-		// Support column length of 20 characters for loadout name
-		paddedLoadout := utils.PadString(loadout, 20)
+			if environment.Compare(key, value) {
+				activeEntries = append(activeEntries, key+"="+value)
+			}
+		}
 
-		fmt.Println(updatedAt.Format(time.DateOnly), " ", loadedAt.Format(time.DateOnly), "", lo.Metadata.Login, " ", paddedLoadout, lo.Metadata.Tags)
+		fmt.Println(
+			// TODO: Determine if time is under 24 hours and print TimeOnly instead of DateOnly
+			strings.TrimPrefix(updatedAt.Format(time.DateOnly), "20"), "",
+			strings.TrimPrefix(loadedAt.Format(time.DateOnly), "20"), "",
+			lo.Metadata.Login, " [",
+			len(activeEntries), " / ",
+			len(lo.Entries), "] ",
+			utils.PadString(loadout, 17), "",
+			lo.Metadata.Tags)
 
 	}
 }

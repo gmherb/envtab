@@ -12,11 +12,12 @@ const (
 )
 
 type EnvMetadata struct {
-	CreatedAt string   `json:"createdAt" yaml:"createdAt"`
-	LoadedAt  string   `json:"loadedAt" yaml:"loadedAt"`
-	UpdatedAt string   `json:"updatedAt" yaml:"updatedAt"`
-	Login     bool     `json:"login" yaml:"login"`
-	Tags      []string `json:"tags" yaml:"tags"`
+	CreatedAt   string   `json:"createdAt" yaml:"createdAt"`
+	LoadedAt    string   `json:"loadedAt" yaml:"loadedAt"`
+	UpdatedAt   string   `json:"updatedAt" yaml:"updatedAt"`
+	Login       bool     `json:"login" yaml:"login"`
+	Tags        []string `json:"tags" yaml:"tags"`
+	Description string   `json:"description" yaml:"description"`
 }
 
 // EnvTable represents the structure of an envtab loadout
@@ -46,7 +47,7 @@ func InitEnvtab() string {
 }
 
 // Find all YAML files in the envtab directory, remove the extension, and return them as a slice
-func getEnvtabSlice() []string {
+func GetEnvtabSlice() []string {
 	envtabPath := InitEnvtab()
 
 	var loadouts []string

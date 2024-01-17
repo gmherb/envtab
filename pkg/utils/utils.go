@@ -10,7 +10,7 @@ func GetCurrentTime() string {
 	return fmt.Sprintf("%s", time.Now().Format(time.RFC3339))
 }
 
-// Pad a string with spaces to a given length
+// Pad a string on Right
 func PadString(s string, length int) string {
 	return fmt.Sprintf("%-*s", length, s)
 }
