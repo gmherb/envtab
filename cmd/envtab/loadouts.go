@@ -124,7 +124,7 @@ func ListEnvtabLoadouts() {
 	environment := env.NewEnv()
 	environment.Populate()
 
-	fmt.Println("UpdatedAt LoadedAt  Login  Active Total  Name               Tags")
+	fmt.Println("UpdatedAt LoadedAt  Login Active Total  Name               Tags")
 	for _, loadout := range envtabSlice {
 
 		lo, err := ReadLoadout(loadout)
