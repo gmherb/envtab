@@ -12,11 +12,8 @@ import (
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:   "envtab",
-	Short: "A CLI tool to manage environment variables",
-	Long: `envtab is a tool used for organizing environment variables into sets
-called loadouts. A loadout is a collection of environment variables that can be
-exported into the current shell. Each loadout has a name and can have a
-description along with tags which can be used to filter/search.`,
+	Short: "Take control of your environment variables.",
+	Long:  `Take control of your environment variables.`,
 	// Uncomment the following line if your bare application
 	// has an action associated with it:
 	// Run: func(cmd *cobra.Command, args []string) { },
