@@ -32,11 +32,6 @@ func TestPopulate(t *testing.T) {
 	} else {
 		println("USER:", e.Env["USER"])
 	}
-	if e.Env["SHELL"] == "" {
-		t.Errorf("Expected %s, got %s", "SHELL", e.Env["SHELL"])
-	} else {
-		println("SHELL:", e.Env["SHELL"])
-	}
 	if e.Env["PWD"] == "" {
 		t.Errorf("Expected %s, got %s", "PWD", e.Env["PWD"])
 	} else {
@@ -47,6 +42,12 @@ func TestPopulate(t *testing.T) {
 	} else {
 		println("SHLVL:", e.Env["SHLVL"])
 	}
+	// This are not set in the test environment
+	//if e.Env["SHELL"] == "" {
+	//	t.Errorf("Expected %s, got %s", "SHELL", e.Env["SHELL"])
+	//} else {
+	//	println("SHELL:", e.Env["SHELL"])
+	//}
 }
 
 func TestPrint(t *testing.T) {
