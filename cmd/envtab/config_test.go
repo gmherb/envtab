@@ -26,9 +26,12 @@ func TestInitEnvtab(t *testing.T) {
 
 	var err error
 
+	envtabExists := false
+
 	// Prep (if envtab exists, rename it)
 	if _, err = os.Stat(envtabPath); err == nil {
 		err = os.Rename(envtabPath, envtabPath+".bak")
+		envtabExists = true
 		if err != nil {
 			t.Errorf("Error renaming %s to %s: %s", envtabPath, envtabPath+".bak", err)
 		}
@@ -52,9 +55,11 @@ func TestInitEnvtab(t *testing.T) {
 		t.Errorf("Error removing %s: %s", envtabPath, err)
 	}
 
-	err = os.Rename(envtabPath+".bak", envtabPath)
-	if err != nil {
-		t.Errorf("Error renaming %s to %s: %s", envtabPath, envtabPath+".bak", err)
+	if envtabExists {
+		err = os.Rename(envtabPath+".bak", envtabPath)
+		if err != nil {
+			t.Errorf("Error renaming %s to %s: %s", envtabPath, envtabPath+".bak", err)
+		}
 	}
 
 }
