@@ -2,7 +2,7 @@
 
 ![diagram](diagram.png "Take control of your environment")
 
-`envtab` aims to be your goto tool for working with environment variables. Organize, tag, list, search, export, and enable environment loadouts.
+`envtab` aims to be your goto tool for working with environment variables. Organize, tag, list, search, export, and enable (on login) environment loadouts.
 
 ## TODO
 
