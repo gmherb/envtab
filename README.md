@@ -6,7 +6,7 @@
 
 ## Usage
 
-```bash
+```
 $ ./envtab
 Take control of your environment variables.
 
@@ -32,12 +32,9 @@ Use "envtab [command] --help" for more information about a command.
 
 To export a loadout into your current shell.
 
-```bash
-$ $(./entab export my-essentials)
-
 ```
-
-
+$ $(./entab export my-essentials)
+```
 
 ## TODO
 
