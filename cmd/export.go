@@ -15,7 +15,9 @@ var exportCmd = &cobra.Command{
 	Use:   "export <loadout>",
 	Short: "Export a loadout",
 	Long: `Print export statements for provided loadout to be sourced into your
-environment`,
+environment.
+
+Example: $(envtab export myloadout)`,
 	Run: func(cmd *cobra.Command, args []string) {
 		println("DEBUG: export called")
 

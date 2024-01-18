@@ -33,7 +33,7 @@ Use "envtab [command] --help" for more information about a command.
 To export a loadout into your current shell.
 
 ```
-$ $(./entab export my-essentials)
+$ $(./envtab export my-essentials)
 ```
 
 ## TODO
