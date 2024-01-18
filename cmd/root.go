@@ -12,8 +12,8 @@ import (
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:   "envtab",
-	Short: "Take control of your environment variables.",
-	Long:  `Take control of your environment variables.`,
+	Short: "Take control of your environment.",
+	Long:  `Take control of your environment.`,
 	// Uncomment the following line if your bare application
 	// has an action associated with it:
 	// Run: func(cmd *cobra.Command, args []string) { },

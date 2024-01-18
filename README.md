@@ -8,7 +8,7 @@
 
 ```
 $ ./envtab
-Take control of your environment variables.
+Take control of your environment.
 
 Usage:
   envtab [command]
