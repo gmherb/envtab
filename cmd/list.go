@@ -43,14 +43,14 @@ func init() {
 }
 
 func PrintEnvtabLoadouts() {
-	loadouts := envtab.GetEnvtabSlice()
+	loadouts := envtab.GetEnvtabSlice("")
 	for _, loadouts := range loadouts {
 		fmt.Println(loadouts)
 	}
 }
 
 func ListEnvtabLoadouts() {
-	envtabSlice := envtab.GetEnvtabSlice()
+	envtabSlice := envtab.GetEnvtabSlice("")
 	environment := env.NewEnv()
 	environment.Populate()
 

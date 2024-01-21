@@ -24,8 +24,15 @@ func getEnvtabPath() string {
 }
 
 // Create the envtab directory if it doesn't exist and return the path
-func InitEnvtab() string {
-	envtabPath := getEnvtabPath()
+func InitEnvtab(path string) string {
+	var envtabPath string
+
+	if path == "" {
+		envtabPath = getEnvtabPath()
+	} else {
+		envtabPath = path
+	}
+
 	if _, err := os.Stat(envtabPath); os.IsNotExist(err) {
 		os.Mkdir(envtabPath, 0700)
 	}
@@ -33,8 +40,14 @@ func InitEnvtab() string {
 }
 
 // Find all YAML files in the envtab directory, remove the extension, and return them as a slice
-func GetEnvtabSlice() []string {
-	envtabPath := InitEnvtab()
+func GetEnvtabSlice(path string) []string {
+	var envtabPath string
+
+	if path == "" {
+		envtabPath = getEnvtabPath()
+	} else {
+		envtabPath = InitEnvtab(path)
+	}
 
 	var loadouts []string
 	err := filepath.Walk(envtabPath, func(path string, info os.FileInfo, err error) error {

@@ -29,7 +29,7 @@ func init() {
 }
 
 func showActiveLoadouts() {
-	envtabSlice := envtab.GetEnvtabSlice()
+	envtabSlice := envtab.GetEnvtabSlice("")
 	environment := env.NewEnv()
 	environment.Populate()
 

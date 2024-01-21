@@ -1,6 +1,7 @@
 package envtab
 
 import (
+	"fmt"
 	"os"
 	"os/user"
 	"path/filepath"
@@ -22,63 +23,45 @@ func TestGetEnvtabPath(t *testing.T) {
 }
 
 func TestInitEnvtab(t *testing.T) {
-	envtabPath := getEnvtabPath()
-
 	var err error
 
-	envtabExists := false
-
-	// Prep (if envtab exists, rename it)
-	if _, err = os.Stat(envtabPath); err == nil {
-		err = os.Rename(envtabPath, envtabPath+".bak")
-		envtabExists = true
-		if err != nil {
-			t.Errorf("Error renaming %s to %s: %s", envtabPath, envtabPath+".bak", err)
-		}
+	usr, err := user.Current()
+	if err != nil {
+		t.Errorf("Error getting user's home directory: %s", err)
 	}
+
+	testPath := filepath.Join(usr.HomeDir, ".envtab_test")
 
 	// Run function
-	output := InitEnvtab()
+	output := InitEnvtab(testPath)
+	fmt.Println(output)
 
-	// Test
-	if _, err = os.Stat(envtabPath); os.IsNotExist(err) {
-		t.Errorf("Expected %s to exist", envtabPath)
+	// Test directory creation
+	if _, err = os.Stat(testPath); os.IsNotExist(err) {
+		t.Errorf("Expected %s to exist", testPath)
 	}
 
-	if output != envtabPath {
-		t.Errorf("Expected %s, got %s", envtabPath, output)
+	// Test output
+	if output != testPath {
+		t.Errorf("Expected %s, got %s", testPath, output)
 	}
 
 	// Cleanup (rename envtab back to original name)
-	err = os.Remove(envtabPath)
+	err = os.Remove(output)
 	if err != nil {
-		t.Errorf("Error removing %s: %s", envtabPath, err)
+		t.Errorf("Error removing %s: %s", testPath, err)
 	}
-
-	if envtabExists {
-		err = os.Rename(envtabPath+".bak", envtabPath)
-		if err != nil {
-			t.Errorf("Error renaming %s to %s: %s", envtabPath, envtabPath+".bak", err)
-		}
-	}
-
 }
 
 func TestGetEnvtabSlice(t *testing.T) {
-	envtabPath := InitEnvtab()
-
-	// Prep (if envtab exists, rename it)
-	if _, err := os.Stat(envtabPath); err == nil {
-		err = os.Rename(envtabPath, envtabPath+".bak")
-		if err != nil {
-			t.Errorf("Error renaming %s to %s: %s", envtabPath, envtabPath+".bak", err)
-		}
-	}
-	// Create envtab directory
-	err := os.Mkdir(envtabPath, 0700)
+	usr, err := user.Current()
 	if err != nil {
-		t.Errorf("Error creating %s: %s", envtabPath, err)
+		t.Errorf("Error getting user's home directory: %s", err)
 	}
+
+	testPath := filepath.Join(usr.HomeDir, ".envtab_test2")
+
+	envtabPath := InitEnvtab(testPath)
 
 	// Create test files
 	testFiles := []string{
@@ -96,7 +79,7 @@ func TestGetEnvtabSlice(t *testing.T) {
 	}
 
 	// Run function
-	output := GetEnvtabSlice()
+	output := GetEnvtabSlice(testPath)
 
 	// Test
 	expected := []string{
@@ -123,14 +106,9 @@ func TestGetEnvtabSlice(t *testing.T) {
 		}
 	}
 
-	// Cleanup (rename envtab back to original name)
+	// Cleanup
 	err = os.Remove(envtabPath)
 	if err != nil {
 		t.Errorf("Error removing %s: %s", envtabPath, err)
-	}
-
-	err = os.Rename(envtabPath+".bak", envtabPath)
-	if err != nil {
-		t.Errorf("Error renaming %s to %s: %s", envtabPath, envtabPath+".bak", err)
 	}
 }

@@ -48,7 +48,7 @@ func init() {
 }
 
 func exportLoginLoadouts() {
-	loadouts := envtab.GetEnvtabSlice()
+	loadouts := envtab.GetEnvtabSlice("")
 
 	for _, loadout := range loadouts {
 

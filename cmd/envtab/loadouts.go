@@ -101,7 +101,7 @@ func InitLoadout() *Loadout {
 // Read a loadout from file and return a Loadout struct
 func ReadLoadout(name string) (*Loadout, error) {
 
-	filePath := filepath.Join(InitEnvtab(), name+".yaml")
+	filePath := filepath.Join(InitEnvtab(""), name+".yaml")
 
 	content, err := os.ReadFile(filePath)
 	if err != nil {
@@ -119,7 +119,7 @@ func ReadLoadout(name string) (*Loadout, error) {
 
 func WriteLoadout(name string, loadout *Loadout) error {
 
-	filePath := filepath.Join(InitEnvtab(), name+".yaml")
+	filePath := filepath.Join(InitEnvtab(""), name+".yaml")
 
 	data, err := yaml.Marshal(loadout)
 	if err != nil {
@@ -156,7 +156,7 @@ func AddEntryToLoadout(name, key, value string, tags []string) error {
 
 func EditLoadout(name string) error {
 
-	filePath := filepath.Join(InitEnvtab(), name+".yaml")
+	filePath := filepath.Join(InitEnvtab(""), name+".yaml")
 
 	editor := os.Getenv("EDITOR")
 	if editor == "" {
@@ -173,7 +173,7 @@ func EditLoadout(name string) error {
 
 func DeleteLoadout(name string) error {
 
-	filePath := filepath.Join(InitEnvtab(), name+".yaml")
+	filePath := filepath.Join(InitEnvtab(""), name+".yaml")
 
 	err := os.Remove(filePath)
 	if err != nil {

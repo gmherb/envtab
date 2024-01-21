@@ -28,7 +28,7 @@ var editCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		envtabPath := envtab.InitEnvtab()
+		envtabPath := envtab.InitEnvtab("")
 
 		loadoutName := args[0]
 		loadoutPath := envtabPath + `/` + loadoutName + `.yaml`

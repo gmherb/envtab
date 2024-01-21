@@ -8,7 +8,7 @@ import (
 
 func TestReadLoadout(t *testing.T) {
 	name := "TestReadLoadout"
-	filePath := filepath.Join(InitEnvtab(), name+".yaml")
+	filePath := filepath.Join(InitEnvtab(""), name+".yaml")
 
 	// Create test file
 	f, err := os.Create(filePath)
@@ -43,7 +43,7 @@ func TestReadLoadout(t *testing.T) {
 
 func TestAddEntryToLoadout(t *testing.T) {
 	name := "TestAddEntryToLoadout"
-	filePath := filepath.Join(InitEnvtab(), name+".yaml")
+	filePath := filepath.Join(InitEnvtab(""), name+".yaml")
 
 	err := AddEntryToLoadout(name, "test2", "test2", []string{"test"})
 	if err != nil {
@@ -67,7 +67,7 @@ func TestAddEntryToLoadout(t *testing.T) {
 
 func TestLoadoutExport(t *testing.T) {
 	name := "TestLoadoutExport"
-	filePath := filepath.Join(InitEnvtab(), name+".yaml")
+	filePath := filepath.Join(InitEnvtab(""), name+".yaml")
 
 	err := AddEntryToLoadout(name, "test2", "test2", []string{"test"})
 	if err != nil {
