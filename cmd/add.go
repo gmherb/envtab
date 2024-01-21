@@ -19,7 +19,7 @@ const (
 
 var addCmd = &cobra.Command{
 	Use:   "add <name> <key>=<value> [tag1 tag2 ...]",
-	Short: "Add an envtab entry to a loadout",
+	Short: "Add an entry to a loadout",
 	Long: `Add an environment variable and its value, KEY=value, as an entry in
 an envtab loadout.
 
@@ -29,11 +29,10 @@ and value. Multiple tags can be provided using space as a separator.`,
 		fmt.Println("DEBUG: add command called")
 
 		var (
-			name  string   // Envtab entry name
+			name  string   // envtab loadout name
 			key   string   // Environment variable key
 			value string   // Environment variable value
-			tags  []string // Tags for the envtab entry
-
+			tags  []string // Tags to append to envtab loadout
 		)
 
 		if len(args) < 2 {
@@ -68,7 +67,7 @@ and value. Multiple tags can be provided using space as a separator.`,
 
 		fmt.Printf("DEBUG: Name: %s, Key: %s, Value: %s, tags: %s.", name, key, value, tags)
 
-		err := envtab.WriteEntryToLoadout(name, key, value, tags)
+		err := envtab.AddEntryToLoadout(name, key, value, tags)
 		if err != nil {
 			fmt.Printf("ERROR: Error writing entry to file [%s]: %s\n", name, err)
 			os.Exit(1)

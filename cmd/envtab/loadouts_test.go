@@ -6,10 +6,6 @@ import (
 	"testing"
 )
 
-func TestPrintEnvtabLoadouts(t *testing.T) {
-	PrintEnvtabLoadouts()
-}
-
 func TestReadLoadout(t *testing.T) {
 	name := "TestReadLoadout"
 	filePath := filepath.Join(InitEnvtab(), name+".yaml")
@@ -45,11 +41,11 @@ func TestReadLoadout(t *testing.T) {
 	}
 }
 
-func TestWriteEntryToLoadout(t *testing.T) {
-	name := "TestWriteEntryToLoadout"
+func TestAddEntryToLoadout(t *testing.T) {
+	name := "TestAddEntryToLoadout"
 	filePath := filepath.Join(InitEnvtab(), name+".yaml")
 
-	err := WriteEntryToLoadout(name, "test2", "test2", []string{"test"})
+	err := AddEntryToLoadout(name, "test2", "test2", []string{"test"})
 	if err != nil {
 		t.Errorf("Error writing test data to %s: %s", filePath, err)
 	}
@@ -62,6 +58,28 @@ func TestWriteEntryToLoadout(t *testing.T) {
 	if entry.Entries["test2"] != "test2" {
 		t.Errorf("Expected test2, got %s", entry.Entries["test2"])
 	}
+
+	err = os.Remove(filePath)
+	if err != nil {
+		t.Errorf("Error removing %s: %s", filePath, err)
+	}
+}
+
+func TestLoadoutExport(t *testing.T) {
+	name := "TestLoadoutExport"
+	filePath := filepath.Join(InitEnvtab(), name+".yaml")
+
+	err := AddEntryToLoadout(name, "test2", "test2", []string{"test"})
+	if err != nil {
+		t.Errorf("Error writing test data to %s: %s", filePath, err)
+	}
+
+	loadout, err := ReadLoadout(name)
+	if err != nil {
+		t.Errorf("Error reading test file %s: %s", filePath, err)
+	}
+
+	loadout.Export()
 
 	err = os.Remove(filePath)
 	if err != nil {

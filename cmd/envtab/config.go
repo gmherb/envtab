@@ -11,21 +11,6 @@ const (
 	ENVTAB_DIR = ".envtab"
 )
 
-type EnvMetadata struct {
-	CreatedAt   string   `json:"createdAt" yaml:"createdAt"`
-	LoadedAt    string   `json:"loadedAt" yaml:"loadedAt"`
-	UpdatedAt   string   `json:"updatedAt" yaml:"updatedAt"`
-	Login       bool     `json:"login" yaml:"login"`
-	Tags        []string `json:"tags" yaml:"tags"`
-	Description string   `json:"description" yaml:"description"`
-}
-
-// EnvTable represents the structure of an envtab loadout
-type EnvTable struct {
-	Metadata EnvMetadata       `json:"metadata" yaml:"metadata"`
-	Entries  map[string]string `json:"entries" yaml:"entries"`
-}
-
 // Get the path to the envtab directory
 func getEnvtabPath() string {
 	usr, err := user.Current()

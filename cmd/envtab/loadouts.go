@@ -5,25 +5,87 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
-	"strings"
-	"time"
 
-	"github.com/gmherb/envtab/pkg/env"
 	tagz "github.com/gmherb/envtab/pkg/tags"
 	"github.com/gmherb/envtab/pkg/utils"
 	yaml "gopkg.in/yaml.v2"
 )
 
-// Print all envtab loadouts
-func PrintEnvtabLoadouts() {
-	loadouts := GetEnvtabSlice()
-	for _, loadouts := range loadouts {
-		fmt.Println(loadouts)
+type LoadoutMetadata struct {
+	CreatedAt   string   `json:"createdAt" yaml:"createdAt"`
+	LoadedAt    string   `json:"loadedAt" yaml:"loadedAt"`
+	UpdatedAt   string   `json:"updatedAt" yaml:"updatedAt"`
+	Login       bool     `json:"login" yaml:"login"`
+	Tags        []string `json:"tags" yaml:"tags"`
+	Description string   `json:"description" yaml:"description"`
+}
+
+type Loadout struct {
+	Metadata LoadoutMetadata   `json:"metadata" yaml:"metadata"`
+	Entries  map[string]string `json:"entries" yaml:"entries"`
+}
+
+func (l Loadout) Export() {
+	for key, value := range l.Entries {
+		fmt.Printf("export %s=%s\n", key, value)
 	}
 }
 
-// Print all envtab entries in a loadout and its metadata
-func ReadLoadout(name string) (*EnvTable, error) {
+func (l Loadout) UpdateEntry(key, value string) error {
+	println("DEBUG: UpdateEntry called")
+	l.Entries[key] = value
+	return nil
+}
+
+func (l Loadout) UpateTags(tags []string) error {
+	println("DEBUG: UpdateTags called")
+	l.Metadata.Tags = tagz.MergeTags(l.Metadata.Tags, tags)
+	return nil
+}
+
+func (l Loadout) UpdateDescription(description string) error {
+	println("DEBUG: UpdateDescription called")
+	l.Metadata.Description = description
+	return nil
+}
+
+func (l Loadout) UpdateLogin(login bool) error {
+	println("DEBUG: UpdateLogin called")
+	l.Metadata.Login = login
+	return nil
+}
+
+func (l Loadout) UpdateUpdatedAt() error {
+	println("DEBUG: UpdateUpdatedAt called")
+	l.Metadata.UpdatedAt = utils.GetCurrentTime()
+	return nil
+}
+
+func (l Loadout) UpdateLoadedAt() error {
+	println("DEBUG: UpdateLoadedAt called")
+	l.Metadata.LoadedAt = utils.GetCurrentTime()
+	return nil
+}
+
+func InitLoadout() *Loadout {
+
+	loadout := &Loadout{
+		Metadata: LoadoutMetadata{
+			CreatedAt:   utils.GetCurrentTime(),
+			LoadedAt:    utils.GetCurrentTime(),
+			UpdatedAt:   utils.GetCurrentTime(),
+			Login:       false,
+			Tags:        []string{},
+			Description: "",
+		},
+		Entries: map[string]string{},
+	}
+
+	return loadout
+}
+
+// Read a loadout from file and return a Loadout struct
+func ReadLoadout(name string) (*Loadout, error) {
 
 	filePath := filepath.Join(InitEnvtab(), name+".yaml")
 
@@ -32,52 +94,20 @@ func ReadLoadout(name string) (*EnvTable, error) {
 		return nil, err
 	}
 
-	var loadout EnvTable
+	var loadout Loadout
 	err = yaml.Unmarshal(content, &loadout)
 	if err != nil {
 		return nil, err
 	}
 
 	return &loadout, nil
-
 }
 
-// Write a key-value pair to a loadout (and optionally add tags) and update the metadata
-func WriteEntryToLoadout(name, key, value string, tags []string) error {
+func WriteLoadout(name string, loadout *Loadout) error {
 
 	filePath := filepath.Join(InitEnvtab(), name+".yaml")
 
-	// Read the existing entries if file exists
-	content, err := ReadLoadout(name)
-	if err != nil && !os.IsNotExist(err) {
-		return err
-
-		// Create a new file if it doesn't exist
-	} else if os.IsNotExist(err) {
-		content = &EnvTable{
-			Metadata: EnvMetadata{
-				CreatedAt:   utils.GetCurrentTime(),
-				LoadedAt:    utils.GetCurrentTime(),
-				UpdatedAt:   utils.GetCurrentTime(),
-				Login:       false,
-				Tags:        []string{},
-				Description: "",
-			},
-			Entries: map[string]string{},
-		}
-	}
-
-	// Update or add the new key-value pair
-	content.Entries[key] = value
-
-	// Append unique tags to the existing list
-	content.Metadata.Tags = tagz.MergeTags(content.Metadata.Tags, tags)
-
-	// Update metadata
-	content.Metadata.UpdatedAt = utils.GetCurrentTime()
-
-	// Write the updated entries to the file
-	data, err := yaml.Marshal(content)
+	data, err := yaml.Marshal(loadout)
 	if err != nil {
 		return err
 	}
@@ -88,6 +118,26 @@ func WriteEntryToLoadout(name, key, value string, tags []string) error {
 	}
 
 	return nil
+}
+
+// Write a key-value pair to a loadout (and optionally add tags) and update UpdatedAt
+func AddEntryToLoadout(name, key, value string, tags []string) error {
+
+	// Read the existing entries if file exists
+	loadout, err := ReadLoadout(name)
+	if err != nil && !os.IsNotExist(err) {
+		return err
+
+	} else if os.IsNotExist(err) {
+		loadout = InitLoadout()
+	}
+
+	loadout.UpdateEntry(key, value)
+	loadout.UpateTags(tags)
+	loadout.UpdateUpdatedAt()
+
+	return WriteLoadout(name, loadout)
+
 }
 
 func EditLoadout(name string) error {
@@ -117,54 +167,4 @@ func DeleteLoadout(name string) error {
 	}
 
 	return nil
-}
-
-func ListEnvtabLoadouts() {
-	envtabSlice := GetEnvtabSlice()
-	environment := env.NewEnv()
-	environment.Populate()
-
-	fmt.Println("UpdatedAt LoadedAt  Login Active Total  Name               Tags")
-	for _, loadout := range envtabSlice {
-
-		lo, err := ReadLoadout(loadout)
-		if err != nil {
-			fmt.Printf("Error reading loadout %s: %s\n", loadout, err)
-			os.Exit(1)
-		}
-
-		updatedAt, err := time.Parse(time.RFC3339, lo.Metadata.UpdatedAt)
-		if err != nil {
-			fmt.Printf("Error parsing updatedAt time %s: %s\n", lo.Metadata.UpdatedAt, err)
-			os.Exit(1)
-		}
-
-		loadedAt, err := time.Parse(time.RFC3339, lo.Metadata.LoadedAt)
-		if err != nil {
-			fmt.Printf(
-				"Error parsing loadedAt time %s: %s\n",
-				lo.Metadata.UpdatedAt, err,
-			)
-			os.Exit(1)
-		}
-
-		var activeEntries = []string{}
-		for key, value := range lo.Entries {
-
-			if environment.Compare(key, value) {
-				activeEntries = append(activeEntries, key+"="+value)
-			}
-		}
-
-		fmt.Println(
-			// TODO: Determine if time is under 24 hours and print TimeOnly instead of DateOnly
-			strings.TrimPrefix(updatedAt.Format(time.DateOnly), "20"), "",
-			strings.TrimPrefix(loadedAt.Format(time.DateOnly), "20"), "",
-			lo.Metadata.Login, " [",
-			len(activeEntries), " / ",
-			len(lo.Entries), "] ",
-			utils.PadString(loadout, 17), "",
-			lo.Metadata.Tags)
-
-	}
 }
