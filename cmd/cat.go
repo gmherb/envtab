@@ -27,21 +27,13 @@ the provided argument.`,
 			os.Exit(1)
 		}
 
-		envtabPath := envtab.InitEnvtab()
-
-		content, err := os.ReadFile(envtabPath + "/" + args[0] + ".yaml")
+		loadout, err := envtab.ReadLoadout(args[0])
 		if err != nil {
-
-			if os.IsNotExist(err) {
-				fmt.Printf("ERROR: Loadout [%s] does not exist\n", args[0])
-				os.Exit(1)
-			}
-
-			fmt.Printf("ERROR: Error reading %s: %s\n", envtabPath, err)
+			fmt.Printf("ERROR: %s\n", err)
 			os.Exit(1)
 		}
-		fmt.Printf("%s", string(content))
 
+		loadout.PrintLoadout()
 	},
 }
 

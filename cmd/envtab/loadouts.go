@@ -67,6 +67,20 @@ func (l Loadout) UpdateLoadedAt() error {
 	return nil
 }
 
+// Print a loadout file to stdout
+func (l Loadout) PrintLoadout() error {
+
+	data, err := yaml.Marshal(l)
+	if err != nil {
+		return err
+	}
+
+	fmt.Printf("%s", string(data))
+
+	return nil
+}
+
+// Initialize a new Loadout struct
 func InitLoadout() *Loadout {
 
 	loadout := &Loadout{
