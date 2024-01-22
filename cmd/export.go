@@ -45,6 +45,7 @@ Example: $(envtab export myloadout)`,
 		}
 
 		loadout.Export()
+		envtab.WriteLoadout(loadoutName, loadout)
 	},
 }
 

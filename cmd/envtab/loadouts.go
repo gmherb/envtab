@@ -32,33 +32,38 @@ func (l Loadout) Export() {
 	l.UpdateLoadedAt()
 }
 
-func (l Loadout) UpdateEntry(key, value string) error {
+func (l Loadout) UpdateEntry(key string, value string) error {
 	println("DEBUG: UpdateEntry called")
 	l.Entries[key] = value
+	l.UpdateUpdatedAt()
 	return nil
 }
 
 func (l Loadout) UpdateTags(tags []string) error {
 	println("DEBUG: UpdateTags called")
 	l.Metadata.Tags = tagz.MergeTags(l.Metadata.Tags, tags)
+	l.UpdateUpdatedAt()
 	return nil
 }
 
 func (l Loadout) ReplaceTags(tags []string) error {
 	println("DEBUG: ReplaceTags called")
 	l.Metadata.Tags = tags
+	l.UpdateUpdatedAt()
 	return nil
 }
 
 func (l Loadout) UpdateDescription(description string) error {
 	println("DEBUG: UpdateDescription called")
 	l.Metadata.Description = description
+	l.UpdateUpdatedAt()
 	return nil
 }
 
 func (l Loadout) UpdateLogin(login bool) error {
 	println("DEBUG: UpdateLogin called")
 	l.Metadata.Login = login
+	l.UpdateUpdatedAt()
 	return nil
 }
 
@@ -143,14 +148,12 @@ func WriteLoadout(name string, loadout *Loadout) error {
 
 	filePath := filepath.Join(InitEnvtab(""), name+".yaml")
 
-	loadout.UpdateUpdatedAt()
-
 	data, err := yaml.Marshal(loadout)
 	if err != nil {
 		return err
 	}
 
-	err = os.WriteFile(filePath, data, 0700)
+	err = os.WriteFile(filePath, data, 0600)
 	if err != nil {
 		return err
 	}
@@ -159,7 +162,7 @@ func WriteLoadout(name string, loadout *Loadout) error {
 }
 
 // Write a key-value pair to a loadout (and optionally add tags)
-func AddEntryToLoadout(name, key, value string, tags []string) error {
+func AddEntryToLoadout(name string, key string, value string, tags []string) error {
 
 	// Read the existing entries if file exists
 	loadout, err := ReadLoadout(name)
