@@ -37,17 +37,17 @@ To export a loadout into your current shell.
 $ $(./envtab export my-essentials)
 ```
 
-## DONE
-- Add options to edit. If option provided, do not enter editor.
-  - n|name (rename loadout when provided)
-  - d|description (replace description when provided)
-  - l|login (modify login field to true when provided)
-  - L|nologin
-- Add options to login. If option provided, do not export login loadouts.
-  - e|enable (Add envtab to shell login script)
-  - d|diable (Remove envtab from shell login script)
-- Split file functionality into file.go (serves as file backend code)
-- Move logic for login to login.go
+To enable envtab to export all login loadouts.
+
+```
+$ ./envtab login --enable
+```
+
+To remove envtab from login shells.
+
+```
+$ ./envtab login --disable
+```
 
 ## TODO
 - Implement `-s|--sensitive` option to the addCmd to optionally encrypt values.
