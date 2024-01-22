@@ -16,8 +16,7 @@ const CAT_USAGE = `Usage: envtab cat <name>`
 var catCmd = &cobra.Command{
 	Use:   "cat <name>",
 	Short: "Print an envtab loadout",
-	Long: `Print the YAML file which contains the envtab loadout with the name
-the provided argument.`,
+	Long:  `Print an envtab loadout`,
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("DEBUG: cat called")
 

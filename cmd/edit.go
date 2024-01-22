@@ -63,13 +63,6 @@ If no options are provided, enter editor to manually edit a envtab loadout.`,
 
 		// If --login is set, enable loadout on login
 		if login, _ := cmd.Flags().GetBool("login"); login {
-
-			// If --login and --no-login are both set, error
-			if noLogin, _ := cmd.Flags().GetBool("no-login"); noLogin {
-				fmt.Printf("ERROR: --login and --no-login are mutually exclusive\n")
-				os.Exit(1)
-			}
-
 			fmt.Printf("DEBUG: Enabling loadout [%s] on login\n", loadoutName)
 			loadout.UpdateLogin(true)
 			loadoutModified = true
@@ -84,7 +77,6 @@ If no options are provided, enter editor to manually edit a envtab loadout.`,
 
 		// If --tags is set, update the loadout tags
 		if tags, _ := cmd.Flags().GetString("tags"); tags != "" {
-
 			newTags := []string{tags}
 
 			newTags = tagz.SplitTags(newTags)
@@ -99,7 +91,6 @@ If no options are provided, enter editor to manually edit a envtab loadout.`,
 
 		if loadoutModified {
 			println("DEBUG: Writing loadout")
-			//loadout.PrintLoadout()
 
 			err = envtab.WriteLoadout(loadoutName, loadout)
 			if err != nil {
@@ -117,11 +108,13 @@ If no options are provided, enter editor to manually edit a envtab loadout.`,
 func init() {
 	rootCmd.AddCommand(editCmd)
 
-	editCmd.Flags().StringP("name", "n", "", "loadout name")
-	editCmd.Flags().StringP("description", "d", "", "loadout description")
-	editCmd.Flags().BoolP("login", "l", false, "enable loadout on login")
-	editCmd.Flags().BoolP("no-login", "L", false, "disable loadout on login (default)")
-	editCmd.Flags().StringP("tags", "t", "", "loadout tags (comma or space separated)")
+	editCmd.Flags().StringP("name", "n", "", "rename loadout")
+	editCmd.Flags().StringP("description", "d", "", "set loadout description")
+	editCmd.Flags().StringP("tags", "t", "", "set loadout tags (separated by comma or space)")
+
+	editCmd.Flags().BoolP("login", "l", false, "enable loadout on login (mutially exclusive with --no-login)")
+	editCmd.Flags().BoolP("no-login", "L", false, "disable loadout on login (mutially exclusive with --login)")
+	editCmd.MarkFlagsMutuallyExclusive("login", "no-login")
 }
 
 func editLoadout(loadoutName string) {

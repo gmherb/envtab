@@ -19,12 +19,12 @@ const (
 
 var addCmd = &cobra.Command{
 	Use:   "add <name> <key>=<value> [tag1 tag2 ...]",
-	Short: "Add an entry to a loadout",
-	Long: `Add an environment variable and its value, KEY=value, as an entry in
-an envtab loadout.
+	Short: "Add an entry to a envtab loadout",
+	Long: `Add an environment variable key-pair as an entry in an envtab
+loadout.
 
-Optionally, you can add tags to the envtab loadout by adding them after the key
-and value. Multiple tags can be provided using space as a separator.`,
+Add tags to your envtab loadout by adding them after the key and value. Multiple
+tags can be provided using space or comma as a separator.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("DEBUG: add command called")
 
@@ -48,7 +48,6 @@ and value. Multiple tags can be provided using space as a separator.`,
 		}
 
 		name = args[0]
-
 		if strings.Contains(args[1], "=") {
 			fmt.Println("DEBUG: Equal sign detected in second argument. Splitting into key and value.")
 			key, value = strings.Split(args[1], "=")[0], strings.Split(args[1], "=")[1]

@@ -13,7 +13,7 @@ import (
 
 var exportCmd = &cobra.Command{
 	Use:   "export <loadout>",
-	Short: "Export a loadout",
+	Short: "Export envtab loadout",
 	Long: `Print export statements for provided loadout to be sourced into your
 environment.
 
