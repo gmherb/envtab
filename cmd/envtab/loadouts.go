@@ -32,55 +32,55 @@ func (l Loadout) Export() {
 	l.UpdateLoadedAt()
 }
 
-func (l Loadout) UpdateEntry(key string, value string) error {
+func (l *Loadout) UpdateEntry(key string, value string) error {
 	println("DEBUG: UpdateEntry called")
 	l.Entries[key] = value
 	l.UpdateUpdatedAt()
 	return nil
 }
 
-func (l Loadout) UpdateTags(tags []string) error {
+func (l *Loadout) UpdateTags(tags []string) error {
 	println("DEBUG: UpdateTags called")
 	l.Metadata.Tags = tagz.MergeTags(l.Metadata.Tags, tags)
 	l.UpdateUpdatedAt()
 	return nil
 }
 
-func (l Loadout) ReplaceTags(tags []string) error {
+func (l *Loadout) ReplaceTags(tags []string) error {
 	println("DEBUG: ReplaceTags called")
 	l.Metadata.Tags = tags
 	l.UpdateUpdatedAt()
 	return nil
 }
 
-func (l Loadout) UpdateDescription(description string) error {
+func (l *Loadout) UpdateDescription(description string) error {
 	println("DEBUG: UpdateDescription called")
 	l.Metadata.Description = description
 	l.UpdateUpdatedAt()
 	return nil
 }
 
-func (l Loadout) UpdateLogin(login bool) error {
+func (l *Loadout) UpdateLogin(login bool) error {
 	println("DEBUG: UpdateLogin called")
 	l.Metadata.Login = login
 	l.UpdateUpdatedAt()
 	return nil
 }
 
-func (l Loadout) UpdateUpdatedAt() error {
+func (l *Loadout) UpdateUpdatedAt() error {
 	println("DEBUG: UpdateUpdatedAt called")
 	l.Metadata.UpdatedAt = utils.GetCurrentTime()
 	return nil
 }
 
-func (l Loadout) UpdateLoadedAt() error {
+func (l *Loadout) UpdateLoadedAt() error {
 	println("DEBUG: UpdateLoadedAt called")
 	l.Metadata.LoadedAt = utils.GetCurrentTime()
 	return nil
 }
 
 // Print a loadout file to stdout
-func (l Loadout) PrintLoadout() error {
+func (l *Loadout) PrintLoadout() error {
 
 	data, err := yaml.Marshal(l)
 	if err != nil {
