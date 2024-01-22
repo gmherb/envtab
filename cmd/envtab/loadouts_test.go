@@ -50,13 +50,19 @@ func TestAddEntryToLoadout(t *testing.T) {
 		t.Errorf("Error writing test data to %s: %s", filePath, err)
 	}
 
-	entry, err := ReadLoadout(name)
+	loadout, err := ReadLoadout(name)
 	if err != nil {
 		t.Errorf("Error reading test file %s: %s", filePath, err)
 	}
+	loadout.PrintLoadout()
 
-	if entry.Entries["test2"] != "test2" {
-		t.Errorf("Expected test2, got %s", entry.Entries["test2"])
+	if loadout.Entries["test2"] != "test2" {
+		t.Errorf("Expected test2, got %s", loadout.Entries["test2"])
+	}
+
+	println(loadout.Metadata.Tags[0])
+	if loadout.Metadata.Tags[0] != "test" {
+		t.Errorf("Expected test, got %s", loadout.Metadata.Tags[0])
 	}
 
 	err = os.Remove(filePath)
@@ -85,4 +91,29 @@ func TestLoadoutExport(t *testing.T) {
 	if err != nil {
 		t.Errorf("Error removing %s: %s", filePath, err)
 	}
+}
+
+func TestRenameLoadout(t *testing.T) {
+	name := "TestRenameLoadout"
+	filePath := filepath.Join(InitEnvtab(""), name+".yaml")
+
+	// Create test loadout
+	err := AddEntryToLoadout(name, "test2", "test2", []string{"test"})
+	if err != nil {
+		t.Errorf("Error writing test data to %s: %s", filePath, err)
+	}
+
+	// Run RenameLoadout
+	err = RenameLoadout(name, "TestRenameLoadout2")
+	if err != nil {
+		t.Errorf("Error renaming loadout %s: %s", name, err)
+	}
+
+	// Test (which also cleans up)
+	filePath = filepath.Join(InitEnvtab(""), "TestRenameLoadout2.yaml")
+	err = os.Remove(filePath)
+	if err != nil {
+		t.Errorf("Error removing %s: %s", filePath, err)
+	}
+
 }

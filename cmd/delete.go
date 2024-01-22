@@ -12,8 +12,8 @@ import (
 
 var deleteCmd = &cobra.Command{
 	Use:   "delete <loadout> [loadout]...",
-	Short: "Delete loadout(s)",
-	Long:  `Delete loadout(s)`,
+	Short: "Delete envtab loadout(s)",
+	Long:  `Delete envtab loadout(s)`,
 	Run: func(cmd *cobra.Command, args []string) {
 		println("DEBUG: delete called")
 

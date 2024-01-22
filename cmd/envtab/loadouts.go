@@ -2,9 +2,6 @@ package envtab
 
 import (
 	"fmt"
-	"os"
-	"os/exec"
-	"path/filepath"
 
 	tagz "github.com/gmherb/envtab/pkg/tags"
 	"github.com/gmherb/envtab/pkg/utils"
@@ -29,46 +26,58 @@ func (l Loadout) Export() {
 	for key, value := range l.Entries {
 		fmt.Printf("export %s=%s\n", key, value)
 	}
+	l.UpdateLoadedAt()
 }
 
-func (l Loadout) UpdateEntry(key, value string) error {
+func (l *Loadout) UpdateEntry(key string, value string) error {
 	println("DEBUG: UpdateEntry called")
 	l.Entries[key] = value
+	l.UpdateUpdatedAt()
 	return nil
 }
 
-func (l Loadout) UpateTags(tags []string) error {
+func (l *Loadout) UpdateTags(tags []string) error {
 	println("DEBUG: UpdateTags called")
 	l.Metadata.Tags = tagz.MergeTags(l.Metadata.Tags, tags)
+	l.UpdateUpdatedAt()
 	return nil
 }
 
-func (l Loadout) UpdateDescription(description string) error {
+func (l *Loadout) ReplaceTags(tags []string) error {
+	println("DEBUG: ReplaceTags called")
+	l.Metadata.Tags = tags
+	l.UpdateUpdatedAt()
+	return nil
+}
+
+func (l *Loadout) UpdateDescription(description string) error {
 	println("DEBUG: UpdateDescription called")
 	l.Metadata.Description = description
+	l.UpdateUpdatedAt()
 	return nil
 }
 
-func (l Loadout) UpdateLogin(login bool) error {
+func (l *Loadout) UpdateLogin(login bool) error {
 	println("DEBUG: UpdateLogin called")
 	l.Metadata.Login = login
+	l.UpdateUpdatedAt()
 	return nil
 }
 
-func (l Loadout) UpdateUpdatedAt() error {
+func (l *Loadout) UpdateUpdatedAt() error {
 	println("DEBUG: UpdateUpdatedAt called")
 	l.Metadata.UpdatedAt = utils.GetCurrentTime()
 	return nil
 }
 
-func (l Loadout) UpdateLoadedAt() error {
+func (l *Loadout) UpdateLoadedAt() error {
 	println("DEBUG: UpdateLoadedAt called")
 	l.Metadata.LoadedAt = utils.GetCurrentTime()
 	return nil
 }
 
 // Print a loadout file to stdout
-func (l Loadout) PrintLoadout() error {
+func (l *Loadout) PrintLoadout() error {
 
 	data, err := yaml.Marshal(l)
 	if err != nil {
@@ -96,89 +105,4 @@ func InitLoadout() *Loadout {
 	}
 
 	return loadout
-}
-
-// Read a loadout from file and return a Loadout struct
-func ReadLoadout(name string) (*Loadout, error) {
-
-	filePath := filepath.Join(InitEnvtab(""), name+".yaml")
-
-	content, err := os.ReadFile(filePath)
-	if err != nil {
-		return nil, err
-	}
-
-	var loadout Loadout
-	err = yaml.Unmarshal(content, &loadout)
-	if err != nil {
-		return nil, err
-	}
-
-	return &loadout, nil
-}
-
-func WriteLoadout(name string, loadout *Loadout) error {
-
-	filePath := filepath.Join(InitEnvtab(""), name+".yaml")
-
-	data, err := yaml.Marshal(loadout)
-	if err != nil {
-		return err
-	}
-
-	err = os.WriteFile(filePath, data, 0700)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-// Write a key-value pair to a loadout (and optionally add tags) and update UpdatedAt
-func AddEntryToLoadout(name, key, value string, tags []string) error {
-
-	// Read the existing entries if file exists
-	loadout, err := ReadLoadout(name)
-	if err != nil && !os.IsNotExist(err) {
-		return err
-
-	} else if os.IsNotExist(err) {
-		loadout = InitLoadout()
-	}
-
-	loadout.UpdateEntry(key, value)
-	loadout.UpateTags(tags)
-	loadout.UpdateUpdatedAt()
-
-	return WriteLoadout(name, loadout)
-
-}
-
-func EditLoadout(name string) error {
-
-	filePath := filepath.Join(InitEnvtab(""), name+".yaml")
-
-	editor := os.Getenv("EDITOR")
-	if editor == "" {
-		editor = "vim"
-	}
-
-	cmd := exec.Command(editor, filePath)
-	cmd.Stdin = os.Stdin
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-
-	return cmd.Run()
-}
-
-func DeleteLoadout(name string) error {
-
-	filePath := filepath.Join(InitEnvtab(""), name+".yaml")
-
-	err := os.Remove(filePath)
-	if err != nil {
-		return err
-	}
-
-	return nil
 }
