@@ -65,7 +65,7 @@ and value. Multiple tags can be provided using space as a separator.`,
 		tags = tagz.RemoveEmptyTags(tags)
 		tags = tagz.RemoveDuplicateTags(tags)
 
-		fmt.Printf("DEBUG: Name: %s, Key: %s, Value: %s, tags: %s.", name, key, value, tags)
+		fmt.Printf("DEBUG: Name: %s, Key: %s, Value: %s, tags: %s.\n", name, key, value, tags)
 
 		err := envtab.AddEntryToLoadout(name, key, value, tags)
 		if err != nil {

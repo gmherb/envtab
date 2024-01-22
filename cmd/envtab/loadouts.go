@@ -29,6 +29,7 @@ func (l Loadout) Export() {
 	for key, value := range l.Entries {
 		fmt.Printf("export %s=%s\n", key, value)
 	}
+	l.UpdateLoadedAt()
 }
 
 func (l Loadout) UpdateEntry(key, value string) error {
@@ -37,9 +38,15 @@ func (l Loadout) UpdateEntry(key, value string) error {
 	return nil
 }
 
-func (l Loadout) UpateTags(tags []string) error {
+func (l Loadout) UpdateTags(tags []string) error {
 	println("DEBUG: UpdateTags called")
 	l.Metadata.Tags = tagz.MergeTags(l.Metadata.Tags, tags)
+	return nil
+}
+
+func (l Loadout) ReplaceTags(tags []string) error {
+	println("DEBUG: ReplaceTags called")
+	l.Metadata.Tags = tags
 	return nil
 }
 
@@ -98,6 +105,21 @@ func InitLoadout() *Loadout {
 	return loadout
 }
 
+// Rename a loadout file
+func RenameLoadout(oldName, newName string) error {
+
+	envtabPath := InitEnvtab("")
+	oldFilePath := filepath.Join(envtabPath, oldName+".yaml")
+	newFilePath := filepath.Join(envtabPath, newName+".yaml")
+
+	err := os.Rename(oldFilePath, newFilePath)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 // Read a loadout from file and return a Loadout struct
 func ReadLoadout(name string) (*Loadout, error) {
 
@@ -121,6 +143,8 @@ func WriteLoadout(name string, loadout *Loadout) error {
 
 	filePath := filepath.Join(InitEnvtab(""), name+".yaml")
 
+	loadout.UpdateUpdatedAt()
+
 	data, err := yaml.Marshal(loadout)
 	if err != nil {
 		return err
@@ -134,7 +158,7 @@ func WriteLoadout(name string, loadout *Loadout) error {
 	return nil
 }
 
-// Write a key-value pair to a loadout (and optionally add tags) and update UpdatedAt
+// Write a key-value pair to a loadout (and optionally add tags)
 func AddEntryToLoadout(name, key, value string, tags []string) error {
 
 	// Read the existing entries if file exists
@@ -147,11 +171,9 @@ func AddEntryToLoadout(name, key, value string, tags []string) error {
 	}
 
 	loadout.UpdateEntry(key, value)
-	loadout.UpateTags(tags)
-	loadout.UpdateUpdatedAt()
+	loadout.UpdateTags(tags)
 
 	return WriteLoadout(name, loadout)
-
 }
 
 func EditLoadout(name string) error {

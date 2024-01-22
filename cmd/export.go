@@ -38,14 +38,13 @@ Example: $(envtab export myloadout)`,
 			os.Exit(1)
 		}
 
-		output, err := envtab.ReadLoadout(loadoutName)
+		loadout, err := envtab.ReadLoadout(loadoutName)
 		if err != nil {
 			fmt.Printf("ERROR: Failure reading loadout [%s]: %s\n", loadoutName, err)
 			os.Exit(1)
 		}
-		for key, value := range output.Entries {
-			fmt.Printf("export %s=%s\n", key, value)
-		}
+
+		loadout.Export()
 	},
 }
 
