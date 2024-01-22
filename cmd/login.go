@@ -13,7 +13,7 @@ import (
 // loginCmd represents the login command
 var loginCmd = &cobra.Command{
 	Use:   "login",
-	Short: "Export all loadouts with login=true",
+	Short: "Export all login loadouts",
 	Long: `Export all loadouts which are enabled on login. This is typically
 run from a login script such as ~/.bash_profile or ~/.zprofile and can be setup
 automatically by running "envtab login --enable". You can disable login
