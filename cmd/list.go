@@ -55,7 +55,7 @@ func ListEnvtabLoadouts() {
 	environment := env.NewEnv()
 	environment.Populate()
 
-	fmt.Println("UpdatedAt LoadedAt  Login Active Total  Name               Tags")
+	fmt.Println("UpdatedAt LoadedAt  Login Active Total Name               Tags")
 	for _, loadout := range envtabSlice {
 
 		lo, err := envtab.ReadLoadout(loadout)
@@ -87,14 +87,20 @@ func ListEnvtabLoadouts() {
 			}
 		}
 
+		loginPaddin := ""
+		if lo.Metadata.Login {
+			loginPaddin = " "
+		}
+
 		fmt.Println(
 			// TODO: Determine if time is under 24 hours and print TimeOnly instead of DateOnly
+
 			strings.TrimPrefix(updatedAt.Format(time.DateOnly), "20"), "",
 			strings.TrimPrefix(loadedAt.Format(time.DateOnly), "20"), "",
-			lo.Metadata.Login, " [",
-			len(activeEntries), " / ",
-			len(lo.Entries), "] ",
-			utils.PadString(loadout, 17), "",
+			lo.Metadata.Login, loginPaddin, "[",
+			len(activeEntries), "/",
+			len(lo.Entries), "]  ",
+			utils.PadString(loadout, 18),
 			lo.Metadata.Tags)
 
 	}
