@@ -18,6 +18,7 @@ var loginCmd = &cobra.Command{
 run from a login script such as ~/.bash_profile or ~/.zprofile and can be setup
 automatically by running "envtab login --enable". You can disable login
 by running "envtab login --disable".`,
+	Args: cobra.NoArgs,
 	Run: func(cmd *cobra.Command, args []string) {
 		println("DEBUG: login called")
 

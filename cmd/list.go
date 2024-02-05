@@ -22,6 +22,7 @@ var listCmd = &cobra.Command{
 	Long: `List all envtab loadouts.  If the --long flag is provided, then
 print the long listing format which includes the loadout name, tags, and other
 metadata.`,
+	Args: cobra.NoArgs,
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("DEBUG: list called")
 
