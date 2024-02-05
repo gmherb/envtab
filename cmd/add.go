@@ -13,10 +13,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-const (
-	ADD_USAGE = `Usage: envtab add <name> <key>=<value> [tag1 tag2 ...]`
-)
-
 var addCmd = &cobra.Command{
 	Use:   "add <name> <key>=<value> [tag1 tag2 ...]",
 	Short: "Add an entry to a envtab loadout",
@@ -25,6 +21,7 @@ loadout.
 
 Add tags to your envtab loadout by adding them after the key and value. Multiple
 tags can be provided using space or comma as a separator.`,
+	Args: cobra.MinimumNArgs(2),
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("DEBUG: add command called")
 
@@ -35,15 +32,9 @@ tags can be provided using space or comma as a separator.`,
 			tags  []string // Tags to append to envtab loadout
 		)
 
-		if len(args) < 2 {
-			fmt.Println("DEBUG: Insufficient number of arguments provided")
-			fmt.Println(ADD_USAGE)
-			os.Exit(1)
-		}
-
 		if len(args) == 2 && !strings.Contains(args[1], "=") {
 			fmt.Println("DEBUG: No value provided for your envtab entry. No equal sign detected and only 2 args provided.")
-			fmt.Println(ADD_USAGE)
+			cmd.Usage()
 			os.Exit(1)
 		}
 
