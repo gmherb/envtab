@@ -11,20 +11,13 @@ import (
 	"github.com/spf13/cobra"
 )
 
-const CAT_USAGE = `Usage: envtab cat <name>`
-
 var catCmd = &cobra.Command{
 	Use:   "cat <name>",
 	Short: "Print an envtab loadout",
 	Long:  `Print an envtab loadout`,
+	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("DEBUG: cat called")
-
-		if len(args) != 1 {
-			fmt.Println("ERROR: Insufficient number of arguments provided")
-			fmt.Println(CAT_USAGE)
-			os.Exit(1)
-		}
 
 		loadout, err := envtab.ReadLoadout(args[0])
 		if err != nil {
