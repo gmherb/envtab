@@ -52,6 +52,10 @@ $ ./envtab login --disable
 ```
 
 ## TODO
+- Add status subcommand to login to show the current state.
+```
+$ ./envtab login status
+```
 - Implement `-s|--sensitive` option to the addCmd to optionally encrypt values.
   - Support: AES, AWS KMS, GPG(PGP)
 - Add ability to create/use templates.
