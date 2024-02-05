@@ -18,13 +18,9 @@ var exportCmd = &cobra.Command{
 environment.
 
 Example: $(envtab export myloadout)`,
+	Args: cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		println("DEBUG: export called")
-
-		if len(args) != 1 {
-			fmt.Printf("ERROR: export requires a loadout name\n")
-			os.Exit(1)
-		}
 
 		envtabPath := envtab.InitEnvtab("")
 
