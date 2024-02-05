@@ -76,7 +76,6 @@ func (l *Loadout) UpdateLoadedAt() error {
 	return nil
 }
 
-// Print a loadout file to stdout
 func (l *Loadout) PrintLoadout() error {
 
 	data, err := yaml.Marshal(l)
@@ -105,4 +104,39 @@ func InitLoadout() *Loadout {
 	}
 
 	return loadout
+}
+
+func CompareLoadouts(old Loadout, new Loadout) bool {
+	if old.Metadata.CreatedAt != new.Metadata.CreatedAt {
+		return true
+	}
+	if old.Metadata.LoadedAt != new.Metadata.LoadedAt {
+		return true
+	}
+	if old.Metadata.UpdatedAt != new.Metadata.UpdatedAt {
+		return true
+	}
+	if old.Metadata.Login != new.Metadata.Login {
+		return true
+	}
+	if len(old.Metadata.Tags) != len(new.Metadata.Tags) {
+		return true
+	}
+	for i, tag := range old.Metadata.Tags {
+		if tag != new.Metadata.Tags[i] {
+			return true
+		}
+	}
+	if old.Metadata.Description != new.Metadata.Description {
+		return true
+	}
+	if len(old.Entries) != len(new.Entries) {
+		return true
+	}
+	for key, value := range old.Entries {
+		if value != new.Entries[key] {
+			return true
+		}
+	}
+	return false
 }
