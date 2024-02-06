@@ -24,18 +24,21 @@ by running "envtab login --disable".`,
 
 		enable, _ := cmd.Flags().GetBool("enable")
 		disable, _ := cmd.Flags().GetBool("disable")
-		if enable && disable {
-			println("ERROR: Cannot enable and disable login at the same time")
-			os.Exit(1)
-		}
+		status, _ := cmd.Flags().GetBool("status")
 
 		if enable {
 			println("DEBUG: Enabling login")
 			envtab.EnableLogin()
 			return
-		} else if disable {
+		}
+		if disable {
 			println("DEBUG: Disabling login")
 			envtab.DisableLogin()
+			return
+		}
+		if status {
+			println("DEBUG: Showing status")
+			envtab.ShowLoginStatus()
 			return
 		}
 
@@ -45,9 +48,10 @@ by running "envtab login --disable".`,
 
 func init() {
 	rootCmd.AddCommand(loginCmd)
-
 	loginCmd.Flags().BoolP("enable", "e", false, "Setup envtab to load on shell login")
 	loginCmd.Flags().BoolP("disable", "d", false, "Remove envtab from your login scripts")
+	loginCmd.Flags().BoolP("status", "s", false, "Show the status of envtab in your login scripts")
+	loginCmd.MarkFlagsMutuallyExclusive("enable", "disable", "status")
 }
 
 func exportLoginLoadouts() {

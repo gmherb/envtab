@@ -95,15 +95,16 @@ func removeEnvtabFromScript(loginScript string) {
 		fmt.Printf("DEBUG: Login script [%s] does not exist\n", loginScript)
 		return
 	} else if err != nil {
-		fmt.Printf("Error reading login script %s: %s\n", loginScript, err)
+		fmt.Printf("Error reading login script [%s]: %s\n", loginScript, err)
 		os.Exit(1)
 	}
 
 	// ignore if login script doesn't contain `envtabLoginLine`
 	if !strings.Contains(string(content), envtabLoginLine) {
-		fmt.Printf("DEBUG: Login script %s does not contain %s\n", loginScript, envtabLoginLine)
+		fmt.Printf("DEBUG: Login script [%s] does not contain [%s]\n", loginScript, envtabLoginLine)
 		return
 	} else {
+		fmt.Printf("DEBUG: Login script [%s] contains [%s]\n", loginScript, envtabLoginLine)
 		// iterate over the lines, looking for `envtabLoginLine`
 		lines := strings.Split(string(content), "\n")
 		for i, line := range lines {
@@ -120,15 +121,48 @@ func removeEnvtabFromScript(loginScript string) {
 		// Overwrite the login script with the updated content
 		f, err := os.OpenFile(loginScript, os.O_WRONLY, 0600)
 		if err != nil {
-			fmt.Printf("Error opening login script %s: %s\n", loginScript, err)
+			fmt.Printf("Error opening login script [%s]: %s\n", loginScript, err)
 			os.Exit(1)
 		}
 		defer f.Close()
 
 		if _, err = f.WriteString(output); err != nil {
-			fmt.Printf("Error writing to login script %s: %s\n", loginScript, err)
+			fmt.Printf("Error writing to login script [%s]: %s\n", loginScript, err)
 			os.Exit(1)
 		}
 
 	}
+}
+
+func ShowLoginStatus() {
+	usr, err := user.Current()
+	if err != nil {
+		fmt.Printf("Error getting user's home directory: %s\n", err)
+		os.Exit(1)
+	}
+	var loginScriptPath string
+	for _, loginScript := range loginScripts {
+		loginScriptPath = usr.HomeDir + "/" + loginScript
+
+		fmt.Printf("DEBUG: Checking login script [%s] for envtab\n", loginScript)
+		content, err := os.ReadFile(loginScriptPath)
+
+		// ignore error if file doesn't exist
+		if os.IsNotExist(err) {
+			fmt.Printf("DEBUG: Login script [%s] does not exist\n", loginScript)
+		} else if err != nil {
+			fmt.Printf("Error reading login script [%s]: %s\n", loginScript, err)
+			os.Exit(1)
+		}
+
+		// Print enabled if the login script contains `envtabLoginLine`
+		if strings.Contains(string(content), envtabLoginLine) {
+			fmt.Printf("DEBUG: Login script [%s] contains [%s]\n", loginScript, envtabLoginLine)
+			fmt.Printf("enabled\n")
+			return
+
+		}
+	}
+	fmt.Printf("disabled")
+	return
 }
