@@ -16,19 +16,20 @@ Usage:
   envtab [command]
 
 Available Commands:
-  add         Add an entry to a loadout
+  add         Add an entry to a envtab loadout
   cat         Print an envtab loadout
   completion  Generate the autocompletion script for the specified shell
-  delete      Delete loadout(s)
+  delete      Delete envtab loadout(s)
   edit        Edit envtab loadout
-  export      Export a loadout
+  export      Export envtab loadout
   help        Help about any command
   list        List all envtab loadouts
-  login       Export all loadouts with login: true
+  login       Export all login loadouts
   show        Show active loadouts
 
 Flags:
-  -h, --help   help for envtab
+  -h, --help      help for envtab
+  -v, --version   version for envtab
 
 Use "envtab [command] --help" for more information about a command.
 ```
@@ -37,6 +38,12 @@ To export a loadout into your current shell.
 
 ```
 $ $(./envtab export my-essentials)
+```
+
+To show the current state of login (enabled|disabled).
+
+```
+$ ./envtab login --status
 ```
 
 To enable envtab to export all login loadouts.
@@ -52,10 +59,6 @@ $ ./envtab login --disable
 ```
 
 ## TODO
-- Add status subcommand to login to show the current state.
-```
-$ ./envtab login status
-```
 - Implement `-s|--sensitive` option to the addCmd to optionally encrypt values.
   - Support: AES, AWS KMS, GPG(PGP)
 - Add ability to create/use templates.
