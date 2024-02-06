@@ -103,35 +103,34 @@ func removeEnvtabFromScript(loginScript string) {
 	if !strings.Contains(string(content), envtabLoginLine) {
 		fmt.Printf("DEBUG: Login script [%s] does not contain [%s]\n", loginScript, envtabLoginLine)
 		return
-	} else {
-		fmt.Printf("DEBUG: Login script [%s] contains [%s]\n", loginScript, envtabLoginLine)
-		// iterate over the lines, looking for `envtabLoginLine`
-		lines := strings.Split(string(content), "\n")
-		for i, line := range lines {
-			if strings.Contains(line, envtabLoginLine) {
-				// remove the line
-				lines[i] = lines[len(lines)-1]
-				lines[len(lines)-1] = ""
-				lines = lines[:len(lines)-1]
-
-			}
-		}
-		output := strings.Join(lines, "\n")
-
-		// Overwrite the login script with the updated content
-		f, err := os.OpenFile(loginScript, os.O_WRONLY, 0600)
-		if err != nil {
-			fmt.Printf("Error opening login script [%s]: %s\n", loginScript, err)
-			os.Exit(1)
-		}
-		defer f.Close()
-
-		if _, err = f.WriteString(output); err != nil {
-			fmt.Printf("Error writing to login script [%s]: %s\n", loginScript, err)
-			os.Exit(1)
-		}
-
 	}
+	fmt.Printf("DEBUG: Login script [%s] contains [%s]\n", loginScript, envtabLoginLine)
+	// iterate over the lines, looking for `envtabLoginLine`
+	lines := strings.Split(string(content), "\n")
+	newlines := []string{}
+	for i, line := range lines {
+		if !strings.Contains(line, envtabLoginLine) {
+			newlines = append(newlines, line)
+			fmt.Printf("DEBUG: Keeping [%s] from line %d\n", line, i)
+		} else {
+			fmt.Printf("DEBUG: Removing [%s] from line %d\n", envtabLoginLine, i)
+		}
+	}
+	output := strings.Join(newlines, "\n")
+
+	// Overwrite the login script with the updated content
+	f, err := os.OpenFile(loginScript, os.O_WRONLY|os.O_TRUNC, 0600)
+	if err != nil {
+		fmt.Printf("Error opening login script [%s]: %s\n", loginScript, err)
+		os.Exit(1)
+	}
+	defer f.Close()
+
+	if _, err = f.WriteString(output); err != nil {
+		fmt.Printf("Error writing to login script [%s]: %s\n", loginScript, err)
+		os.Exit(1)
+	}
+
 }
 
 func ShowLoginStatus() {
