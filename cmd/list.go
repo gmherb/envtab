@@ -17,7 +17,7 @@ import (
 )
 
 var listCmd = &cobra.Command{
-	Use:   "list",
+	Use:   "ls",
 	Short: "List all envtab loadouts",
 	Long: `List all envtab loadouts.  If the --long flag is provided, then
 print the long listing format which includes the loadout name, tags, and other
@@ -91,6 +91,10 @@ func ListEnvtabLoadouts() {
 		loginPaddin := ""
 		if lo.Metadata.Login {
 			loginPaddin = " "
+		}
+
+		if len(loadout) >= 18 {
+			loadout = loadout[:17] + "."
 		}
 
 		fmt.Println(

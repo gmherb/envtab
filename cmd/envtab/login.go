@@ -57,7 +57,7 @@ func EnableLogin() {
 	}
 
 	if strings.Contains(string(content), envtabLogin) {
-		fmt.Printf("Login script %s already contains %s\n", loginScript, envtabLogin)
+		fmt.Printf("DEBUG: Login script %s already contains %s\n", loginScript, envtabLogin)
 		os.Exit(0)
 	}
 
@@ -162,6 +162,6 @@ func ShowLoginStatus() {
 
 		}
 	}
-	fmt.Printf("disabled")
+	fmt.Printf("disabled\n")
 	return
 }

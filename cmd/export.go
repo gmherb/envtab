@@ -27,7 +27,7 @@ Example: $(envtab export myloadout)`,
 		loadoutName := args[0]
 		loadoutPath := envtabPath + `/` + loadoutName + `.yaml`
 
-		println("DEBUG: loadoutPath:" + loadoutPath + ", loadoutName: " + loadoutPath)
+		println("DEBUG: loadoutName: " + loadoutName + ", loadoutPath: " + loadoutPath)
 
 		if _, err := os.Stat(loadoutPath); os.IsNotExist(err) {
 			fmt.Printf("ERROR: Loadout [%s] does not exist\n", loadoutName)

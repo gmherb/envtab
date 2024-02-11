@@ -8,8 +8,8 @@
 
 ## Usage
 
-```
-$ ./envtab
+```shell
+$ envtab
 Take control of your environment.
 
 Usage:
@@ -36,34 +36,39 @@ Use "envtab [command] --help" for more information about a command.
 
 To export a loadout into your current shell.
 
-```
-$ $(./envtab export my-essentials)
+```shell
+$ $(envtab export my-essentials)
+
+
 ```
 
 To show the current state of login (enabled|disabled).
 
-```
-$ ./envtab login --status
+```shell
+$ envtab login --status
+enabled
 ```
 
 To enable envtab to export all login loadouts.
 
-```
-$ ./envtab login --enable
+```shell
+envtab login --enable
 ```
 
 To remove envtab from login shells.
 
-```
-$ ./envtab login --disable
+```shell
+envtab login --disable
 ```
 
 ## TODO
+
+- Implement `new` subcmd which creates a loadout.
+  - Optionally, specify a template with preset Keys.
+- Create templates for most commonly used tools.
+  - AWS, Vault, etc
 - Implement `-s|--sensitive` option to the addCmd to optionally encrypt values.
   - Support: AES, AWS KMS, GPG(PGP)
-- Add ability to create/use templates.
-  - Create templates for most commonly used tools.
-    - AWS, Vault, etc
 - Add additional backends.
   - File (Default)
   - Vault
