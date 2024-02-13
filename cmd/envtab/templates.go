@@ -72,13 +72,6 @@ func MakeLoadoutFromTemplate(templateName string, force bool) Loadout {
 	}
 	fmt.Printf("DEBUG: templatePath: %s\n", templatePath)
 
-	// Check if the loadout exists and exit if it does
-	loadoutPath := filepath.Join(InitEnvtab(""), templateName+".yaml")
-	if _, err := os.Stat(loadoutPath); err == nil {
-		fmt.Printf("ERROR: Loadout [%s] already exists.\n", templateName)
-		os.Exit(1)
-	}
-
 	loadout := InitLoadout()
 
 	data, err := os.ReadFile(templatePath)
