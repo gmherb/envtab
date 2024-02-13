@@ -14,7 +14,7 @@ import (
 )
 
 var addCmd = &cobra.Command{
-	Use:   "add <name> <key>=<value> [tag1 tag2 ...]",
+	Use:   "add LOADOUT_NAME KEY=VALUE [TAG1 TAG2,TAG3 ...]",
 	Short: "Add an entry to a envtab loadout",
 	Long: `Add an environment variable key-pair as an entry in an envtab
 loadout.

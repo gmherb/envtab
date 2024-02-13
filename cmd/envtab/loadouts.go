@@ -24,7 +24,9 @@ type Loadout struct {
 
 func (l Loadout) Export() {
 	for key, value := range l.Entries {
-		fmt.Printf("export %s=%s\n", key, value)
+		if value != "" {
+			fmt.Printf("export %s=%s\n", key, value)
+		}
 	}
 	l.UpdateLoadedAt()
 }
