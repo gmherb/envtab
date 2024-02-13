@@ -24,7 +24,7 @@ func (e *Env) Populate() {
 	}
 }
 
-func (e *Env) Print() {
+func (e *Env) Dump() {
 	for k, v := range e.Env {
 		println(k, ":", v)
 	}

@@ -16,7 +16,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var listCmd = &cobra.Command{
+var lsCmd = &cobra.Command{
 	Use:   "ls",
 	Short: "List all envtab loadouts",
 	Long: `List all envtab loadouts.  If the --long flag is provided, then
@@ -38,9 +38,9 @@ metadata.`,
 }
 
 func init() {
-	rootCmd.AddCommand(listCmd)
+	rootCmd.AddCommand(lsCmd)
 
-	listCmd.PersistentFlags().BoolP("long", "l", false, "Print long listing format")
+	lsCmd.PersistentFlags().BoolP("long", "l", false, "Print long listing format")
 }
 
 func PrintEnvtabLoadouts() {

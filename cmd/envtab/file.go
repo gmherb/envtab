@@ -27,8 +27,8 @@ func AddEntryToLoadout(name string, key string, value string, tags []string) err
 	return WriteLoadout(name, loadout)
 }
 
-// Delete a loadout file
-func DeleteLoadout(name string) error {
+// Remove a loadout file
+func RemoveLoadout(name string) error {
 
 	filePath := filepath.Join(InitEnvtab(""), name+".yaml")
 

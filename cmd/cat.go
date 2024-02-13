@@ -13,19 +13,22 @@ import (
 
 var catCmd = &cobra.Command{
 	Use:   "cat <name>",
-	Short: "Print an envtab loadout",
-	Long:  `Print an envtab loadout`,
-	Args:  cobra.ExactArgs(1),
+	Short: "Concatenate envtab loadouts to stdout",
+	Long:  `Concatenate envtab loadouts to stdout.`,
+	Args:  cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("DEBUG: cat called")
 
-		loadout, err := envtab.ReadLoadout(args[0])
-		if err != nil {
-			fmt.Printf("ERROR: %s\n", err)
-			os.Exit(1)
-		}
+		for _, arg := range args {
 
-		loadout.PrintLoadout()
+			loadout, err := envtab.ReadLoadout(arg)
+			if err != nil {
+				fmt.Printf("ERROR: %s\n", err)
+				os.Exit(1)
+			}
+
+			loadout.PrintLoadout()
+		}
 	},
 }
 

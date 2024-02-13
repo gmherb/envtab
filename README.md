@@ -9,7 +9,6 @@
 ## Usage
 
 ```shell
-$ envtab
 Take control of your environment.
 
 Usage:
@@ -17,14 +16,14 @@ Usage:
 
 Available Commands:
   add         Add an entry to a envtab loadout
-  cat         Print an envtab loadout
+  cat         Concatenate envtab loadouts to stdout
   completion  Generate the autocompletion script for the specified shell
-  delete      Delete envtab loadout(s)
   edit        Edit envtab loadout
   export      Export envtab loadout
   help        Help about any command
-  list        List all envtab loadouts
   login       Export all login loadouts
+  ls          List all envtab loadouts
+  rm          Remove envtab loadout(s)
   show        Show active loadouts
 
 Flags:
@@ -37,10 +36,19 @@ Use "envtab [command] --help" for more information about a command.
 To export a loadout into your current shell.
 
 ```shell
-$ $(envtab export my-essentials)
+$ $(envtab export aws-prd)
+$ envtab show
+aws-dev ---------------------------------------------------------------------------------- [ 1 / 3 ]
+   AWS_DEFAULT_REGION=us-west-2
 
+aws-prd ---------------------------------------------------------------------------------- [ 3 / 3 ]
+   AWS_SECRET_ACCESS_KEY=wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
+   AWS_ACCESS_KEY_ID=AKIAIOSFODNN7EXAMPLE
+   AWS_DEFAULT_REGION=us-west-2
 
 ```
+
+*Note: The same key pair value can be set in different loadouts. envtab shows each matching loadout.*
 
 To show the current state of login (enabled|disabled).
 
