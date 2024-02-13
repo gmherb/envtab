@@ -23,6 +23,7 @@ Available Commands:
   help        Help about any command
   login       Export all login loadouts
   ls          List all envtab loadouts
+  mk          Make loadout from a template
   rm          Remove envtab loadout(s)
   show        Show active loadouts
 
