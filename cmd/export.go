@@ -12,36 +12,38 @@ import (
 )
 
 var exportCmd = &cobra.Command{
-	Use:   "export <loadout>",
+	Use:   "export LOADOUT_NAME [LOADOUT_NAME ...]",
 	Short: "Export envtab loadout",
-	Long: `Print export statements for provided loadout to be sourced into your
+	Long: `Print export statements for provided loadouts to be sourced into your
 environment.
 
 Example: $(envtab export myloadout)`,
-	Args: cobra.ExactArgs(1),
+	Args: cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		println("DEBUG: export called")
 
 		envtabPath := envtab.InitEnvtab("")
 
-		loadoutName := args[0]
-		loadoutPath := envtabPath + `/` + loadoutName + `.yaml`
+		for _, arg := range args {
 
-		println("DEBUG: loadoutName: " + loadoutName + ", loadoutPath: " + loadoutPath)
+			loadoutName := arg
+			loadoutPath := envtabPath + `/` + loadoutName + `.yaml`
 
-		if _, err := os.Stat(loadoutPath); os.IsNotExist(err) {
-			fmt.Printf("ERROR: Loadout [%s] does not exist\n", loadoutName)
-			os.Exit(1)
+			println("DEBUG: loadoutName: " + loadoutName + ", loadoutPath: " + loadoutPath)
+
+			if _, err := os.Stat(loadoutPath); os.IsNotExist(err) {
+				fmt.Printf("ERROR: Loadout [%s] does not exist\n", loadoutName)
+				os.Exit(1)
+			}
+
+			loadout, err := envtab.ReadLoadout(loadoutName)
+			if err != nil {
+				fmt.Printf("ERROR: Failure reading loadout [%s]: %s\n", loadoutName, err)
+				os.Exit(1)
+			}
+
+			loadout.Export()
 		}
-
-		loadout, err := envtab.ReadLoadout(loadoutName)
-		if err != nil {
-			fmt.Printf("ERROR: Failure reading loadout [%s]: %s\n", loadoutName, err)
-			os.Exit(1)
-		}
-
-		loadout.Export()
-		envtab.WriteLoadout(loadoutName, loadout)
 	},
 }
 

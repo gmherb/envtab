@@ -12,7 +12,7 @@ import (
 )
 
 var catCmd = &cobra.Command{
-	Use:   "cat <name>",
+	Use:   "cat LOADOUT_NAME [LOADOUT_NAME ...]",
 	Short: "Concatenate envtab loadouts to stdout",
 	Long:  `Concatenate envtab loadouts to stdout.`,
 	Args:  cobra.MinimumNArgs(1),

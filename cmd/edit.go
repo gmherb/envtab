@@ -17,7 +17,7 @@ import (
 )
 
 var editCmd = &cobra.Command{
-	Use:   "edit [loadout]",
+	Use:   "edit LOADOUT_NAME [flags]",
 	Short: "Edit envtab loadout",
 	Long: `Edit envtab loadout name, description, tags, and whether its enabled on login.
 If no options are provided, enter editor to manually edit a envtab loadout.`,

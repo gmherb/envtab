@@ -9,7 +9,7 @@ import (
 )
 
 var rmCmd = &cobra.Command{
-	Use:   "rm <loadout> [loadout]...",
+	Use:   "rm LOADOUT_NAME [LOADOUT_NAME ...]",
 	Short: "Remove envtab loadout(s)",
 	Long:  `Remove envtab loadout(s)`,
 	Args:  cobra.MinimumNArgs(1),
