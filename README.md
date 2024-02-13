@@ -71,10 +71,9 @@ envtab login --disable
 
 ## TODO
 
-- Implement `new` subcmd which creates a loadout.
-  - Optionally, specify a template with preset Keys.
 - Create templates for most commonly used tools.
   - AWS, Vault, etc
+  - Check for predefined if no user defined templates match.
 - Implement `-s|--sensitive` option to the addCmd to optionally encrypt values.
   - Support: AES, AWS KMS, GPG(PGP)
 - Add additional backends.

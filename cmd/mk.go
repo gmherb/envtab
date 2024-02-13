@@ -31,8 +31,9 @@ templates subdirectory of envtabs HOME.`,
 
 		loadoutName := args[0]
 		templateName := args[1]
+		force, _ := cmd.Flags().GetBool("force")
 
-		loadout := envtab.MakeLoadoutFromTemplate(templateName)
+		loadout := envtab.MakeLoadoutFromTemplate(templateName, force)
 
 		err := envtab.WriteLoadout(loadoutName, &loadout)
 		if err != nil {
@@ -46,4 +47,5 @@ templates subdirectory of envtabs HOME.`,
 
 func init() {
 	rootCmd.AddCommand(mkCmd)
+	mkCmd.Flags().BoolP("force", "f", false, "overwrite any existing loadouts")
 }

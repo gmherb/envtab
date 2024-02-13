@@ -6,6 +6,6 @@ import (
 )
 
 func TestMakeLoadoutFromTemplate(t *testing.T) {
-	loadout := MakeLoadoutFromTemplate("aws")
+	loadout := MakeLoadoutFromTemplate("aws", false)
 	fmt.Printf("DEBUG: Loadout: %v\n", loadout)
 }
