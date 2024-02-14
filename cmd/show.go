@@ -52,6 +52,9 @@ func showActiveLoadouts() {
 		green := color.New(color.FgGreen).SprintFunc()
 		purple := color.New(color.FgHiMagenta).SprintFunc()
 
+		activeEntryCount := len(activeEntries)
+		totalEntryCount := len(lo.Entries)
+
 		// If a loadout has fewer active entries than total entries, colorize the count red
 		var countColor func(a ...interface{}) string
 		if len(activeEntries) < len(lo.Entries) {
@@ -62,11 +65,15 @@ func showActiveLoadouts() {
 
 		if len(activeEntries) > 0 {
 
-			// 80 is term width, 9 is the length of the [x/y] string
-			t := 80 - len(loadout) + 9
+			d := 80 - // term width
+				len(loadout) -
+				len(fmt.Sprint(activeEntryCount)) -
+				len(fmt.Sprint(totalEntryCount)) -
+				10 // magic number
 			fmt.Println(
-				green(loadout), strings.Repeat(purple("-"), t),
-				"[", countColor(len(activeEntries)), "/", countColor(len(lo.Entries)), "]",
+				green(loadout),
+				strings.Repeat(purple("-"), d),
+				"[", countColor(len(activeEntries)), "/", countColor(totalEntryCount), "]",
 			)
 			for _, entry := range activeEntries {
 				fmt.Println("  ", entry)

@@ -39,14 +39,13 @@ To export a loadout into your current shell.
 ```shell
 $ $(envtab export aws-prd)
 $ envtab show
-aws-dev ---------------------------------------------------------------------------------- [ 1 / 3 ]
+aws-dev ------------------------------------------------------------- [ 1 / 1 ]
    AWS_DEFAULT_REGION=us-west-2
 
-aws-prd ---------------------------------------------------------------------------------- [ 3 / 3 ]
-   AWS_SECRET_ACCESS_KEY=wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
+aws-prd ------------------------------------------------------------- [ 3 / 3 ]
    AWS_ACCESS_KEY_ID=AKIAIOSFODNN7EXAMPLE
    AWS_DEFAULT_REGION=us-west-2
-
+   AWS_SECRET_ACCESS_KEY=wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
 ```
 
 *Note: The same key pair value can be set in different loadouts. envtab shows each matching loadout.*
