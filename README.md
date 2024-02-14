@@ -39,7 +39,7 @@ To export a loadout into your current shell.
 ```shell
 $ $(envtab export aws-prd)
 $ envtab show
-aws-dev ------------------------------------------------------------- [ 1 / 1 ]
+aws-dev ------------------------------------------------------------- [ 1 / 3 ]
    AWS_DEFAULT_REGION=us-west-2
 
 aws-prd ------------------------------------------------------------- [ 3 / 3 ]
