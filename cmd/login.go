@@ -66,7 +66,7 @@ func exportLoginLoadouts() {
 			os.Exit(1)
 		}
 
-		if lo.Metadata.Login == true {
+		if lo.Metadata.Login {
 			println("DEBUG: Loadout [" + loadout + "] has login enabled")
 			lo.Export()
 		} else {
