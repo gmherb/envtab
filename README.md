@@ -71,6 +71,8 @@ envtab login --disable
 
 ## TODO
 
+- Fix Active/Total spacing in `ls` output when counts are double, or triple digits.
+- Allow passing filter/pattern arg to the listCmd.
 - Create templates for most commonly used tools.
   - AWS, Vault, etc
   - Check for predefined if no user defined templates match.
