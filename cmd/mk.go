@@ -25,7 +25,8 @@ Cloud:   Databases:      MQ/Msg:    Cache:      Container:
 
 You can also create your own custom templates and store them in the
 templates subdirectory of envtabs HOME.`,
-	Args: cobra.ExactArgs(2),
+	Args:    cobra.ExactArgs(2),
+	Aliases: []string{"m", "make", "create", "new"},
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("mk called")
 

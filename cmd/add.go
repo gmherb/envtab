@@ -21,7 +21,8 @@ loadout.
 
 Add tags to your envtab loadout by adding them after the key and value. Multiple
 tags can be provided using space or comma as a separator.`,
-	Args: cobra.MinimumNArgs(2),
+	Args:    cobra.MinimumNArgs(2),
+	Aliases: []string{"a", "ad"},
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("DEBUG: add command called")
 

@@ -13,12 +13,14 @@ import (
 
 var exportCmd = &cobra.Command{
 	Use:   "export LOADOUT_NAME [LOADOUT_NAME ...]",
-	Short: "Export envtab loadout",
+	Short: "Export envtab loadout(s)",
 	Long: `Print export statements for provided loadouts to be sourced into your
 environment.
 
 Example: $(envtab export myloadout)`,
-	Args: cobra.MinimumNArgs(1),
+	Args:       cobra.MinimumNArgs(1),
+	SuggestFor: []string{"load"},
+	Aliases:    []string{"ex", "exp", "expo", "source", "."},
 	Run: func(cmd *cobra.Command, args []string) {
 		println("DEBUG: export called")
 

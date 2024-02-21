@@ -21,7 +21,8 @@ var editCmd = &cobra.Command{
 	Short: "Edit envtab loadout",
 	Long: `Edit envtab loadout name, description, tags, and whether its enabled on login.
 If no options are provided, enter editor to manually edit a envtab loadout.`,
-	Args: cobra.ExactArgs(1),
+	Args:    cobra.ExactArgs(1),
+	Aliases: []string{"ed", "edi"},
 	Run: func(cmd *cobra.Command, args []string) {
 		println("DEBUG: edit called")
 

@@ -1,4 +1,4 @@
-# envtab
+# envtab ()
 
 ![diagram](diagram.png "Take control of your environment")
 
@@ -8,7 +8,7 @@
 
 ## Usage
 
-```shell
+```text
 Take control of your environment.
 
 Usage:
@@ -36,7 +36,7 @@ Use "envtab [command] --help" for more information about a command.
 
 To export a loadout into your current shell.
 
-```shell
+```text
 $ $(envtab export aws-prd)
 $ envtab show
 aws-dev ------------------------------------------------------------- [ 1 / 3 ]
@@ -52,20 +52,20 @@ aws-prd ------------------------------------------------------------- [ 3 / 3 ]
 
 To show the current state of login (enabled|disabled).
 
-```shell
+```text
 $ envtab login --status
 enabled
 ```
 
 To enable envtab to export all login loadouts.
 
-```shell
+```text
 envtab login --enable
 ```
 
 To remove envtab from login shells.
 
-```shell
+```text
 envtab login --disable
 ```
 

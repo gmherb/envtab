@@ -12,10 +12,11 @@ import (
 )
 
 var catCmd = &cobra.Command{
-	Use:   "cat LOADOUT_NAME [LOADOUT_NAME ...]",
-	Short: "Concatenate envtab loadouts to stdout",
-	Long:  `Concatenate envtab loadouts to stdout.`,
-	Args:  cobra.MinimumNArgs(1),
+	Use:     "cat LOADOUT_NAME [LOADOUT_NAME ...]",
+	Short:   "Concatenate envtab loadouts to stdout",
+	Long:    `Concatenate envtab loadouts to stdout.`,
+	Args:    cobra.MinimumNArgs(1),
+	Aliases: []string{"c", "ca", "print"},
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("DEBUG: cat called")
 

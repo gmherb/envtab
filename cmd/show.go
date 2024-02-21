@@ -15,10 +15,11 @@ import (
 )
 
 var showCmd = &cobra.Command{
-	Use:   "show",
-	Short: "Show active loadouts",
-	Long:  `Show each loadout with active entries (environment variables).`,
-	Args:  cobra.NoArgs,
+	Use:     "show",
+	Short:   "Show active loadouts",
+	Long:    `Show each loadout with active entries (environment variables).`,
+	Args:    cobra.NoArgs,
+	Aliases: []string{"s", "sh", "sho"},
 	Run: func(cmd *cobra.Command, args []string) {
 		println("DEBUG: show called")
 		showActiveLoadouts()
