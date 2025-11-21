@@ -24,15 +24,18 @@ var showCmd = &cobra.Command{
 	DisableFlagsInUseLine: true,
 	Run: func(cmd *cobra.Command, args []string) {
 		println("DEBUG: show called")
-		showActiveLoadouts()
+		sparse, _ := cmd.Flags().GetBool("sparse")
+		println("DEBUG: Dense: ", sparse)
+		showActiveLoadouts(sparse)
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(showCmd)
+	showCmd.Flags().BoolP("sparse", "s", false, "Show loadouts in sparse format")
 }
 
-func showActiveLoadouts() {
+func showActiveLoadouts(sparse bool) {
 	envtabSlice := envtab.GetEnvtabSlice("")
 	environment := env.NewEnv()
 	environment.Populate()
@@ -68,20 +71,28 @@ func showActiveLoadouts() {
 
 		if len(activeEntries) > 0 {
 
-			d := 80 - // term width
+			dashCount := 80 - // term width
 				len(loadout) -
 				len(fmt.Sprint(activeEntryCount)) -
 				len(fmt.Sprint(totalEntryCount)) -
 				10 // magic number
+
 			fmt.Println(
 				green(loadout),
-				strings.Repeat(purple("-"), d),
+				strings.Repeat(purple("-"), dashCount),
 				"[", countColor(len(activeEntries)), "/", countColor(totalEntryCount), "]",
 			)
+			padding := "  "
 			for _, entry := range activeEntries {
-				fmt.Println("  ", entry)
+				if sparse {
+					entry = strings.Replace(entry, "=", " = ", 1)
+					padding = "    "
+				}
+				fmt.Println(padding, entry)
 			}
-			fmt.Println()
+			if sparse {
+				fmt.Println()
+			}
 		}
 	}
 
