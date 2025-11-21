@@ -26,7 +26,11 @@ var catCmd = &cobra.Command{
 
 			loadout, err := envtab.ReadLoadout(arg)
 			if err != nil {
-				fmt.Printf("ERROR: %s\n", err)
+				if os.IsNotExist(err) {
+					fmt.Printf("ERROR: Loadout %s does not exist\n", arg)
+					continue
+				}
+				fmt.Printf("Error reading loadout %s: %s\n", arg, err)
 				os.Exit(1)
 			}
 
