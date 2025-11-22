@@ -14,11 +14,6 @@ func GetCurrentTime() string {
 	return fmt.Sprintf("%s", time.Now().Format(time.RFC3339))
 }
 
-// Pad a string on Right
-func PadString(s string, length int) string {
-	return fmt.Sprintf("%-*s", length, s)
-}
-
 func PromptForAnswer(s string) bool {
 	reader := bufio.NewReader(os.Stdin)
 

@@ -7,11 +7,11 @@ import (
 	"fmt"
 	"os"
 	"strings"
+	"text/tabwriter"
 	"time"
 
 	"github.com/gmherb/envtab/cmd/envtab"
 	"github.com/gmherb/envtab/pkg/env"
-	"github.com/gmherb/envtab/pkg/utils"
 
 	"github.com/spf13/cobra"
 )
@@ -50,9 +50,13 @@ func init() {
 func PrintEnvtabLoadouts() {
 	envtabPath := envtab.InitEnvtab("")
 	loadouts := envtab.GetEnvtabSlice(envtabPath)
-	for _, loadouts := range loadouts {
-		fmt.Println(loadouts)
+
+	tw := tabwriter.NewWriter(os.Stdout, 0, 8, 2, ' ', 0)
+	for i := 0; i < len(loadouts); i++ {
+		fmt.Fprintf(tw, "%s\t", loadouts[i])
 	}
+	fmt.Fprintln(tw)
+	tw.Flush()
 }
 
 func ListEnvtabLoadouts() {
@@ -60,7 +64,9 @@ func ListEnvtabLoadouts() {
 	environment := env.NewEnv()
 	environment.Populate()
 
-	fmt.Println("UpdatedAt LoadedAt  Login Active Total Name               Tags")
+	tw := tabwriter.NewWriter(os.Stdout, 0, 8, 2, ' ', 0)
+	fmt.Fprintf(tw, "UpdatedAt\tLoadedAt\tLogin\tActive\tTotal\tName\tTags\n")
+
 	for _, loadout := range envtabSlice {
 
 		lo, err := envtab.ReadLoadout(loadout)
@@ -92,25 +98,26 @@ func ListEnvtabLoadouts() {
 			}
 		}
 
-		loginPaddin := ""
-		if lo.Metadata.Login {
-			loginPaddin = " "
+		var updatedAtTime string
+		var loadedAtTime string
+		if time.Since(updatedAt) > 24*time.Hour {
+			loadedAtTime = strings.TrimPrefix(loadedAt.Format(time.DateOnly), "20")
+			updatedAtTime = strings.TrimPrefix(updatedAt.Format(time.DateOnly), "20")
+		} else {
+			loadedAtTime = loadedAt.Format(time.TimeOnly)
+			updatedAtTime = updatedAt.Format(time.TimeOnly)
 		}
 
-		if len(loadout) >= 18 {
-			loadout = loadout[:17] + "."
-		}
-
-		fmt.Println(
-			// TODO: Determine if time is under 24 hours and print TimeOnly instead of DateOnly
-
-			strings.TrimPrefix(updatedAt.Format(time.DateOnly), "20"), "",
-			strings.TrimPrefix(loadedAt.Format(time.DateOnly), "20"), "",
-			lo.Metadata.Login, loginPaddin, "[",
-			len(activeEntries), "/",
-			len(lo.Entries), "]  ",
-			utils.PadString(loadout, 18),
+		fmt.Fprintf(tw, "%s\t%s\t%t\t%d\t%d\t%s\t%s\n",
+			//strings.TrimPrefix(updatedAt.Format(time.DateOnly), "20"),
+			updatedAtTime,
+			loadedAtTime,
+			lo.Metadata.Login,
+			len(activeEntries),
+			len(lo.Entries),
+			loadout,
 			lo.Metadata.Tags)
-
 	}
+	fmt.Fprintln(tw)
+	tw.Flush()
 }
