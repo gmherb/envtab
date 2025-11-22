@@ -59,8 +59,8 @@ func (l Loadout) Export() {
 					paths = append(paths, k)
 				}
 
-				os.Setenv("PATH", strings.Join(paths, string(os.PathListSeparator)))
-				fmt.Printf("export PATH=%s\n", os.Getenv("PATH"))
+				os.Setenv(key, strings.Join(paths, string(os.PathListSeparator)))
+				fmt.Printf("export %s=%s\n", key, os.Getenv("PATH"))
 			} else {
 				fmt.Printf("export %s=%s\n", key, value)
 			}
