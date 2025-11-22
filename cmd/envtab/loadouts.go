@@ -2,6 +2,9 @@ package envtab
 
 import (
 	"fmt"
+	"os"
+	"regexp"
+	"strings"
 
 	tagz "github.com/gmherb/envtab/pkg/tags"
 	"github.com/gmherb/envtab/pkg/utils"
@@ -23,9 +26,23 @@ type Loadout struct {
 }
 
 func (l Loadout) Export() {
+
+	paths := strings.Split(os.Getenv("PATH"), string(os.PathListSeparator))
+
 	for key, value := range l.Entries {
 		if value != "" {
-			fmt.Printf("export %s=%s\n", key, value)
+			re := regexp.MustCompile(`\$PATH:`)
+
+			match := re.MatchString(value)
+			if match {
+				newPath := re.ReplaceAllString(value, "")
+				println("DEBUG: Found new PATH [" + newPath + "].")
+				paths = append(paths, newPath)
+				os.Setenv("PATH", strings.Join(paths, string(os.PathListSeparator)))
+				fmt.Printf("export PATH=%s\n", os.Getenv("PATH"))
+			} else {
+				fmt.Printf("export %s=%s\n", key, value)
+			}
 		}
 	}
 	l.UpdateLoadedAt()
