@@ -54,11 +54,9 @@ func (l Loadout) Export() {
 				}
 
 				paths := make([]string, 0, len(pathMap)) // preallocate for efficiency
-				// preserve order
+				// preserve order with loop
 				for _, k := range order {
 					paths = append(paths, k)
-					fmt.Printf("yo")
-
 				}
 
 				os.Setenv("PATH", strings.Join(paths, string(os.PathListSeparator)))
