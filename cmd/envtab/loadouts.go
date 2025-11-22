@@ -27,7 +27,15 @@ type Loadout struct {
 
 func (l Loadout) Export() {
 
-	paths := strings.Split(os.Getenv("PATH"), string(os.PathListSeparator))
+	pathMap := make(map[string]bool)
+	order := []string{}
+
+	for _, p := range strings.Split(os.Getenv("PATH"), string(os.PathListSeparator)) {
+		if _, exists := pathMap[p]; !exists {
+			order = append(order, p)
+		}
+		pathMap[p] = true
+	}
 
 	for key, value := range l.Entries {
 		if value != "" {
@@ -36,8 +44,23 @@ func (l Loadout) Export() {
 			match := re.MatchString(value)
 			if match {
 				newPath := re.ReplaceAllString(value, "")
-				println("DEBUG: Found new PATH [" + newPath + "].")
-				paths = append(paths, newPath)
+				println("DEBUG: Found potential new PATH(s) [" + newPath + "].")
+				for _, np := range strings.Split(newPath, string(os.PathListSeparator)) {
+					if _, exists := pathMap[np]; !exists {
+						println("DEBUG: Adding new path [" + np + "] to PATH map.")
+						order = append(order, np)
+						pathMap[np] = true
+					}
+				}
+
+				paths := make([]string, 0, len(pathMap)) // preallocate for efficiency
+				// preserve order
+				for _, k := range order {
+					paths = append(paths, k)
+					fmt.Printf("yo")
+
+				}
+
 				os.Setenv("PATH", strings.Join(paths, string(os.PathListSeparator)))
 				fmt.Printf("export PATH=%s\n", os.Getenv("PATH"))
 			} else {
