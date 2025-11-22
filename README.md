@@ -69,25 +69,20 @@ To remove envtab from login shells.
 envtab login --disable
 ```
 
-### Using Environment Variables in Values
+### Using Environment Variables in Values (e.g. PATH)
 
 Sometimes you may need to utilize environment variables in the value of a loadout entry.
 
 #### add
 
-If you utilize add, the environment variable will be subject to shell variable/parameter expansion.
+If you utilize add, the environment variable will be subjected to shell variable/parameter expansion.
 
     $ envtab add testld EXAMPLE_ENTRY=$PATH:/other/bin
     ...
-    DEBUG: Name: testld, Key: EXAMPLE_ENTRY, Value: /home/gmherb/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin:/snap/bin:/usr/local/go/bin:/other/bin, tags: [].
+    DEBUG: Name: testld, Key: EXAMPLE_ENTRY, Value: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/go/bin:/other/bin, tags: [].
     ...
 
-    $ $(envtab export testld)
-    $ env | grep EXAMPLE
-    EXAMPLE_ENTRY=/home/gmherb/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin:/snap/bin:/usr/local/go/bin:/other/bin
-
 CAUTION: To utilize multiple entries of the same KEY with environment variables; you must use edit to set the actual variable in the configuration file. Otherwise the last export will overwrite previous entries.
-
 
 #### edit
 
@@ -106,22 +101,11 @@ By editing the loadout configuration directly you can add the environment variab
       EXAMPLE_ENTRY: $PATH:/other/bin
 
     $ envtab export testld
-    export EXAMPLE_ENTRY=$PATH:/other/bin
-
-##### caveat
-
-The one caveat is that we need to utilize eval for variable/parameter expansion
-
-    $ $(envtab export testld)
-    $ env | grep EXAMPLE
-    EXAMPLE_ENTRY=$PATH:/other/bin
-
-    $ eval $(envtab export testld)
-    $ env | grep EXAMPLE
-    EXAMPLE_ENTRY=/home/gmherb/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin:/snap/bin:/usr/local/go/bin:/other/bin
+    export EXAMPLE_ENTRY=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/go/bin:/other/bin
 
 ## TODO
-
+- In edit subcommand, ensure no duplicate keys (otherwise it will be overwritten)
+- Add support for PATH environemnt variable (done)
 - Fix Active/Total spacing in `ls` output when counts are double, or triple digits.
 - Allow passing filter/pattern arg to the listCmd.
 - Create templates for most commonly used tools.
@@ -133,4 +117,3 @@ The one caveat is that we need to utilize eval for variable/parameter expansion
   - File (Default)
   - Vault
 - Add ability to import/export various backends
-
