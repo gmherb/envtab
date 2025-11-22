@@ -69,6 +69,57 @@ To remove envtab from login shells.
 envtab login --disable
 ```
 
+### Using Environment Variables in Values
+
+Sometimes you may need to utilize environment variables in the value of a loadout entry.
+
+#### add
+
+If you utilize add, the environment variable will be subject to shell variable/parameter expansion.
+
+    $ envtab add testld EXAMPLE_ENTRY=$PATH:/other/bin
+    ...
+    DEBUG: Name: testld, Key: EXAMPLE_ENTRY, Value: /home/gmherb/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin:/snap/bin:/usr/local/go/bin:/other/bin, tags: [].
+    ...
+
+    $ $(envtab export testld)
+    $ env | grep EXAMPLE
+    EXAMPLE_ENTRY=/home/gmherb/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin:/snap/bin:/usr/local/go/bin:/other/bin
+
+CAUTION: To utilize multiple entries of the same KEY with environment variables; you must use edit to set the actual variable in the configuration file. Otherwise the last export will overwrite previous entries.
+
+
+#### edit
+
+By editing the loadout configuration directly you can add the environment variable to the entry you need.
+
+    $ envtab edit testld
+    ----
+    metadata:
+      createdAt: "2025-11-21T19:21:06-05:00"
+      loadedAt: "2025-11-21T19:21:06-05:00"
+      updatedAt: "2025-11-21T19:25:07-05:00"
+      login: false
+      tags: []
+      description: ""
+    entries:
+      EXAMPLE_ENTRY: $PATH:/other/bin
+
+    $ envtab export testld
+    export EXAMPLE_ENTRY=$PATH:/other/bin
+
+##### caveat
+
+The one caveat is that we need to utilize eval for variable/parameter expansion
+
+    $ $(envtab export testld)
+    $ env | grep EXAMPLE
+    EXAMPLE_ENTRY=$PATH:/other/bin
+
+    $ eval $(envtab export testld)
+    $ env | grep EXAMPLE
+    EXAMPLE_ENTRY=/home/gmherb/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin:/snap/bin:/usr/local/go/bin:/other/bin
+
 ## TODO
 
 - Fix Active/Total spacing in `ls` output when counts are double, or triple digits.
@@ -82,3 +133,4 @@ envtab login --disable
   - File (Default)
   - Vault
 - Add ability to import/export various backends
+
