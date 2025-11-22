@@ -82,7 +82,7 @@ If you utilize add, the environment variable will be subjected to shell variable
     DEBUG: Name: testld, Key: EXAMPLE_ENTRY, Value: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/go/bin:/other/bin, tags: [].
     ...
 
-CAUTION: To utilize multiple entries of the same KEY with environment variables; you must use edit to set the actual variable in the configuration file. Otherwise the last export will overwrite previous entries.
+CAUTION: To utilize multiple entries of the same KEY (e.g. PATH); you must utilize multiple loadouts. A single loadout cannot have duplicate keys.
 
 #### edit
 
