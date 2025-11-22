@@ -14,7 +14,7 @@ var loginScripts = []string{
 	".zprofile",
 	".login",
 }
-var envtabLoginLine = "$(envtab login)"
+var envtabLoginLine = "eval $(envtab login)"
 
 func detectLoginScript() string {
 	shell := os.Getenv("SHELL")
