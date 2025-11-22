@@ -104,7 +104,7 @@ By editing the loadout configuration directly you can add the environment variab
     export EXAMPLE_ENTRY=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/go/bin:/other/bin
 
 ## TODO
-
+- In edit subcommand, ensure no duplicate keys (otherwise it will be overwritten)
 - Add support for PATH environemnt variable (done)
 - Fix Active/Total spacing in `ls` output when counts are double, or triple digits.
 - Allow passing filter/pattern arg to the listCmd.
