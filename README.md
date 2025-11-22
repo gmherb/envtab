@@ -77,7 +77,7 @@ Sometimes you may need to utilize environment variables in the value of a loadou
 
 If you utilize add, the environment variable will be subjected to shell variable/parameter expansion.
 
-    $ envtab add testld EXAMPLE_ENTRY=$PATH:/other/bin
+    $ envtab add testld PATH=$PATH:/other/bin
     ...
     DEBUG: Name: testld, Key: EXAMPLE_ENTRY, Value: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/go/bin:/other/bin, tags: [].
     ...
@@ -98,15 +98,15 @@ By editing the loadout configuration directly you can add the environment variab
       tags: []
       description: ""
     entries:
-      EXAMPLE_ENTRY: $PATH:/other/bin
+      PATH: $PATH:/other/bin
 
     $ envtab export testld
-    export EXAMPLE_ENTRY=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/go/bin:/other/bin
+    export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/go/bin:/other/bin
 
 ## TODO
 - In edit subcommand, ensure no duplicate keys (otherwise it will be overwritten)
 - Add support for PATH environemnt variable (done)
-- Fix show for PATH environment variable
+- Fix show for PATH environment variable (done)
 - Fix Active/Total spacing in `ls` output when counts are double, or triple digits.
 - Allow passing filter/pattern arg to the listCmd.
 - Create templates for most commonly used tools.
