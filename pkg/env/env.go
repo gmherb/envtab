@@ -37,9 +37,10 @@ func (e *Env) Get(key string) string {
 func (e *Env) Compare(key string, value string) bool {
 	match := false
 
-	if strings.Contains(value, "$PATH:") {
+	if strings.Contains(value, "$PATH") {
 		//println("DEBUG: entry contains $PATH")
-		value = strings.Replace(value, "$PATH:", "", 1)
+		value = strings.Replace(value, "$PATH", "", 1)
+		value = strings.Trim(value, ":")
 		//println("DEBUG: trying to match:", value)
 	}
 

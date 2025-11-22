@@ -39,11 +39,12 @@ func (l Loadout) Export() {
 
 	for key, value := range l.Entries {
 		if value != "" {
-			re := regexp.MustCompile(`\$PATH:`)
-
+			re := regexp.MustCompile(`\$PATH`)
 			match := re.MatchString(value)
-			if match {
+
+			if key == "PATH" && match {
 				newPath := re.ReplaceAllString(value, "")
+				newPath = strings.Trim(newPath, ":")
 				println("DEBUG: Found potential new PATH(s) [" + newPath + "].")
 				for _, np := range strings.Split(newPath, string(os.PathListSeparator)) {
 					if _, exists := pathMap[np]; !exists {
@@ -59,8 +60,8 @@ func (l Loadout) Export() {
 					paths = append(paths, k)
 				}
 
-				os.Setenv(key, strings.Join(paths, string(os.PathListSeparator)))
-				fmt.Printf("export %s=%s\n", key, os.Getenv("PATH"))
+				os.Setenv("PATH", strings.Join(paths, string(os.PathListSeparator)))
+				fmt.Printf("export PATH=%s\n", os.Getenv("PATH"))
 			} else {
 				fmt.Printf("export %s=%s\n", key, value)
 			}
