@@ -112,9 +112,6 @@ By editing the loadout configuration directly you can add the environment variab
 ## TODO
 
 - In edit subcommand, ensure no duplicate keys (otherwise it will be overwritten)
-- Add support for PATH environemnt variable (done)
-- Fix show for PATH environment variable (done)
-- Fix Active/Total spacing in `ls` output when counts are double, or triple digits.
 - Allow passing filter/pattern arg to the listCmd.
 - Create templates for most commonly used tools.
   - AWS, Vault, etc
@@ -125,3 +122,9 @@ By editing the loadout configuration directly you can add the environment variab
   - File (Default)
   - Vault
 - Add ability to import/export various backends
+
+### Done
+
+- Add support for PATH environemnt variable (done)
+- Fix show for PATH environment variable (done)
+- Fix Active/Total spacing in `ls` output when counts are double, or triple digits. (done)
