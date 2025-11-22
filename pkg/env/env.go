@@ -48,7 +48,7 @@ func (e *Env) Compare(key string, value string) bool {
 		if k == key && v == value {
 			match = true
 			break
-		} else if k == "$PATH" && strings.Contains(v, value) {
+		} else if key == "PATH" && strings.Contains(v, value) {
 			match = true
 			break
 		}
