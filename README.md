@@ -69,9 +69,11 @@ To remove envtab from login shells.
 envtab login --disable
 ```
 
-### Using Environment Variables in Values (e.g. PATH)
+### Environment Variables in Values
 
-Sometimes you may need to utilize environment variables in the value of a loadout entry.
+Sometimes you may need to utilize environment variables in the value of a loadout entry. For example, the PATH environment variable.
+
+CAUTION: To utilize multiple entries of the same KEY (e.g. PATH); you must utilize multiple loadouts. A single loadout cannot have duplicate keys.
 
 #### add
 
@@ -79,10 +81,9 @@ If you utilize add, the environment variable will be subjected to shell variable
 
     $ envtab add testld PATH=$PATH:/other/bin
     ...
-    DEBUG: Name: testld, Key: EXAMPLE_ENTRY, Value: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/go/bin:/other/bin, tags: [].
+    DEBUG: Name: testld, Key: PATH, Value: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/go/bin:/other/bin, tags: [].
     ...
 
-CAUTION: To utilize multiple entries of the same KEY (e.g. PATH); you must utilize multiple loadouts. A single loadout cannot have duplicate keys.
 
 #### edit
 
@@ -103,7 +104,13 @@ By editing the loadout configuration directly you can add the environment variab
     $ envtab export testld
     export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/go/bin:/other/bin
 
+    $ $(envtab export testld)
+    $ envtab show
+    testld -------------------------------------------------------------- [ 1 / 1 ]
+       PATH=$PATH:/some/bin
+
 ## TODO
+
 - In edit subcommand, ensure no duplicate keys (otherwise it will be overwritten)
 - Add support for PATH environemnt variable (done)
 - Fix show for PATH environment variable (done)
