@@ -45,7 +45,10 @@ func (e *Env) Compare(key string, value string) bool {
 	}
 
 	for k, v := range e.Env {
-		if k == key && (v == value || strings.Contains(v, value)) {
+		if k == key && v == value {
+			match = true
+			break
+		} else if k == "$PATH" && strings.Contains(v, value) {
 			match = true
 			break
 		}

@@ -52,9 +52,10 @@ func showActiveLoadouts() {
 			}
 		}
 
-		loColor := color.New(color.FgGreen).SprintFunc()
-		entryColor := color.New(color.FgCyan).SprintFunc()
+		// TODO: Add different color pattern/options
+		entryColor := color.New(color.FgHiWhite).SprintFunc()
 		dashColor := color.New(color.FgHiBlack).SprintFunc()
+		loColor := color.New(color.FgGreen).SprintFunc()
 
 		activeEntryCount := len(activeEntries)
 		totalEntryCount := len(lo.Entries)
