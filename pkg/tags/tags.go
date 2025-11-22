@@ -12,21 +12,18 @@ func ContainsTag(tags []string, tag string) bool {
 }
 
 func MergeTags(existingTags []string, newTags []string) []string {
-	tagSet := make(map[string]bool)
+	tagMap := make(map[string]bool)
 
-	// Add existing tags to the set
 	for _, tag := range existingTags {
-		tagSet[tag] = true
+		tagMap[tag] = true
 	}
 
-	// Add new tags to the set
 	for _, tag := range newTags {
-		tagSet[tag] = true
+		tagMap[tag] = true
 	}
 
-	// Convert the set back to a slice
-	result := make([]string, 0, len(tagSet))
-	for tag := range tagSet {
+	result := make([]string, 0, len(tagMap))
+	for tag := range tagMap {
 		result = append(result, tag)
 	}
 
