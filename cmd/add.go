@@ -4,11 +4,13 @@ Copyright © 2024 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
+	"encoding/base64"
 	"fmt"
 	"os"
 	"strings"
 
 	"github.com/gmherb/envtab/cmd/envtab"
+	"github.com/gmherb/envtab/internal/crypto"
 	tagz "github.com/gmherb/envtab/pkg/tags"
 	"github.com/spf13/cobra"
 )
@@ -38,6 +40,11 @@ tags can be provided using space or comma as a separator.`,
 			tags  []string // Tags to append to envtab loadout
 		)
 
+		const EncryptedPrefix = "ENC:"
+		gcpKeyName := os.Getenv("ENVTAB_GCP_KMS_KEY")
+
+		encrypt, _ := cmd.Flags().GetBool("encrypt")
+
 		if len(args) == 2 && !strings.Contains(args[1], "=") {
 			fmt.Println("DEBUG: No value provided for your envtab entry. No equal sign detected and only 2 args provided.")
 			cmd.Usage()
@@ -63,7 +70,14 @@ tags can be provided using space or comma as a separator.`,
 
 		fmt.Printf("DEBUG: Name: %s, Key: %s, Value: %s, tags: %s.\n", name, key, value, tags)
 
-		err := envtab.AddEntryToLoadout(name, key, value, tags)
+		var err error
+		if encrypt {
+			ciphertext := crypto.GcpKmsEncrypt(gcpKeyName, value)
+			ciphertextB64 := EncryptedPrefix + base64.StdEncoding.EncodeToString(ciphertext)
+			err = envtab.AddEntryToLoadout(name, key, ciphertextB64, tags)
+		} else {
+			err = envtab.AddEntryToLoadout(name, key, value, tags)
+		}
 		if err != nil {
 			fmt.Printf("ERROR: Error writing entry to file [%s]: %s\n", name, err)
 			os.Exit(1)
@@ -73,4 +87,6 @@ tags can be provided using space or comma as a separator.`,
 
 func init() {
 	rootCmd.AddCommand(addCmd)
+	addCmd.Flags().BoolP("encrypt", "e", false, "Encrypt the entry value")
+
 }

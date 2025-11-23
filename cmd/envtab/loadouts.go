@@ -37,17 +37,23 @@ func (l Loadout) Export() {
 		pathMap[p] = true
 	}
 
+	re := regexp.MustCompile(`\$PATH`)
+	reEnc := regexp.MustCompile(`^ENC:`)
+
 	for key, value := range l.Entries {
 		if value != "" {
-			re := regexp.MustCompile(`\$PATH`)
 			match := re.MatchString(value)
-
+			encrypted := reEnc.MatchString(value)
 			if key == "PATH" && match {
+
 				newPath := re.ReplaceAllString(value, "")
 				newPath = strings.Trim(newPath, ":")
+
 				println("DEBUG: Found potential new PATH(s) [" + newPath + "].")
+
 				for _, np := range strings.Split(newPath, string(os.PathListSeparator)) {
 					if _, exists := pathMap[np]; !exists {
+
 						println("DEBUG: Adding new path [" + np + "] to PATH map.")
 						order = append(order, np)
 						pathMap[np] = true
@@ -62,6 +68,10 @@ func (l Loadout) Export() {
 
 				os.Setenv("PATH", strings.Join(paths, string(os.PathListSeparator)))
 				fmt.Printf("export PATH=%s\n", os.Getenv("PATH"))
+			} else if encrypted {
+				// TODO DECRYPYT
+				println("DEBUG: value for [" + key + "] is encrypted.")
+				fmt.Printf("export %s=%s\n", key, value)
 			} else {
 				fmt.Printf("export %s=%s\n", key, value)
 			}
