@@ -35,7 +35,11 @@ metadata.`,
 
 		if cmd.Flag("long").Value.String() == "true" {
 			println("DEBUG: long listing format")
-			ListEnvtabLoadouts()
+			if len(args) > 0 {
+				ListEnvtabLoadouts(args[0])
+			} else {
+				ListEnvtabLoadouts("")
+			}
 
 		} else {
 			println("DEBUG: short listing format")
@@ -56,30 +60,23 @@ func init() {
 
 func PrintEnvtabLoadouts(glob string) {
 	envtabPath := envtab.InitEnvtab("")
-	loadoutSlice := envtab.GetEnvtabSlice(envtabPath)
-
-	var loadouts []string
-	if len(glob) > 0 {
-		println("DEBUG: glob pattern detecting, trying to match [" + glob + "]")
-		for _, l := range loadoutSlice {
-			matched, _ := filepath.Match(glob, l)
-			if matched {
-				loadouts = append(loadouts, l)
-			}
-		}
-	} else {
-		loadouts = loadoutSlice
-	}
+	loadouts := envtab.GetEnvtabSlice(envtabPath)
 
 	tw := tabwriter.NewWriter(os.Stdout, 0, 8, 2, ' ', 0)
-	for i := 0; i < len(loadouts); i++ {
-		fmt.Fprintf(tw, "%s\t", loadouts[i])
+	for _, loadout := range loadouts {
+		fmt.Fprintf(tw, "%s\t", loadout)
+		if len(glob) > 0 {
+			matched, _ := filepath.Match(glob, loadout)
+			if !matched {
+				continue
+			}
+		}
 	}
 	fmt.Fprintln(tw)
 	tw.Flush()
 }
 
-func ListEnvtabLoadouts() {
+func ListEnvtabLoadouts(glob string) {
 	envtabSlice := envtab.GetEnvtabSlice("")
 	environment := env.NewEnv()
 	environment.Populate()
@@ -88,6 +85,13 @@ func ListEnvtabLoadouts() {
 	fmt.Fprintf(tw, "UpdatedAt\tLoadedAt\tLogin\tActive\tTotal\tName\tTags\n")
 
 	for _, loadout := range envtabSlice {
+
+		if len(glob) > 0 {
+			matched, _ := filepath.Match(glob, loadout)
+			if !matched {
+				continue
+			}
+		}
 
 		lo, err := envtab.ReadLoadout(loadout)
 		if err != nil {
