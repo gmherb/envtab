@@ -85,14 +85,21 @@ If you utilize add, the environment variable will be subjected to shell variable
 
 ```text
 $ envtab add testld PATH=$PATH:/other/bin
-...
-DEBUG: Name: testld, Key: PATH, Value: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/go/bin:/other/bin, tags: [].
-...
+$ envtab cat testld | grep PATH
+  PATH: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/go/bin:/other/bin
+```
+
+Use must escape to bypass expansion.
+
+```text
+$ envtab add testld PATH=\$PATH:/other/bin
+$ envtab cat testld | grep PATH
+  PATH: $PATH:/other/bin
 ```
 
 ##### edit
 
-By editing the loadout configuration directly you can add the environment variable to the entry you need.
+Or by editing the loadout configuration directly.
 
 ```text
 $ envtab edit testld
