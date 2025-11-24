@@ -60,7 +60,7 @@ func PrintEnvtabLoadouts(glob string) {
 
 	var loadouts []string
 	if len(glob) > 0 {
-		println("DEBUG: glob pattern matching ", glob)
+		println("DEBUG: glob pattern detecting, trying to match [" + glob + "]")
 		for _, l := range loadoutSlice {
 			matched, _ := filepath.Match(glob, l)
 			if matched {
