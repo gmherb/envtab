@@ -6,6 +6,7 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
 	"text/tabwriter"
 	"time"
@@ -19,24 +20,30 @@ import (
 var lsCmd = &cobra.Command{
 	Use:   "ls",
 	Short: "List all envtab loadouts",
-	Long: `List all envtab loadouts.  If the --long flag is provided, then
+	Long: `List all envtab loadouts. A glob pattern can be provided to narrow results. If the --long flag is provided, then
 print the long listing format which includes the loadout name, tags, and other
 metadata.`,
 	Example: `  envtab ls
   envtab ls -l
-  envtab ls --long`,
-	Args:    cobra.NoArgs,
+  envtab ls --long
+  envtab ls dev*
+  envtab ls -l *staging*`,
+	Args:    cobra.MaximumNArgs(1),
 	Aliases: []string{"l", "list"},
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("DEBUG: list called")
+		println("DEBUG: list called")
 
 		if cmd.Flag("long").Value.String() == "true" {
-			fmt.Println("DEBUG: long listing format")
+			println("DEBUG: long listing format")
 			ListEnvtabLoadouts()
 
 		} else {
-			fmt.Println("DEBUG: short listing format")
-			PrintEnvtabLoadouts()
+			println("DEBUG: short listing format")
+			if len(args) > 0 {
+				PrintEnvtabLoadouts(args[0])
+			} else {
+				PrintEnvtabLoadouts("")
+			}
 		}
 	},
 }
@@ -47,9 +54,26 @@ func init() {
 	lsCmd.PersistentFlags().BoolP("long", "l", false, "Print long listing format")
 }
 
-func PrintEnvtabLoadouts() {
+func PrintEnvtabLoadouts(glob string) {
 	envtabPath := envtab.InitEnvtab("")
-	loadouts := envtab.GetEnvtabSlice(envtabPath)
+	loadoutSlice := envtab.GetEnvtabSlice(envtabPath)
+
+	var loadouts []string
+	if len(glob) > 0 {
+		println("DEBUG: glob pattern matching ", glob)
+		for _, l := range loadoutSlice {
+			println("DEBUG: loadout", l)
+			matched, _ := filepath.Match(glob, l)
+			if matched {
+
+				loadouts = append(loadouts, l)
+			} else {
+				println("DEBUG: glob pattern matching failed", glob)
+			}
+		}
+	} else {
+		loadouts = loadoutSlice
+	}
 
 	tw := tabwriter.NewWriter(os.Stdout, 0, 8, 2, ' ', 0)
 	for i := 0; i < len(loadouts); i++ {
