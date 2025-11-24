@@ -65,10 +65,7 @@ func PrintEnvtabLoadouts(glob string) {
 			println("DEBUG: loadout", l)
 			matched, _ := filepath.Match(glob, l)
 			if matched {
-
 				loadouts = append(loadouts, l)
-			} else {
-				println("DEBUG: glob pattern matching failed", glob)
 			}
 		}
 	} else {
