@@ -113,6 +113,7 @@ By editing the loadout configuration directly you can add the environment variab
 
 - Implement `-s|--sensitive` option to the addCmd to optionally encrypt values.
   - Support: GCP KMS, AWS KMS, GPG(PGP)
+  - Piggy back off sops? It already supports all providers
 - In edit subcommand, ensure no duplicate keys (otherwise it will be overwritten)
 - Create templates for most commonly used tools.
   - AWS, Vault, etc
