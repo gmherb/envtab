@@ -62,7 +62,6 @@ func PrintEnvtabLoadouts(glob string) {
 	if len(glob) > 0 {
 		println("DEBUG: glob pattern matching ", glob)
 		for _, l := range loadoutSlice {
-			println("DEBUG: loadout", l)
 			matched, _ := filepath.Match(glob, l)
 			if matched {
 				loadouts = append(loadouts, l)
