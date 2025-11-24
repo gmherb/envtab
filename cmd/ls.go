@@ -64,13 +64,13 @@ func PrintEnvtabLoadouts(glob string) {
 
 	tw := tabwriter.NewWriter(os.Stdout, 0, 8, 2, ' ', 0)
 	for _, loadout := range loadouts {
-		fmt.Fprintf(tw, "%s\t", loadout)
 		if len(glob) > 0 {
 			matched, _ := filepath.Match(glob, loadout)
 			if !matched {
 				continue
 			}
 		}
+		fmt.Fprintf(tw, "%s\t", loadout)
 	}
 	fmt.Fprintln(tw)
 	tw.Flush()
