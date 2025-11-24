@@ -52,21 +52,21 @@ aws-prd ------------------------------------------------------------- [ 3 / 3 ]
 
 To show the current state of login (enabled|disabled).
 
-```text
+```shell
 $ envtab login --status
 enabled
 ```
 
 To enable envtab to export all login loadouts.
 
-```text
-envtab login --enable
+```shell
+$ envtab login --enable
 ```
 
 To remove envtab from login shells.
 
-```text
-envtab login --disable
+```shell
+$ envtab login --disable
 ```
 
 ### Environment Variables in Values
@@ -82,35 +82,41 @@ NOTE: To utilize multiple entries of the same KEY such as PATH, you must utilize
 ##### add
 
 If you utilize add, the environment variable will be subjected to shell variable/parameter expansion.
-DEBUG: UpdateUpdatedAt called
-    $ envtab add testld PATH=$PATH:/other/bin
-    ...
-    DEBUG: Name: testld, Key: PATH, Value: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/go/bin:/other/bin, tags: [].
-    ...
+
+```shell
+$ envtab add testld PATH=$PATH:/other/bin
+...
+DEBUG: Name: testld, Key: PATH, Value: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/go/bin:/other/bin, tags: [].
+...
+```
 
 ##### edit
 
 By editing the loadout configuration directly you can add the environment variable to the entry you need.
 
-    $ envtab edit testld
-    ----
-    metadata:
-      createdAt: "2025-11-21T19:21:06-05:00"
-      loadedAt: "2025-11-21T19:21:06-05:00"
-      updatedAt: "2025-11-21T19:25:07-05:00"
-      login: false
-      tags: []
-      description: ""
-    entries:
-      PATH: $PATH:/other/bin
+```text
+$ envtab edit testld
+----
+metadata:
+  createdAt: "2025-11-21T19:21:06-05:00"
+  loadedAt: "2025-11-21T19:21:06-05:00"
+  updatedAt: "2025-11-21T19:25:07-05:00"
+  login: false
+  tags: []
+  description: ""
+entries:
+  PATH: $PATH:/other/bin
+```
 
-    $ envtab export testld
-    export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/go/bin:/other/bin
+```shell
+$ envtab export testld
+export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/go/bin:/other/bin
 
-    $ $(envtab export testld)
-    $ envtab show
-    testld -------------------------------------------------------------- [ 1 / 1 ]
-       PATH=$PATH:/some/bin
+$ $(envtab export testld)
+$ envtab show
+testld -------------------------------------------------------------- [ 1 / 1 ]
+   PATH=$PATH:/some/bin
+```
 
 #### Environment variables other than PATH
 
@@ -118,7 +124,8 @@ Currently, PATH is the only officially support environment variable. You can use
 
 ##### Eval
 
-```$ envtab cat example
+```text
+$ envtab cat example
 metadata:
   createdAt: "2025-11-23T22:59:13-05:00"
   loadedAt: "2025-11-23T22:59:13-05:00"
@@ -128,7 +135,9 @@ metadata:
   description: ""
 entries:
   CONFIG_DIR: $HOME/conf
+```
 
+```shell
 # Export shows the actual variable
 $ envtab export example
 export CONFIG_DIR=$HOME/conf
@@ -149,6 +158,9 @@ CONFIG_DIR=/home/gmherb/conf
 
 # Unfortunately, no match in `show` or `list` at this time.
 $ envtab show
+```
+
+```text
 $ envtab ls -l example
 UpdatedAt  LoadedAt  Login  Active  Total  Name     Tags
 23:08:32   22:59:13  false  0       1      example  []
