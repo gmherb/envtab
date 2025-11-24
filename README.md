@@ -158,7 +158,7 @@ UpdatedAt  LoadedAt  Login  Active  Total  Name     Tags
 
 - Support environment variables in show; exported with eval $(envtab export loadout)
   - Can we resolve all environment variables like we do with PATH?
-  - Add loadout priority/number to support specific load order in case entries build upon environment variable expansion.
+- Add loadout priority/number to support specific load order in case entries build upon environment variable expansion.
 - Implement `-s|--sensitive` option to the addCmd to optionally encrypt values.
   - Support: GCP KMS, AWS KMS, GPG(PGP)
   - Piggy back off sops? It already supports all providers
