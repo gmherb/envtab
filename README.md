@@ -52,20 +52,20 @@ aws-prd ------------------------------------------------------------- [ 3 / 3 ]
 
 To show the current state of login (enabled|disabled).
 
-```shell
+```text
 $ envtab login --status
 enabled
 ```
 
 To enable envtab to export all login loadouts.
 
-```shell
+```text
 $ envtab login --enable
 ```
 
 To remove envtab from login shells.
 
-```shell
+```text
 $ envtab login --disable
 ```
 
@@ -83,7 +83,7 @@ NOTE: To utilize multiple entries of the same KEY such as PATH, you must utilize
 
 If you utilize add, the environment variable will be subjected to shell variable/parameter expansion.
 
-```shell
+```text
 $ envtab add testld PATH=$PATH:/other/bin
 ...
 DEBUG: Name: testld, Key: PATH, Value: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/go/bin:/other/bin, tags: [].
@@ -108,7 +108,7 @@ entries:
   PATH: $PATH:/other/bin
 ```
 
-```shell
+```text
 $ envtab export testld
 export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/go/bin:/other/bin
 
@@ -137,7 +137,7 @@ entries:
   CONFIG_DIR: $HOME/conf
 ```
 
-```shell
+```text
 # Export shows the actual variable
 $ envtab export example
 export CONFIG_DIR=$HOME/conf
