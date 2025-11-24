@@ -73,19 +73,22 @@ envtab login --disable
 
 Sometimes you may need to utilize environment variables in the value of a loadout entry. For example, the PATH environment variable.
 
-CAUTION: To utilize multiple entries of the same KEY (e.g. PATH); you must utilize multiple loadouts. A single loadout cannot have duplicate keys.
+#### PATH
 
-#### add
+The PATH environment variable has first class support and will work without utilizing eval (shown below).
+
+NOTE: To utilize multiple entries of the same KEY such as PATH, you must utilize multiple loadouts. A single loadout cannot have duplicate keys.
+
+##### add
 
 If you utilize add, the environment variable will be subjected to shell variable/parameter expansion.
-
+DEBUG: UpdateUpdatedAt called
     $ envtab add testld PATH=$PATH:/other/bin
     ...
     DEBUG: Name: testld, Key: PATH, Value: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/go/bin:/other/bin, tags: [].
     ...
 
-
-#### edit
+##### edit
 
 By editing the loadout configuration directly you can add the environment variable to the entry you need.
 
@@ -109,12 +112,57 @@ By editing the loadout configuration directly you can add the environment variab
     testld -------------------------------------------------------------- [ 1 / 1 ]
        PATH=$PATH:/some/bin
 
+#### Environment variables other than PATH
+
+Currently, PATH is the only officially support environment variable. You can use other envrionment variables using eval however, do not expect `envtab show` to work properly.
+
+##### Eval
+
+```$ envtab cat example
+metadata:
+  createdAt: "2025-11-23T22:59:13-05:00"
+  loadedAt: "2025-11-23T22:59:13-05:00"
+  updatedAt: "2025-11-23T23:08:32-05:00"
+  login: false
+  tags: []
+  description: ""
+entries:
+  CONFIG_DIR: $HOME/conf
+
+# Export shows the actual variable
+$ envtab export example
+export CONFIG_DIR=$HOME/conf
+
+# But when sourced it is not expanded
+$ $(envtab export example)
+
+# See variable hardcoded
+$ env|grep CONFIG_DIR
+CONFIG_DIR=$HOME/conf
+
+# Use eval to expand
+$ eval $(envtab export example)
+
+# Variable expanded
+$ env|grep CONFIG_DIR
+CONFIG_DIR=/home/gmherb/conf
+
+# Unfortunately, no match in `show` or `list` at this time.
+$ envtab show
+$ envtab ls -l example
+UpdatedAt  LoadedAt  Login  Active  Total  Name     Tags
+23:08:32   22:59:13  false  0       1      example  []
+```
+
 ## TODO
 
+- Support environment variables in show; exported with eval $(envtab export loadout)
+  - Can we resolve all environment variables like we do with PATH?
 - Implement `-s|--sensitive` option to the addCmd to optionally encrypt values.
   - Support: GCP KMS, AWS KMS, GPG(PGP)
   - Piggy back off sops? It already supports all providers
 - In edit subcommand, ensure no duplicate keys (otherwise it will be overwritten)
+  - edit fails when loadout does not exist
 - Create templates for most commonly used tools.
   - AWS, Vault, etc
   - Check for predefined if no user defined templates match.
