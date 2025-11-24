@@ -111,13 +111,12 @@ By editing the loadout configuration directly you can add the environment variab
 
 ## TODO
 
+- Implement `-s|--sensitive` option to the addCmd to optionally encrypt values.
+  - Support: GCP KMS, AWS KMS, GPG(PGP)
 - In edit subcommand, ensure no duplicate keys (otherwise it will be overwritten)
-- Allow passing filter/pattern arg to the listCmd.
 - Create templates for most commonly used tools.
   - AWS, Vault, etc
   - Check for predefined if no user defined templates match.
-- Implement `-s|--sensitive` option to the addCmd to optionally encrypt values.
-  - Support: AES, AWS KMS, GPG(PGP)
 - Add additional backends.
   - File (Default)
   - Vault
@@ -125,6 +124,7 @@ By editing the loadout configuration directly you can add the environment variab
 
 ### Done
 
+- Allow passing filter/pattern arg to the listCmd. (done w/ glob)
 - Add support for PATH environemnt variable (done)
 - Fix show for PATH environment variable (done)
 - Fix Active/Total spacing in `ls` output when counts are double, or triple digits. (done)
