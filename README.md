@@ -165,9 +165,6 @@ CONFIG_DIR=/home/gmherb/conf
 
 # Unfortunately, no match in `show` or `list` at this time.
 $ envtab show
-```
-
-```text
 $ envtab ls -l example
 UpdatedAt  LoadedAt  Login  Active  Total  Name     Tags
 23:08:32   22:59:13  false  0       1      example  []
