@@ -50,7 +50,7 @@ Multiple tags can be provided using space or comma as a separator.`,
 
 		if len(args) == 2 && !strings.Contains(args[1], "=") {
 			fmt.Println("DEBUG: No value provided for your envtab entry. No equal sign detected and only 2 args provided.")
-			cmd.Usage()
+			cmd.Help()
 			os.Exit(1)
 		}
 
