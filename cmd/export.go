@@ -7,7 +7,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/gmherb/envtab/internal/envtab"
+	"github.com/gmherb/envtab/internal/backends"
+	"github.com/gmherb/envtab/internal/config"
 	"github.com/spf13/cobra"
 )
 
@@ -25,7 +26,7 @@ var exportCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		logger.Debug("export called")
 
-		envtabPath := envtab.InitEnvtab("")
+		envtabPath := config.InitEnvtab("")
 
 		for _, arg := range args {
 
@@ -39,7 +40,7 @@ var exportCmd = &cobra.Command{
 				os.Exit(1)
 			}
 
-			loadout, err := envtab.ReadLoadout(loadoutName)
+			loadout, err := backends.ReadLoadout(loadoutName)
 			if err != nil {
 				fmt.Printf("ERROR: Failure reading loadout [%s]: %s\n", loadoutName, err)
 				os.Exit(1)

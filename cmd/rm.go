@@ -4,7 +4,7 @@ Copyright © 2024 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
-	"github.com/gmherb/envtab/internal/envtab"
+	"github.com/gmherb/envtab/internal/backends"
 	"github.com/spf13/cobra"
 )
 
@@ -21,7 +21,7 @@ var rmCmd = &cobra.Command{
 		logger.Debug("rm called")
 		for _, loadout := range args {
 			logger.Debug("removing loadout", "loadout", loadout)
-			envtab.RemoveLoadout(loadout)
+			backends.RemoveLoadout(loadout)
 		}
 	},
 }

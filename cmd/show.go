@@ -10,9 +10,10 @@ import (
 	"strings"
 
 	"github.com/fatih/color"
+	"github.com/gmherb/envtab/internal/backends"
+	"github.com/gmherb/envtab/internal/config"
 	"github.com/gmherb/envtab/internal/crypto"
 	"github.com/gmherb/envtab/internal/env"
-	"github.com/gmherb/envtab/internal/envtab"
 	"github.com/spf13/cobra"
 )
 
@@ -38,7 +39,7 @@ func init() {
 }
 
 func showActiveLoadouts(showSensitive bool, patterns []string) {
-	envtabSlice := envtab.GetEnvtabSlice("")
+	envtabSlice := config.GetEnvtabSlice("")
 	environment := env.NewEnv()
 	environment.Populate()
 
@@ -59,7 +60,7 @@ func showActiveLoadouts(showSensitive bool, patterns []string) {
 			}
 		}
 
-		lo, err := envtab.ReadLoadout(loadout)
+		lo, err := backends.ReadLoadout(loadout)
 		if err != nil {
 			fmt.Printf("Error reading loadout %s: %s\n", loadout, err)
 			os.Exit(1)

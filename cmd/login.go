@@ -7,7 +7,9 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/gmherb/envtab/internal/envtab"
+	"github.com/gmherb/envtab/internal/backends"
+	"github.com/gmherb/envtab/internal/config"
+	"github.com/gmherb/envtab/internal/login"
 	"github.com/spf13/cobra"
 )
 
@@ -30,17 +32,17 @@ by running "envtab login --disable".`,
 
 		if enable {
 			logger.Debug("enabling login")
-			envtab.EnableLogin()
+			login.EnableLogin()
 			return
 		}
 		if disable {
 			logger.Debug("disabling login")
-			envtab.DisableLogin()
+			login.DisableLogin()
 			return
 		}
 		if status {
 			logger.Debug("showing status")
-			envtab.ShowLoginStatus()
+			login.ShowLoginStatus()
 			return
 		}
 
@@ -57,11 +59,11 @@ func init() {
 }
 
 func exportLoginLoadouts() {
-	loadouts := envtab.GetEnvtabSlice("")
+	loadouts := config.GetEnvtabSlice("")
 
 	for _, loadout := range loadouts {
 
-		lo, err := envtab.ReadLoadout(loadout)
+		lo, err := backends.ReadLoadout(loadout)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "ERROR: Failure reading loadout [%s]: %s\n", loadout, err)
 			os.Exit(1)

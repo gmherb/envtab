@@ -1,4 +1,4 @@
-package envtab
+package loadout
 
 import (
 	"fmt"
@@ -38,13 +38,13 @@ func ValidateLoadout(loadout *Loadout) error {
 	if loadout == nil {
 		return fmt.Errorf("loadout is nil")
 	}
-	
+
 	// Check for duplicate keys in entries
 	// Since entries is a map, duplicates would have been silently overwritten during unmarshaling
 	// We need to check the raw YAML content instead
 	// For now, we'll validate by checking if the map structure is valid
 	// (maps can't have duplicates by definition, so if we got here, the YAML was valid)
-	
+
 	// However, we can add additional validation here if needed
 	// For example, checking for empty keys or other issues
 	for key := range loadout.Entries {
@@ -52,7 +52,7 @@ func ValidateLoadout(loadout *Loadout) error {
 			return fmt.Errorf("loadout contains empty key in entries")
 		}
 	}
-	
+
 	return nil
 }
 
@@ -64,22 +64,22 @@ func ValidateLoadoutYAML(yamlContent []byte) error {
 	inEntries := false
 	indentLevel := 0
 	seenKeys := make(map[string]int)
-	
+
 	for i, line := range lines {
 		trimmed := strings.TrimSpace(line)
-		
+
 		// Skip empty lines and comments
 		if trimmed == "" || strings.HasPrefix(trimmed, "#") {
 			continue
 		}
-		
+
 		// Check if we're entering the entries section
 		if strings.HasPrefix(trimmed, "entries:") {
 			inEntries = true
 			indentLevel = len(line) - len(strings.TrimLeft(line, " \t"))
 			continue
 		}
-		
+
 		// Check if we've left the entries section (reached a top-level key)
 		if inEntries {
 			currentIndent := len(line) - len(strings.TrimLeft(line, " \t"))
@@ -87,7 +87,7 @@ func ValidateLoadoutYAML(yamlContent []byte) error {
 				// We've left the entries section
 				break
 			}
-			
+
 			// Check if this is a key-value pair in entries
 			if strings.Contains(trimmed, ":") {
 				parts := strings.SplitN(trimmed, ":", 2)
@@ -101,7 +101,7 @@ func ValidateLoadoutYAML(yamlContent []byte) error {
 			}
 		}
 	}
-	
+
 	return nil
 }
 
@@ -120,7 +120,7 @@ func (l Loadout) Export() {
 	re := regexp.MustCompile(`\$PATH`)
 	reSOPS := regexp.MustCompile(`^SOPS:`)
 
-		for key, value := range l.Entries {
+	for key, value := range l.Entries {
 		if value != "" {
 			match := re.MatchString(value)
 			sopsEncrypted := reSOPS.MatchString(value)
@@ -323,3 +323,4 @@ func CompareLoadouts(old Loadout, new Loadout) bool {
 	}
 	return false
 }
+

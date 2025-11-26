@@ -1,4 +1,4 @@
-package envtab
+package config
 
 import (
 	"fmt"
@@ -112,3 +112,4 @@ func TestGetEnvtabSlice(t *testing.T) {
 		t.Errorf("Error removing %s: %s", envtabPath, err)
 	}
 }
+

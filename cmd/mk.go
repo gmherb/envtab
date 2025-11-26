@@ -6,7 +6,8 @@ package cmd
 import (
 	"fmt"
 
-	"github.com/gmherb/envtab/internal/envtab"
+	"github.com/gmherb/envtab/internal/backends"
+	"github.com/gmherb/envtab/internal/templates"
 	"github.com/spf13/cobra"
 )
 
@@ -36,9 +37,9 @@ templates subdirectory of envtabs HOME.`,
 		templateName := args[1]
 		force, _ := cmd.Flags().GetBool("force")
 
-		loadout := envtab.MakeLoadoutFromTemplate(templateName, force)
+		loadout := templates.MakeLoadoutFromTemplate(templateName, force)
 
-		err := envtab.WriteLoadout(loadoutName, &loadout)
+		err := backends.WriteLoadout(loadoutName, &loadout)
 		if err != nil {
 			fmt.Printf("ERROR: %s\n", err)
 		}

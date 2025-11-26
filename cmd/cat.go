@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/gmherb/envtab/internal/envtab"
+	"github.com/gmherb/envtab/internal/backends"
 	"github.com/spf13/cobra"
 )
 
@@ -24,7 +24,7 @@ var catCmd = &cobra.Command{
 
 		for _, arg := range args {
 
-			loadout, err := envtab.ReadLoadout(arg)
+			loadout, err := backends.ReadLoadout(arg)
 			if err != nil {
 				if os.IsNotExist(err) {
 					fmt.Printf("ERROR: Loadout %s does not exist\n", arg)

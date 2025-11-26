@@ -1,4 +1,4 @@
-package envtab
+package config
 
 import (
 	"fmt"
@@ -65,3 +65,4 @@ func GetEnvtabSlice(path string) []string {
 
 	return loadouts
 }
+

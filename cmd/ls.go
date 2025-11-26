@@ -11,9 +11,10 @@ import (
 	"text/tabwriter"
 	"time"
 
+	"github.com/gmherb/envtab/internal/backends"
+	"github.com/gmherb/envtab/internal/config"
 	"github.com/gmherb/envtab/internal/crypto"
 	"github.com/gmherb/envtab/internal/env"
-	"github.com/gmherb/envtab/internal/envtab"
 
 	"github.com/spf13/cobra"
 )
@@ -53,8 +54,8 @@ func init() {
 }
 
 func PrintEnvtabLoadouts(patterns []string) {
-	envtabPath := envtab.InitEnvtab("")
-	loadouts := envtab.GetEnvtabSlice(envtabPath)
+	envtabPath := config.InitEnvtab("")
+	loadouts := config.GetEnvtabSlice(envtabPath)
 
 	tw := tabwriter.NewWriter(os.Stdout, 0, 8, 2, ' ', 0)
 	for _, loadout := range loadouts {
@@ -79,7 +80,7 @@ func PrintEnvtabLoadouts(patterns []string) {
 }
 
 func ListEnvtabLoadouts(patterns []string) {
-	envtabSlice := envtab.GetEnvtabSlice("")
+	envtabSlice := config.GetEnvtabSlice("")
 	environment := env.NewEnv()
 	environment.Populate()
 
@@ -103,7 +104,7 @@ func ListEnvtabLoadouts(patterns []string) {
 			}
 		}
 
-		lo, err := envtab.ReadLoadout(loadout)
+		lo, err := backends.ReadLoadout(loadout)
 		if err != nil {
 			fmt.Printf("Error reading loadout %s: %s\n", loadout, err)
 			os.Exit(1)

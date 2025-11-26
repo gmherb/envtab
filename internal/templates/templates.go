@@ -1,4 +1,4 @@
-package envtab
+package templates
 
 import (
 	"fmt"
@@ -6,6 +6,8 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/gmherb/envtab/internal/config"
+	"github.com/gmherb/envtab/internal/loadout"
 	yaml "gopkg.in/yaml.v2"
 )
 
@@ -55,7 +57,7 @@ var envtabTemplates = LoadoutTemplates{
 	},
 }
 
-func MakeLoadoutFromTemplate(templateName string, force bool) Loadout {
+func MakeLoadoutFromTemplate(templateName string, force bool) loadout.Loadout {
 
 	//var templateFound bool
 
@@ -66,14 +68,14 @@ func MakeLoadoutFromTemplate(templateName string, force bool) Loadout {
 	//}
 
 	// Check for template with short extension
-	templatePath := filepath.Join(InitEnvtab(""), "templates/"+templateName+".yml")
+	templatePath := filepath.Join(config.InitEnvtab(""), "templates/"+templateName+".yml")
 	if _, err := os.Stat(templatePath); os.IsNotExist(err) {
 		slog.Debug("template does not exist", "template", templateName, "path", templatePath)
 		os.Exit(1)
 	}
 	slog.Debug("using template", "template", templateName, "path", templatePath)
 
-	loadout := InitLoadout()
+	lo := loadout.InitLoadout()
 
 	data, err := os.ReadFile(templatePath)
 	if err != nil {
@@ -88,12 +90,13 @@ func MakeLoadoutFromTemplate(templateName string, force bool) Loadout {
 		os.Exit(1)
 	}
 
-	loadout.Metadata.Description = template.Description
+	lo.Metadata.Description = template.Description
 
 	for _, entry := range template.Entries {
-		loadout.Entries[entry] = ""
+		lo.Entries[entry] = ""
 	}
 
-	return *loadout
+	return *lo
 
 }
+

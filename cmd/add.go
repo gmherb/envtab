@@ -8,8 +8,8 @@ import (
 	"os"
 	"strings"
 
+	"github.com/gmherb/envtab/internal/backends"
 	"github.com/gmherb/envtab/internal/crypto"
-	"github.com/gmherb/envtab/internal/envtab"
 	"github.com/gmherb/envtab/internal/tags"
 	"github.com/spf13/cobra"
 )
@@ -91,9 +91,9 @@ Multiple tags can be provided using space or comma as a separator.`,
 
 		// Write to loadout (with file-level SOPS encryption if requested)
 		if sopsFile || useSOPS {
-			err = envtab.AddEntryToLoadoutWithSOPS(name, key, finalValue, newTags, true)
+			err = backends.AddEntryToLoadoutWithSOPS(name, key, finalValue, newTags, true)
 		} else {
-			err = envtab.AddEntryToLoadout(name, key, finalValue, newTags)
+			err = backends.AddEntryToLoadout(name, key, finalValue, newTags)
 		}
 		if err != nil {
 			fmt.Printf("ERROR: Error writing entry to file [%s]: %s\n", name, err)

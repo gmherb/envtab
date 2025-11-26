@@ -1,4 +1,4 @@
-package envtab
+package login
 
 import (
 	"fmt"
@@ -166,3 +166,4 @@ func ShowLoginStatus() {
 	fmt.Printf("disabled\n")
 	return
 }
+
