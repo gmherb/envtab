@@ -6,7 +6,7 @@ import (
 	"regexp"
 	"strings"
 
-	tagz "github.com/gmherb/envtab/internal/tags"
+	"github.com/gmherb/envtab/internal/tags"
 	"github.com/gmherb/envtab/internal/utils"
 	yaml "gopkg.in/yaml.v2"
 )
@@ -61,10 +61,7 @@ func (l Loadout) Export() {
 				}
 
 				paths := make([]string, 0, len(pathMap)) // preallocate for efficiency
-				// preserve order with loop
-				for _, k := range order {
-					paths = append(paths, k)
-				}
+				paths = append(paths, order...)
 
 				os.Setenv("PATH", strings.Join(paths, string(os.PathListSeparator)))
 				fmt.Printf("export PATH=%s\n", os.Getenv("PATH"))
@@ -87,9 +84,9 @@ func (l *Loadout) UpdateEntry(key string, value string) error {
 	return nil
 }
 
-func (l *Loadout) UpdateTags(tags []string) error {
+func (l *Loadout) UpdateTags(newTags []string) error {
 	println("DEBUG: UpdateTags called")
-	l.Metadata.Tags = tagz.MergeTags(l.Metadata.Tags, tags)
+	l.Metadata.Tags = tags.MergeTags(l.Metadata.Tags, newTags)
 	l.UpdateUpdatedAt()
 	return nil
 }

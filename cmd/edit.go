@@ -10,7 +10,7 @@ import (
 	"path/filepath"
 
 	"github.com/gmherb/envtab/internal/envtab"
-	tagz "github.com/gmherb/envtab/internal/tags"
+	"github.com/gmherb/envtab/internal/tags"
 	"github.com/gmherb/envtab/internal/utils"
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v2"
@@ -81,12 +81,12 @@ If no options are provided, enter editor to manually edit a envtab loadout.`,
 		}
 
 		// If --tags is set, update the loadout tags
-		if tags, _ := cmd.Flags().GetString("tags"); tags != "" {
-			newTags := []string{tags}
+		if tagsStr, _ := cmd.Flags().GetString("tags"); tagsStr != "" {
+			newTags := []string{tagsStr}
 
-			newTags = tagz.SplitTags(newTags)
-			newTags = tagz.RemoveEmptyTags(newTags)
-			newTags = tagz.RemoveDuplicateTags(newTags)
+			newTags = tags.SplitTags(newTags)
+			newTags = tags.RemoveEmptyTags(newTags)
+			newTags = tags.RemoveDuplicateTags(newTags)
 
 			fmt.Printf("DEBUG: Updating loadout [%s] tags to %s\n", loadoutName, newTags)
 
