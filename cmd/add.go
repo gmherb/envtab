@@ -9,9 +9,9 @@ import (
 	"os"
 	"strings"
 
-	"github.com/gmherb/envtab/cmd/envtab"
 	"github.com/gmherb/envtab/internal/crypto"
-	tagz "github.com/gmherb/envtab/pkg/tags"
+	"github.com/gmherb/envtab/internal/envtab"
+	tagz "github.com/gmherb/envtab/internal/tags"
 	"github.com/spf13/cobra"
 )
 

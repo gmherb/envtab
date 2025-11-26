@@ -9,8 +9,8 @@ import (
 	"strings"
 
 	"github.com/fatih/color"
-	"github.com/gmherb/envtab/cmd/envtab"
-	"github.com/gmherb/envtab/pkg/env"
+	"github.com/gmherb/envtab/internal/envtab"
+	"github.com/gmherb/envtab/internal/env"
 	"github.com/spf13/cobra"
 )
 
