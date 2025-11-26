@@ -34,10 +34,10 @@ If no options are provided, enter editor to manually edit a envtab loadout.`,
 	Args:    cobra.ExactArgs(1),
 	Aliases: []string{"ed", "edi"},
 	Run: func(cmd *cobra.Command, args []string) {
-		println("DEBUG: edit called")
+		logger.Debug("edit called")
 
 		loadoutName := args[0]
-		println("DEBUG: Loadout: " + loadoutName)
+		logger.Debug("editing loadout", "loadout", loadoutName)
 
 		loadoutModified := false
 
@@ -101,7 +101,7 @@ If no options are provided, enter editor to manually edit a envtab loadout.`,
 		}
 
 		if loadoutModified {
-			println("DEBUG: Writing loadout")
+			logger.Debug("writing loadout", "loadout", loadoutName)
 
 			// Preserve SOPS encryption if the file was originally encrypted
 			if isSOPSEncrypted {

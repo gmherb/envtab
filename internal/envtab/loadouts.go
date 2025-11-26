@@ -2,6 +2,7 @@ package envtab
 
 import (
 	"fmt"
+	"log/slog"
 	"os"
 	"regexp"
 	"strings"
@@ -58,12 +59,12 @@ func (l Loadout) Export() {
 					newPath = strings.ReplaceAll(newPath, "::", ":")
 				}
 
-				println("DEBUG: Found potential new PATH(s) [" + newPath + "].")
+				slog.Debug("found potential new PATH(s)", "path", newPath)
 
 				for _, np := range strings.Split(newPath, string(os.PathListSeparator)) {
 					if _, exists := pathMap[np]; !exists {
 
-						println("DEBUG: Adding new path [" + np + "] to PATH map.")
+						slog.Debug("adding new path to PATH map", "path", np)
 						order = append(order, np)
 						pathMap[np] = true
 					}
@@ -98,48 +99,48 @@ func (l Loadout) Export() {
 }
 
 func (l *Loadout) UpdateEntry(key string, value string) error {
-	println("DEBUG: UpdateEntry called")
+	slog.Debug("UpdateEntry called", "key", key)
 	l.Entries[key] = value
 	l.UpdateUpdatedAt()
 	return nil
 }
 
 func (l *Loadout) UpdateTags(newTags []string) error {
-	println("DEBUG: UpdateTags called")
+	slog.Debug("UpdateTags called", "tags", newTags)
 	l.Metadata.Tags = tags.MergeTags(l.Metadata.Tags, newTags)
 	l.UpdateUpdatedAt()
 	return nil
 }
 
 func (l *Loadout) ReplaceTags(tags []string) error {
-	println("DEBUG: ReplaceTags called")
+	slog.Debug("ReplaceTags called", "tags", tags)
 	l.Metadata.Tags = tags
 	l.UpdateUpdatedAt()
 	return nil
 }
 
 func (l *Loadout) UpdateDescription(description string) error {
-	println("DEBUG: UpdateDescription called")
+	slog.Debug("UpdateDescription called", "description", description)
 	l.Metadata.Description = description
 	l.UpdateUpdatedAt()
 	return nil
 }
 
 func (l *Loadout) UpdateLogin(login bool) error {
-	println("DEBUG: UpdateLogin called")
+	slog.Debug("UpdateLogin called", "login", login)
 	l.Metadata.Login = login
 	l.UpdateUpdatedAt()
 	return nil
 }
 
 func (l *Loadout) UpdateUpdatedAt() error {
-	println("DEBUG: UpdateUpdatedAt called")
+	slog.Debug("UpdateUpdatedAt called")
 	l.Metadata.UpdatedAt = utils.GetCurrentTime()
 	return nil
 }
 
 func (l *Loadout) UpdateLoadedAt() error {
-	println("DEBUG: UpdateLoadedAt called")
+	slog.Debug("UpdateLoadedAt called")
 	l.Metadata.LoadedAt = utils.GetCurrentTime()
 	return nil
 }

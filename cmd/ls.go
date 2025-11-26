@@ -32,10 +32,10 @@ metadata.`,
 	Args:    cobra.MaximumNArgs(1),
 	Aliases: []string{"l", "list"},
 	Run: func(cmd *cobra.Command, args []string) {
-		println("DEBUG: list called")
+		logger.Debug("list called")
 
 		if cmd.Flag("long").Value.String() == "true" {
-			println("DEBUG: long listing format")
+			logger.Debug("long listing format")
 			if len(args) > 0 {
 				ListEnvtabLoadouts(args[0])
 			} else {
@@ -43,7 +43,7 @@ metadata.`,
 			}
 
 		} else {
-			println("DEBUG: short listing format")
+			logger.Debug("short listing format")
 			if len(args) > 0 {
 				PrintEnvtabLoadouts(args[0])
 			} else {

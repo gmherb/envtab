@@ -33,7 +33,7 @@ Multiple tags can be provided using space or comma as a separator.`,
 	Args:                  cobra.MinimumNArgs(2),
 	Aliases:               []string{"a", "ad"},
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("DEBUG: add command called")
+		logger.Debug("add command called")
 
 		var (
 			name    string   // envtab loadout name
@@ -49,19 +49,19 @@ Multiple tags can be provided using space or comma as a separator.`,
 		sopsFile, _ := cmd.Flags().GetBool("sops-file")
 
 		if len(args) == 2 && !strings.Contains(args[1], "=") {
-			fmt.Println("DEBUG: No value provided for your envtab entry. No equal sign detected and only 2 args provided.")
+			logger.Debug("No value provided for your envtab entry. No equal sign detected and only 2 args provided.")
 			cmd.Usage()
 			os.Exit(1)
 		}
 
 		name = args[0]
 		if strings.Contains(args[1], "=") {
-			fmt.Println("DEBUG: Equal sign detected in second argument. Splitting into key and value.")
+			logger.Debug("Equal sign detected in second argument. Splitting into key and value.")
 			key, value = strings.Split(args[1], "=")[0], strings.Split(args[1], "=")[1]
 			newTags = args[2:]
 
 		} else {
-			fmt.Println("DEBUG: No equal sign detected in second argument. Assigning second argument as key.")
+			logger.Debug("No equal sign detected in second argument. Assigning second argument as key.")
 			key = args[1]
 			value = args[2]
 			newTags = args[3:]
@@ -71,7 +71,7 @@ Multiple tags can be provided using space or comma as a separator.`,
 		newTags = tags.RemoveEmptyTags(newTags)
 		newTags = tags.RemoveDuplicateTags(newTags)
 
-		fmt.Printf("DEBUG: Name: %s, Key: %s, Value: %s, tags: %s.\n", name, key, value, newTags)
+		logger.Debug("parsing arguments", "name", name, "key", key, "value", "[REDACTED]", "tags", newTags)
 
 		var err error
 		var finalValue string

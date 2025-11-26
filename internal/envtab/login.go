@@ -2,6 +2,7 @@ package envtab
 
 import (
 	"fmt"
+	"log/slog"
 	"os"
 	"os/user"
 	"strings"
@@ -47,7 +48,7 @@ func detectLoginScript() string {
 
 func EnableLogin() {
 	loginScript := detectLoginScript()
-	println("DEBUG: Detected login script: " + loginScript)
+	slog.Debug("detected login script", "script", loginScript)
 	envtabLogin := "$(envtab login)"
 
 	content, err := os.ReadFile(loginScript)

@@ -24,7 +24,7 @@ var showCmd = &cobra.Command{
 	Aliases:               []string{"sh", "sho"},
 	DisableFlagsInUseLine: true,
 	Run: func(cmd *cobra.Command, args []string) {
-		println("DEBUG: show called")
+		logger.Debug("show called")
 		showSensitive, _ := cmd.Flags().GetBool("sensitive")
 		showActiveLoadouts(showSensitive)
 	},
