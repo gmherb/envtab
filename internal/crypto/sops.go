@@ -2,11 +2,14 @@ package crypto
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"strings"
+	
+	yaml "gopkg.in/yaml.v2"
 )
 
 // SOPSEncryptFile encrypts a file using sops command-line tool
@@ -117,35 +120,37 @@ func contains(s, substr string) bool {
 }
 
 // IsSOPSEncrypted checks if a file is encrypted with sops
-// by checking if it contains sops metadata at the top level
+// by parsing the YAML/JSON and checking if a top-level "sops" or "data" key exists
+// For file-level SOPS encryption:
+//   - Files encrypted with --sops-file typically have "data:" as a top-level key (binary/blob mode)
+//   - Files may also have "sops:" metadata at the top level
+// For value-level SOPS encryption, values start with "SOPS:" prefix (handled separately)
+// SOPS can encrypt both YAML and JSON files
 func IsSOPSEncrypted(filePath string) bool {
 	content, err := os.ReadFile(filePath)
 	if err != nil {
 		return false
 	}
 
-	// SOPS encrypted YAML files have "sops:" as a top-level key
-	// Check if it appears at the beginning of a line (not just anywhere)
-	lines := bytes.Split(content, []byte("\n"))
-	for _, line := range lines {
-		trimmed := bytes.TrimSpace(line)
-		// Check for "sops:" at the start of a line (top-level key)
-		if bytes.HasPrefix(trimmed, []byte("sops:")) {
-			return true
-		}
-		// Also check for JSON format
-		if bytes.Contains(trimmed, []byte("\"sops\"")) {
-			return true
-		}
-		// If we've seen content beyond the sops metadata, stop checking
-		// (sops metadata is always at the top)
-		if len(trimmed) > 0 && !bytes.HasPrefix(trimmed, []byte("#")) && 
-		   !bytes.HasPrefix(trimmed, []byte("sops")) {
-			break
+	// Try parsing as YAML first (most common for envtab loadouts)
+	var data map[string]interface{}
+	err = yaml.Unmarshal(content, &data)
+	if err != nil {
+		// If YAML parsing fails, try JSON (SOPS can encrypt JSON files too)
+		err = json.Unmarshal(content, &data)
+		if err != nil {
+			// If both fail, it's not a valid YAML/JSON file, so not SOPS-encrypted
+			return false
 		}
 	}
 
-	return false
+	// Check if "sops" key exists at the top level (SOPS metadata)
+	_, hasSops := data["sops"]
+	// Check if "data" key exists at the top level (indicates --sops-file binary/blob encryption)
+	_, hasData := data["data"]
+	
+	// File is SOPS-encrypted if it has either sops metadata or data wrapper
+	return hasSops || hasData
 }
 
 // SOPSEncryptValue encrypts a single value using sops

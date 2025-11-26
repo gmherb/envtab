@@ -1,6 +1,7 @@
 package envtab
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 	"os/exec"
@@ -112,10 +113,54 @@ func ReadLoadout(name string) (*Loadout, error) {
 		}
 	}
 
+	// Handle case where SOPS wrapped content in "data:" key (binary/blob encryption mode)
+	// First try to parse and check if there's a "data" key at top level
+	var dataWrapper map[string]interface{}
+	if err := yaml.Unmarshal(content, &dataWrapper); err == nil {
+		if dataValue, exists := dataWrapper["data"]; exists {
+			// Content is wrapped in "data:" key, extract it
+			if dataStr, ok := dataValue.(string); ok {
+				// data: is a string (encrypted blob), use it as content
+				content = []byte(dataStr)
+			} else {
+				// data: is an object, marshal it back to YAML/JSON
+				var marshalErr error
+				content, marshalErr = yaml.Marshal(dataValue)
+				if marshalErr != nil {
+					content, marshalErr = json.Marshal(dataValue)
+					if marshalErr != nil {
+						return nil, fmt.Errorf("failed to extract data from wrapper: %w", marshalErr)
+					}
+				}
+			}
+		}
+	} else {
+		// Try JSON format
+		if err := json.Unmarshal(content, &dataWrapper); err == nil {
+			if dataValue, exists := dataWrapper["data"]; exists {
+				// Content is wrapped in "data:" key, extract it
+				if dataStr, ok := dataValue.(string); ok {
+					content = []byte(dataStr)
+				} else {
+					var marshalErr error
+					content, marshalErr = json.Marshal(dataValue)
+					if marshalErr != nil {
+						return nil, fmt.Errorf("failed to extract data from JSON wrapper: %w", marshalErr)
+					}
+				}
+			}
+		}
+	}
+
 	var loadout Loadout
+	// Try YAML first (most common for envtab loadouts)
 	err = yaml.Unmarshal(content, &loadout)
 	if err != nil {
-		return nil, err
+		// If YAML parsing fails, try JSON (SOPS might decrypt to JSON format)
+		err = json.Unmarshal(content, &loadout)
+		if err != nil {
+			return nil, fmt.Errorf("failed to parse loadout (tried YAML and JSON): %w", err)
+		}
 	}
 
 	return &loadout, nil
