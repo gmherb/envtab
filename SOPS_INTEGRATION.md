@@ -182,20 +182,6 @@ SOPS supports multiple encryption backends:
 
 Configure these in your `.sops.yaml` file.
 
-## Migration
-
-### Migration from Other Encryption Methods
-
-If you have existing encrypted values, you can migrate to SOPS:
-
-```bash
-# Re-add values with SOPS encryption
-envtab add myloadout --sops-value SECRET=value
-
-# Or use file-level encryption
-envtab add myloadout --sops-file SECRET=value
-```
-
 ## Key Rotation
 
 When encryption keys are rotated (e.g., AWS KMS key rotation, age key changes):
