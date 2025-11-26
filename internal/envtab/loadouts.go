@@ -12,6 +12,11 @@ import (
 	yaml "gopkg.in/yaml.v2"
 )
 
+// Helper function to check if string contains substring
+func contains(s, substr string) bool {
+	return strings.Contains(strings.ToLower(s), strings.ToLower(substr))
+}
+
 type LoadoutMetadata struct {
 	CreatedAt   string   `json:"createdAt" yaml:"createdAt"`
 	LoadedAt    string   `json:"loadedAt" yaml:"loadedAt"`
@@ -70,9 +75,16 @@ func (l Loadout) Export() {
 				fmt.Printf("export PATH=%s\n", os.Getenv("PATH"))
 			} else if sopsEncrypted {
 				// Decrypt SOPS-encrypted value
+				// SOPS metadata is preserved in the encrypted value string
 				decrypted, err := crypto.SOPSDecryptValue(value)
 				if err != nil {
-					fmt.Fprintf(os.Stderr, "ERROR: Failed to decrypt SOPS value for %s: %s\n", key, err)
+					// Check if it's a key rotation issue
+					if contains(err.Error(), "keys may have been rotated") {
+						fmt.Fprintf(os.Stderr, "WARNING: Cannot decrypt %s - encryption keys may have been rotated. Skipping.\n", key)
+						fmt.Fprintf(os.Stderr, "         To fix: re-encrypt the loadout with current keys using 'envtab reencrypt'\n")
+					} else {
+						fmt.Fprintf(os.Stderr, "ERROR: Failed to decrypt SOPS value for %s: %s\n", key, err)
+					}
 					continue
 				}
 				fmt.Printf("export %s=%s\n", key, decrypted)

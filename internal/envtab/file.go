@@ -1,9 +1,11 @@
 package envtab
 
 import (
+	"fmt"
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strings"
 
 	"github.com/gmherb/envtab/internal/crypto"
 	"github.com/gmherb/envtab/internal/utils"
@@ -72,7 +74,11 @@ func ReadLoadout(name string) (*Loadout, error) {
 	if crypto.IsSOPSEncrypted(filePath) {
 		content, err = crypto.SOPSDecryptFile(filePath)
 		if err != nil {
-			return nil, err
+			// Provide helpful error for key rotation
+			if strings.Contains(strings.ToLower(err.Error()), "keys may have been rotated") {
+				return nil, fmt.Errorf("cannot decrypt loadout: encryption keys may have been rotated. Use 'envtab reencrypt %s' to re-encrypt with current keys: %w", name, err)
+			}
+			return nil, fmt.Errorf("failed to decrypt SOPS-encrypted loadout: %w", err)
 		}
 	} else {
 		content, err = os.ReadFile(filePath)
