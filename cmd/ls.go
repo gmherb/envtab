@@ -19,36 +19,29 @@ import (
 )
 
 var lsCmd = &cobra.Command{
-	Use:   "ls",
+	Use:   "ls [LOADOUT_PATTERN...]",
 	Short: "List all envtab loadouts",
-	Long: `List all envtab loadouts. A glob pattern can be provided to narrow results. If the --long flag is provided, then
+	Long: `List all envtab loadouts. Optional glob patterns can be provided to narrow results. If multiple patterns are provided, loadouts matching any pattern will be shown. If the --long flag is provided, then
 print the long listing format which includes the loadout name, tags, and other
 metadata.`,
 	Example: `  envtab ls
   envtab ls -l
   envtab ls --long
   envtab ls dev*
-  envtab ls -l *staging*`,
-	Args:    cobra.MaximumNArgs(1),
+  envtab ls -l *staging*
+  envtab ls aws-* gcp-*`,
+	Args:    cobra.ArbitraryArgs,
 	Aliases: []string{"l", "list"},
 	Run: func(cmd *cobra.Command, args []string) {
 		logger.Debug("list called")
 
 		if long, _ := cmd.Flags().GetBool("long"); long {
 			logger.Debug("long listing format")
-			if len(args) > 0 {
-				ListEnvtabLoadouts(args[0])
-			} else {
-				ListEnvtabLoadouts("")
-			}
+			ListEnvtabLoadouts(args)
 
 		} else {
 			logger.Debug("short listing format")
-			if len(args) > 0 {
-				PrintEnvtabLoadouts(args[0])
-			} else {
-				PrintEnvtabLoadouts("")
-			}
+			PrintEnvtabLoadouts(args)
 		}
 	},
 }
@@ -59,14 +52,22 @@ func init() {
 	lsCmd.PersistentFlags().BoolP("long", "l", false, "Print long listing format")
 }
 
-func PrintEnvtabLoadouts(glob string) {
+func PrintEnvtabLoadouts(patterns []string) {
 	envtabPath := envtab.InitEnvtab("")
 	loadouts := envtab.GetEnvtabSlice(envtabPath)
 
 	tw := tabwriter.NewWriter(os.Stdout, 0, 8, 2, ' ', 0)
 	for _, loadout := range loadouts {
-		if len(glob) > 0 {
-			matched, _ := filepath.Match(glob, loadout)
+		// Filter by patterns if provided
+		if len(patterns) > 0 {
+			matched := false
+			for _, pattern := range patterns {
+				m, _ := filepath.Match(pattern, loadout)
+				if m {
+					matched = true
+					break
+				}
+			}
 			if !matched {
 				continue
 			}
@@ -77,7 +78,7 @@ func PrintEnvtabLoadouts(glob string) {
 	tw.Flush()
 }
 
-func ListEnvtabLoadouts(glob string) {
+func ListEnvtabLoadouts(patterns []string) {
 	envtabSlice := envtab.GetEnvtabSlice("")
 	environment := env.NewEnv()
 	environment.Populate()
@@ -87,8 +88,16 @@ func ListEnvtabLoadouts(glob string) {
 
 	for _, loadout := range envtabSlice {
 
-		if len(glob) > 0 {
-			matched, _ := filepath.Match(glob, loadout)
+		// Filter by patterns if provided
+		if len(patterns) > 0 {
+			matched := false
+			for _, pattern := range patterns {
+				m, _ := filepath.Match(pattern, loadout)
+				if m {
+					matched = true
+					break
+				}
+			}
 			if !matched {
 				continue
 			}
