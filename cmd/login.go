@@ -22,24 +22,24 @@ by running "envtab login --disable".`,
 	Args:    cobra.NoArgs,
 	Aliases: []string{"lo", "log", "logi"},
 	Run: func(cmd *cobra.Command, args []string) {
-		println("DEBUG: login called")
+		logger.Debug("login called")
 
 		enable, _ := cmd.Flags().GetBool("enable")
 		disable, _ := cmd.Flags().GetBool("disable")
 		status, _ := cmd.Flags().GetBool("status")
 
 		if enable {
-			println("DEBUG: Enabling login")
+			logger.Debug("enabling login")
 			envtab.EnableLogin()
 			return
 		}
 		if disable {
-			println("DEBUG: Disabling login")
+			logger.Debug("disabling login")
 			envtab.DisableLogin()
 			return
 		}
 		if status {
-			println("DEBUG: Showing status")
+			logger.Debug("showing status")
 			envtab.ShowLoginStatus()
 			return
 		}

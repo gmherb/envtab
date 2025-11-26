@@ -2,6 +2,7 @@ package envtab
 
 import (
 	"fmt"
+	"log/slog"
 	"os"
 	"path/filepath"
 
@@ -67,10 +68,10 @@ func MakeLoadoutFromTemplate(templateName string, force bool) Loadout {
 	// Check for template with short extension
 	templatePath := filepath.Join(InitEnvtab(""), "templates/"+templateName+".yml")
 	if _, err := os.Stat(templatePath); os.IsNotExist(err) {
-		fmt.Printf("DEBUG: Template [%s] does not exist\n", templatePath)
+		slog.Debug("template does not exist", "template", templateName, "path", templatePath)
 		os.Exit(1)
 	}
-	fmt.Printf("DEBUG: templatePath: %s\n", templatePath)
+	slog.Debug("using template", "template", templateName, "path", templatePath)
 
 	loadout := InitLoadout()
 

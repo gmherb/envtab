@@ -43,7 +43,7 @@ If no options are provided, enter editor to manually edit a envtab loadout.`,
 
 		// If --name is set, rename the loadout
 		if name, _ := cmd.Flags().GetString("name"); name != "" {
-			fmt.Printf("DEBUG: Renaming loadout [%s] to [%s]\n", loadoutName, name)
+			logger.Debug("renaming loadout", "old", loadoutName, "new", name)
 			err := envtab.RenameLoadout(loadoutName, name)
 			if err != nil {
 				fmt.Printf("ERROR: Failure renaming loadout [%s] to [%s]: %s\n", loadoutName, name, err)
@@ -67,21 +67,21 @@ If no options are provided, enter editor to manually edit a envtab loadout.`,
 
 		// If --description is set, update the loadout description
 		if description, _ := cmd.Flags().GetString("description"); description != "" {
-			fmt.Printf("DEBUG: Updating loadout [%s] description to [%s]\n", loadoutName, description)
+			logger.Debug("updating loadout description", "loadout", loadoutName, "description", description)
 			loadout.UpdateDescription(description)
 			loadoutModified = true
 		}
 
 		// If --login is set, enable loadout on login
 		if login, _ := cmd.Flags().GetBool("login"); login {
-			fmt.Printf("DEBUG: Enabling loadout [%s] on login\n", loadoutName)
+			logger.Debug("enabling loadout on login", "loadout", loadoutName)
 			loadout.UpdateLogin(true)
 			loadoutModified = true
 		}
 
 		// If --no-login is set, disable loadout on login
 		if noLogin, _ := cmd.Flags().GetBool("no-login"); noLogin {
-			fmt.Printf("DEBUG: Disabling loadout [%s] on login\n", loadoutName)
+			logger.Debug("disabling loadout on login", "loadout", loadoutName)
 			loadout.UpdateLogin(false)
 			loadoutModified = true
 		}
@@ -94,7 +94,7 @@ If no options are provided, enter editor to manually edit a envtab loadout.`,
 			newTags = tags.RemoveEmptyTags(newTags)
 			newTags = tags.RemoveDuplicateTags(newTags)
 
-			fmt.Printf("DEBUG: Updating loadout [%s] tags to %s\n", loadoutName, newTags)
+			logger.Debug("updating loadout tags", "loadout", loadoutName, "tags", newTags)
 
 			loadout.UpdateTags(newTags)
 			loadoutModified = true

@@ -58,7 +58,7 @@ func EnableLogin() {
 	}
 
 	if strings.Contains(string(content), envtabLogin) {
-		fmt.Printf("DEBUG: Login script %s already contains %s\n", loginScript, envtabLogin)
+		slog.Debug("login script already contains envtab", "script", loginScript)
 		os.Exit(0)
 	}
 
@@ -88,12 +88,12 @@ func DisableLogin() {
 }
 
 func removeEnvtabFromScript(loginScript string) {
-	fmt.Printf("DEBUG: Removing envtab from login script [%s]\n", loginScript)
+	slog.Debug("removing envtab from login script", "script", loginScript)
 	content, err := os.ReadFile(loginScript)
 
 	// ignore error if file doesn't exist
 	if os.IsNotExist(err) {
-		fmt.Printf("DEBUG: Login script [%s] does not exist\n", loginScript)
+		slog.Debug("login script does not exist", "script", loginScript)
 		return
 	} else if err != nil {
 		fmt.Printf("Error reading login script [%s]: %s\n", loginScript, err)
@@ -102,19 +102,19 @@ func removeEnvtabFromScript(loginScript string) {
 
 	// ignore if login script doesn't contain `envtabLoginLine`
 	if !strings.Contains(string(content), envtabLoginLine) {
-		fmt.Printf("DEBUG: Login script [%s] does not contain [%s]\n", loginScript, envtabLoginLine)
+		slog.Debug("login script does not contain envtab", "script", loginScript)
 		return
 	}
-	fmt.Printf("DEBUG: Login script [%s] contains [%s]\n", loginScript, envtabLoginLine)
+	slog.Debug("login script contains envtab", "script", loginScript)
 	// iterate over the lines, looking for `envtabLoginLine`
 	lines := strings.Split(string(content), "\n")
 	newlines := []string{}
 	for i, line := range lines {
 		if !strings.Contains(line, envtabLoginLine) {
 			newlines = append(newlines, line)
-			fmt.Printf("DEBUG: Keeping [%s] from line %d\n", line, i)
+			slog.Debug("keeping line from login script", "script", loginScript, "line", i, "content", line)
 		} else {
-			fmt.Printf("DEBUG: Removing [%s] from line %d\n", envtabLoginLine, i)
+			slog.Debug("removing line from login script", "script", loginScript, "line", i)
 		}
 	}
 	output := strings.Join(newlines, "\n")
@@ -144,12 +144,12 @@ func ShowLoginStatus() {
 	for _, loginScript := range loginScripts {
 		loginScriptPath = usr.HomeDir + "/" + loginScript
 
-		fmt.Printf("DEBUG: Checking login script [%s] for envtab\n", loginScript)
+		slog.Debug("checking login script for envtab", "script", loginScript)
 		content, err := os.ReadFile(loginScriptPath)
 
 		// ignore error if file doesn't exist
 		if os.IsNotExist(err) {
-			fmt.Printf("DEBUG: Login script [%s] does not exist\n", loginScript)
+			slog.Debug("login script does not exist", "script", loginScript)
 		} else if err != nil {
 			fmt.Printf("Error reading login script [%s]: %s\n", loginScript, err)
 			os.Exit(1)
@@ -157,7 +157,7 @@ func ShowLoginStatus() {
 
 		// Print enabled if the login script contains `envtabLoginLine`
 		if strings.Contains(string(content), envtabLoginLine) {
-			fmt.Printf("DEBUG: Login script [%s] contains [%s]\n", loginScript, envtabLoginLine)
+			slog.Debug("login script contains envtab", "script", loginScript)
 			fmt.Printf("enabled\n")
 			return
 

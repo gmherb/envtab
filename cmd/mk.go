@@ -30,7 +30,7 @@ templates subdirectory of envtabs HOME.`,
 	SuggestFor: []string{"create", "new"},
 	Aliases:    []string{"m", "make"},
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("mk called")
+		logger.Debug("mk called")
 
 		loadoutName := args[0]
 		templateName := args[1]
