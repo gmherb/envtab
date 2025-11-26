@@ -189,3 +189,59 @@ func TestRemoveDuplicateTags(t *testing.T) {
 		}
 	}
 }
+
+func TestRemoveEmptyTags(t *testing.T) {
+	type args struct {
+		tags []string
+	}
+	tests := []struct {
+		name string
+		args args
+		want []string
+	}{
+		{
+			name: "test1 - no empty tags",
+			args: args{
+				tags: []string{"tag1", "tag2", "tag3"},
+			},
+			want: []string{"tag1", "tag2", "tag3"},
+		},
+		{
+			name: "test2 - with empty string",
+			args: args{
+				tags: []string{"tag1", "", "tag2", "", "tag3"},
+			},
+			want: []string{"tag1", "tag2", "tag3"},
+		},
+		{
+			name: "test3 - all empty",
+			args: args{
+				tags: []string{"", "", ""},
+			},
+			want: []string{},
+		},
+		{
+			name: "test4 - empty slice",
+			args: args{
+				tags: []string{},
+			},
+			want: []string{},
+		},
+		{
+			name: "test5 - whitespace only tags",
+			args: args{
+				tags: []string{"tag1", " ", "tag2", "\t", "tag3", "\n"},
+			},
+			want: []string{"tag1", " ", "tag2", "\t", "tag3", "\n"},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := RemoveEmptyTags(tt.args.tags)
+			if !assert.ElementsMatch(t, got, tt.want) {
+				t.Errorf("RemoveEmptyTags() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
