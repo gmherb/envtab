@@ -42,7 +42,7 @@ Encrypt individual values with SOPS:
 # Encrypt a single value
 envtab add myloadout --sops-value SECRET_KEY=mysecret
 
-# Combine with sensitive flag (falls back to SOPS if GCP KMS not configured)
+# Combine with sensitive flag (uses SOPS encryption)
 envtab add myloadout -s API_KEY=apikey123
 ```
 
@@ -81,7 +81,6 @@ creation_rules:
 ### Environment Variables
 
 - `ENVTAB_USE_SOPS=true`: Enable file-level SOPS encryption by default
-- `ENVTAB_GCP_KMS_KEY`: GCP KMS key for GCP encryption (existing)
 
 ## Examples
 
@@ -133,16 +132,42 @@ envtab add secrets --sops-file API_KEY=mykey
 
 ## Implementation Details
 
+### SOPS Metadata Preservation
+
+**Important**: SOPS requires metadata (encryption keys used, MAC, etc.) to decrypt files. Our implementation preserves this:
+
+1. **File-level encryption**: The entire file is encrypted with SOPS, preserving all metadata in the file itself. This is the recommended approach.
+
+2. **Value-level encryption**: When encrypting individual values:
+   - We create a temporary YAML file: `value: <secret>`
+   - Encrypt it with SOPS (which adds metadata)
+   - Store the **entire SOPS-encrypted YAML structure** (including metadata) as the value
+   - On decryption, we write the full encrypted structure to a temp file and decrypt it
+   - This ensures all SOPS metadata is preserved
+
+### Key Rotation Handling
+
+SOPS encryption keys can be rotated (AWS KMS key rotation, age key changes, etc.). When this happens:
+
+1. **Automatic Detection**: The system detects key rotation errors and provides helpful messages
+2. **Graceful Degradation**: Failed decryptions are skipped with warnings (not fatal errors)
+3. **Re-encryption Support**: Use `SOPSReencryptFile()` to re-encrypt files with current keys
+
 ### File Operations
 
 - `ReadLoadout()`: Automatically detects and decrypts SOPS-encrypted files
+  - Handles key rotation errors gracefully
+  - Provides helpful error messages
 - `WriteLoadoutWithEncryption()`: Optionally encrypts files with SOPS
 - `IsSOPSEncrypted()`: Checks if a file is SOPS-encrypted
+- `SOPSCanDecrypt()`: Checks if a file can be decrypted with current keys
+- `SOPSReencryptFile()`: Re-encrypts a file with current keys (for key rotation)
 
 ### Value Operations
 
-- `SOPSEncryptValue()`: Encrypts a single value
-- `SOPSDecryptValue()`: Decrypts a SOPS-encrypted value
+- `SOPSEncryptValue()`: Encrypts a single value (preserves full SOPS metadata)
+- `SOPSDecryptValue()`: Decrypts a SOPS-encrypted value (uses preserved metadata)
+- `SOPSCanDecryptValue()`: Checks if a value can be decrypted
 - Values prefixed with `SOPS:` are automatically decrypted on export
 
 ### Backend Support
@@ -157,20 +182,41 @@ SOPS supports multiple encryption backends:
 
 Configure these in your `.sops.yaml` file.
 
-## Migration
+## Key Rotation
 
-### From GCP KMS to SOPS
+When encryption keys are rotated (e.g., AWS KMS key rotation, age key changes):
 
+### Symptoms
+- Decryption errors when reading loadouts
+- Warnings like "keys may have been rotated" when exporting
+- `sops -d` fails on encrypted files
+
+### Solution
+
+**For file-level encrypted loadouts:**
 ```bash
-# Old way (GCP KMS per-value)
-envtab add myloadout -s SECRET=value
+# Re-encrypt with current keys
+sops -i -e ~/.envtab/myloadout.yaml
 
-# New way (SOPS file-level)
-envtab add myloadout --sops-file SECRET=value
-
-# Or value-level
-envtab add myloadout --sops-value SECRET=value
+# Or use the helper function (if implemented as command)
+envtab reencrypt myloadout
 ```
+
+**For value-level encrypted entries:**
+You'll need to re-add the values with current keys:
+```bash
+# Remove old encrypted value
+envtab rm myloadout  # or edit manually
+
+# Re-add with current keys
+envtab add myloadout --sops-value SECRET=newvalue
+```
+
+### Prevention
+
+- Use key management systems that support key versioning (AWS KMS, GCP KMS via SOPS)
+- Keep old keys accessible during rotation period
+- Use multiple encryption keys in SOPS config for redundancy
 
 ## Troubleshooting
 
@@ -186,6 +232,12 @@ Install SOPS: `brew install sops` or download from https://github.com/getsops/so
 - Ensure you have access to the encryption keys
 - Check that SOPS can decrypt the file: `sops -d file.yaml`
 - Verify your `.sops.yaml` configuration matches the encryption method used
+
+### "keys may have been rotated"
+- This means the encryption keys used to encrypt the data are no longer available
+- Re-encrypt the loadout with current keys (see Key Rotation section above)
+- For file-level encryption: `sops -i -e ~/.envtab/myloadout.yaml`
+- For value-level encryption: Re-add the values with `--sops-value` flag
 
 ## Security Considerations
 

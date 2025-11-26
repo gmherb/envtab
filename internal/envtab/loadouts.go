@@ -12,6 +12,11 @@ import (
 	yaml "gopkg.in/yaml.v2"
 )
 
+// Helper function to check if string contains substring
+func contains(s, substr string) bool {
+	return strings.Contains(strings.ToLower(s), strings.ToLower(substr))
+}
+
 type LoadoutMetadata struct {
 	CreatedAt   string   `json:"createdAt" yaml:"createdAt"`
 	LoadedAt    string   `json:"loadedAt" yaml:"loadedAt"`
@@ -39,18 +44,19 @@ func (l Loadout) Export() {
 	}
 
 	re := regexp.MustCompile(`\$PATH`)
-	reEnc := regexp.MustCompile(`^ENC:`)
 	reSOPS := regexp.MustCompile(`^SOPS:`)
 
-	for key, value := range l.Entries {
+		for key, value := range l.Entries {
 		if value != "" {
 			match := re.MatchString(value)
-			encrypted := reEnc.MatchString(value)
 			sopsEncrypted := reSOPS.MatchString(value)
 			if key == "PATH" && match {
 
 				newPath := re.ReplaceAllString(value, "")
 				newPath = strings.Trim(newPath, ":")
+				for strings.Contains(newPath, "::") {
+					newPath = strings.ReplaceAll(newPath, "::", ":")
+				}
 
 				println("DEBUG: Found potential new PATH(s) [" + newPath + "].")
 
@@ -70,16 +76,19 @@ func (l Loadout) Export() {
 				fmt.Printf("export PATH=%s\n", os.Getenv("PATH"))
 			} else if sopsEncrypted {
 				// Decrypt SOPS-encrypted value
+				// SOPS metadata is preserved in the encrypted value string
 				decrypted, err := crypto.SOPSDecryptValue(value)
 				if err != nil {
-					fmt.Fprintf(os.Stderr, "ERROR: Failed to decrypt SOPS value for %s: %s\n", key, err)
+					// Check if it's a key rotation issue
+					if contains(err.Error(), "keys may have been rotated") {
+						fmt.Fprintf(os.Stderr, "WARNING: Cannot decrypt %s - encryption keys may have been rotated. Skipping.\n", key)
+						fmt.Fprintf(os.Stderr, "         To fix: re-encrypt the loadout with current keys using 'envtab reencrypt'\n")
+					} else {
+						fmt.Fprintf(os.Stderr, "ERROR: Failed to decrypt SOPS value for %s: %s\n", key, err)
+					}
 					continue
 				}
 				fmt.Printf("export %s=%s\n", key, decrypted)
-			} else if encrypted {
-				// TODO DECRYPT GCP KMS
-				println("DEBUG: value for [" + key + "] is encrypted.")
-				fmt.Printf("export %s=%s\n", key, value)
 			} else {
 				fmt.Printf("export %s=%s\n", key, value)
 			}
