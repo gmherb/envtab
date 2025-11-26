@@ -4,7 +4,7 @@ Copyright © 2024 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
-	"github.com/gmherb/envtab/cmd/envtab"
+	"github.com/gmherb/envtab/internal/envtab"
 	"github.com/spf13/cobra"
 )
 

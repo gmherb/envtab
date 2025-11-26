@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/gmherb/envtab/cmd/envtab"
+	"github.com/gmherb/envtab/internal/envtab"
 	"github.com/spf13/cobra"
 )
 

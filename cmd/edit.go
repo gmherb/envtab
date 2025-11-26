@@ -9,9 +9,9 @@ import (
 	"os/exec"
 	"path/filepath"
 
-	"github.com/gmherb/envtab/cmd/envtab"
-	tagz "github.com/gmherb/envtab/pkg/tags"
-	"github.com/gmherb/envtab/pkg/utils"
+	"github.com/gmherb/envtab/internal/envtab"
+	tagz "github.com/gmherb/envtab/internal/tags"
+	"github.com/gmherb/envtab/internal/utils"
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v2"
 )

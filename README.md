@@ -172,6 +172,11 @@ UpdatedAt  LoadedAt  Login  Active  Total  Name     Tags
 
 ## TODO
 
+- Add import subcmd
+  - from various backends:
+    - .env files
+
+
 - Support environment variables in show; exported with eval $(envtab export loadout)
   - Can we resolve all environment variables like we do with PATH?
 - Add loadout priority/number to support specific load order in case entries build upon environment variable expansion.
