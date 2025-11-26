@@ -4,6 +4,7 @@ Copyright © 2024 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
+	"fmt"
 	"os"
 
 	"github.com/gmherb/envtab/internal/envtab"
@@ -62,15 +63,15 @@ func exportLoginLoadouts() {
 
 		lo, err := envtab.ReadLoadout(loadout)
 		if err != nil {
-			println("ERROR: Failure reading loadout [%s]: %s\n", loadout, err)
+			fmt.Fprintf(os.Stderr, "ERROR: Failure reading loadout [%s]: %s\n", loadout, err)
 			os.Exit(1)
 		}
 
 		if lo.Metadata.Login {
-			println("DEBUG: Loadout [" + loadout + "] has login enabled")
+			logger.Debug("loadout has login enabled", "loadout", loadout)
 			lo.Export()
 		} else {
-			println("DEBUG: Loadout [" + loadout + "] has login disabled")
+			logger.Debug("loadout has login disabled", "loadout", loadout)
 		}
 	}
 }

@@ -4,10 +4,45 @@ Copyright © 2024 Greg Herbster
 package cmd
 
 import (
+	"log/slog"
 	"os"
+	"strings"
 
 	"github.com/spf13/cobra"
 )
+
+// logger is a structured logger that writes to stderr
+// This allows separating debug logs from normal output (which goes to stdout)
+var logger *slog.Logger
+
+// parseLogLevel parses the log level from an environment variable
+// Supported values: DEBUG, INFO, WARN, ERROR (case-insensitive)
+// Defaults to INFO if not set or invalid
+func parseLogLevel() slog.Level {
+	levelStr := strings.ToUpper(os.Getenv("ENVTAB_LOG_LEVEL"))
+	switch levelStr {
+	case "DEBUG":
+		return slog.LevelDebug
+	case "INFO":
+		return slog.LevelInfo
+	case "WARN", "WARNING":
+		return slog.LevelWarn
+	case "ERROR":
+		return slog.LevelError
+	default:
+		// Default to INFO if not set or invalid
+		return slog.LevelInfo
+	}
+}
+
+func init() {
+	// Initialize logger to write to stderr
+	// This ensures debug logs don't interfere with normal command output
+	// Log level can be configured via ENVTAB_LOG_LEVEL environment variable
+	logger = slog.New(slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{
+		Level: parseLogLevel(),
+	}))
+}
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{

@@ -18,9 +18,9 @@ var rmCmd = &cobra.Command{
 	SuggestFor: []string{"delete", "del"},
 	Aliases:    []string{"r", "remove"},
 	Run: func(cmd *cobra.Command, args []string) {
-		println("DEBUG: rm called")
+		logger.Debug("rm called")
 		for _, loadout := range args {
-			println("DEBUG: removing loadout " + loadout)
+			logger.Debug("removing loadout", "loadout", loadout)
 			envtab.RemoveLoadout(loadout)
 		}
 	},

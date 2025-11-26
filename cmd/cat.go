@@ -20,7 +20,7 @@ var catCmd = &cobra.Command{
 	Args:    cobra.MinimumNArgs(1),
 	Aliases: []string{"c", "ca", "print"},
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("DEBUG: cat called")
+		logger.Debug("cat called")
 
 		for _, arg := range args {
 
