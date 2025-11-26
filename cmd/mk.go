@@ -15,17 +15,21 @@ import (
 var mkCmd = &cobra.Command{
 	Use:   "mk LOADOUT_NAME TEMPLATE_NAME",
 	Short: "Make loadout from a template",
-	Long: `Make loadouts from a templates. The following predefined templates
-are supported:
+	Long: `Make loadouts from templates. Predefined templates:
 
-Cloud:   Databases:      MQ/Msg:    Cache:      Container:
-- aws    - pgsql	     - kafka    - memcached - docker
-- gcp    - mysql         - rabbitmq - redis     - k8s
-- azure  - mongodb       -          -           -
--        - elasticsearch -          -           -
+Cloud:        aws, gcp, azure
+Databases:    pgsql, mysql, mongodb, elasticsearch
+MQ/Msg:       kafka, rabbitmq
+Cache:        redis, memcached
+Container:    docker, k8s
+Secrets:      vault, consul
+Tools:        terraform, terragrunt, helm, ansible, packer, vagrant, jira-cli
+Languages:    python, go, rust, c
+VCS:          git, github, gitlab
+Network:      proxy, wireguard
+Utils:        sops, yq, jq, jo, etcd, k6
 
-You can also create your own custom templates and store them in the
-templates subdirectory of envtabs HOME.`,
+You can also create custom templates in ~/.envtab/templates/.`,
 	Example:    `  envtab mk myloadout aws`,
 	Args:       cobra.ExactArgs(2),
 	SuggestFor: []string{"create", "new"},
