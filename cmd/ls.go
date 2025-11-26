@@ -34,7 +34,7 @@ metadata.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		logger.Debug("list called")
 
-		if cmd.Flag("long").Value.String() == "true" {
+		if cmd.Flags("long").Value.String() == "true" {
 			logger.Debug("long listing format")
 			if len(args) > 0 {
 				ListEnvtabLoadouts(args[0])
