@@ -172,26 +172,18 @@ UpdatedAt  LoadedAt  Login  Active  Total  Name     Tags
 
 ## TODO
 
-- Add import subcmd
-  - from various backends:
-    - .env files
-
-
 - Support environment variables in show; exported with eval $(envtab export loadout)
   - Can we resolve all environment variables like we do with PATH?
 - Add loadout priority/number to support specific load order in case entries build upon environment variable expansion.
-- Implement `-s|--sensitive` option to the addCmd to optionally encrypt values.
-  - Support: GCP KMS, AWS KMS, GPG(PGP)
-  - Piggy back off sops? It already supports all providers
-- In edit subcommand, ensure no duplicate keys (otherwise it will be overwritten)
-  - edit fails when loadout does not exist
-- Create templates for most commonly used tools.
-  - AWS, Vault, etc
-  - Check for predefined if no user defined templates match.
-- Add additional backends.
+- Add support for templates with the mk command. Set user defined for matches before utilizing included templates.
+  - templates can be .env files.
+  - include templates for common things: AWS|GCP|Azure, Vault, GIT|GITHUB|GITLAB, PGSQL, etc.
+- Add additional backends in addition to default (file backend).
   - File (Default)
   - Vault
-- Add ability to import/export various backends
+- Add ability to import/export various backends (import|export subCmd)
+  - First, support .env which will be used for templates.
+  - Vault, S3, GCS
 
 ### Done
 
@@ -199,3 +191,8 @@ UpdatedAt  LoadedAt  Login  Active  Total  Name     Tags
 - Add support for PATH environemnt variable (done)
 - Fix show for PATH environment variable (done)
 - Fix Active/Total spacing in `ls` output when counts are double, or triple digits. (done)
+- Implement `-s|--sensitive` option to the addCmd to optionally encrypt values. (done)
+  - Support: GCP KMS, AWS KMS, GPG(PGP)
+  - Piggy back off sops? It already supports all providers
+- In edit subcommand, ensure no duplicate keys (otherwise it will be overwritten) (done)
+  - edit fails when loadout does not exist (fixed)
