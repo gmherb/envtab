@@ -9,6 +9,7 @@ import (
 	"os/exec"
 	"path/filepath"
 
+	"github.com/gmherb/envtab/internal/crypto"
 	"github.com/gmherb/envtab/internal/envtab"
 	"github.com/gmherb/envtab/internal/tags"
 	"github.com/gmherb/envtab/internal/utils"
@@ -51,6 +52,11 @@ If no options are provided, enter editor to manually edit a envtab loadout.`,
 			loadoutName = name
 			loadoutModified = true
 		}
+
+		// Check if file is SOPS-encrypted to preserve encryption on save
+		envtabPath := envtab.InitEnvtab("")
+		loadoutPath := filepath.Join(envtabPath, loadoutName+".yaml")
+		isSOPSEncrypted := crypto.IsSOPSEncrypted(loadoutPath)
 
 		// load the loadout
 		loadout, err := envtab.ReadLoadout(loadoutName)
@@ -97,7 +103,12 @@ If no options are provided, enter editor to manually edit a envtab loadout.`,
 		if loadoutModified {
 			println("DEBUG: Writing loadout")
 
-			err = envtab.WriteLoadout(loadoutName, loadout)
+			// Preserve SOPS encryption if the file was originally encrypted
+			if isSOPSEncrypted {
+				err = envtab.WriteLoadoutWithEncryption(loadoutName, loadout, true)
+			} else {
+				err = envtab.WriteLoadout(loadoutName, loadout)
+			}
 			if err != nil {
 				fmt.Printf("ERROR: Failure writing loadout [%s]: %s\n", loadoutName, err)
 				os.Exit(1)
@@ -122,12 +133,8 @@ func init() {
 
 func editLoadout(loadoutName string) error {
 
-	var loadout envtab.Loadout
-	var editedLoadout envtab.Loadout
-
 	envtabPath := envtab.InitEnvtab("")
 	loadoutPath := filepath.Join(envtabPath, loadoutName+".yaml")
-	tempFilePath := loadoutPath + ".tmp"
 
 	// Check if the loadout exists
 	if _, err := os.Stat(loadoutPath); os.IsNotExist(err) {
@@ -135,14 +142,24 @@ func editLoadout(loadoutName string) error {
 		os.Exit(1)
 	}
 
-	// Read the loadout file
-	data, err := os.ReadFile(loadoutPath)
+	// Check if file is SOPS-encrypted to preserve encryption on save
+	isSOPSEncrypted := crypto.IsSOPSEncrypted(loadoutPath)
+
+	// Read the loadout (handles SOPS decryption automatically)
+	loadout, err := envtab.ReadLoadout(loadoutName)
 	if err != nil {
 		return err
 	}
 
-	// Load loadout yaml file into a Loadout struct
-	err = yaml.Unmarshal(data, &loadout)
+	// Decrypt all SOPS-encrypted values for editing
+	// Keep track of which keys were encrypted so we can re-encrypt them on save
+	encryptedKeys, err := loadout.DecryptSOPSValues()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "WARNING: Some SOPS values could not be decrypted: %s\n", err)
+	}
+
+	// Marshal to get YAML for editing (now with decrypted values)
+	data, err := yaml.Marshal(loadout)
 	if err != nil {
 		return err
 	}
@@ -150,6 +167,8 @@ func editLoadout(loadoutName string) error {
 	// Save the original timestamps
 	createdAt := loadout.Metadata.CreatedAt
 	updatedAt := loadout.Metadata.LoadedAt
+
+	tempFilePath := loadoutPath + ".tmp"
 
 	// Write the Loadout struct to a temp file
 	err = os.WriteFile(tempFilePath, data, 0600)
@@ -161,6 +180,8 @@ func editLoadout(loadoutName string) error {
 	if editor == "" {
 		editor = "vim"
 	}
+
+	var editedLoadout *envtab.Loadout
 
 	// Loop until a valid loadout is provided or user aborts
 	for {
@@ -180,7 +201,8 @@ func editLoadout(loadoutName string) error {
 		}
 
 		// Load yaml file into a Loadout struct
-		err = yaml.Unmarshal(data, &editedLoadout)
+		editedLoadout = &envtab.Loadout{}
+		err = yaml.Unmarshal(data, editedLoadout)
 
 		// If the contents of the file could not be parsed
 		// Ask the user to continue editing the file or abort
@@ -204,10 +226,22 @@ func editLoadout(loadoutName string) error {
 	editedLoadout.Metadata.UpdatedAt = updatedAt
 
 	// Only overwrite the loadout when modified
-	if envtab.CompareLoadouts(loadout, editedLoadout) {
+	if envtab.CompareLoadouts(*loadout, *editedLoadout) {
 		editedLoadout.UpdateUpdatedAt()
 
-		return envtab.WriteLoadout(loadoutName, &editedLoadout)
+		// Re-encrypt values that were originally SOPS-encrypted
+		if len(encryptedKeys) > 0 {
+			err := editedLoadout.ReencryptSOPSValues(encryptedKeys)
+			if err != nil {
+				return fmt.Errorf("failed to re-encrypt SOPS values: %w", err)
+			}
+		}
+
+		// Preserve SOPS encryption if the file was originally encrypted
+		if isSOPSEncrypted {
+			return envtab.WriteLoadoutWithEncryption(loadoutName, editedLoadout, true)
+		}
+		return envtab.WriteLoadout(loadoutName, editedLoadout)
 	}
 
 	// Remove the temp file

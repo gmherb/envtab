@@ -83,7 +83,7 @@ func ListEnvtabLoadouts(glob string) {
 	environment.Populate()
 
 	tw := tabwriter.NewWriter(os.Stdout, 0, 8, 2, ' ', 0)
-	fmt.Fprintf(tw, "UpdatedAt\tLoadedAt\tLogin\tActive\tTotal\tName\tTags\n")
+	fmt.Fprintf(tw, "UpdatedAt\tLoadedAt\tLogin\tTotal\tActive\tName\tTags\n")
 
 	for _, loadout := range envtabSlice {
 
@@ -100,19 +100,32 @@ func ListEnvtabLoadouts(glob string) {
 			os.Exit(1)
 		}
 
-		updatedAt, err := time.Parse(time.RFC3339, lo.Metadata.UpdatedAt)
-		if err != nil {
-			fmt.Printf("Error parsing updatedAt time %s: %s\n", lo.Metadata.UpdatedAt, err)
-			os.Exit(1)
+		// Handle empty timestamps gracefully
+		var updatedAt time.Time
+		var loadedAt time.Time
+		
+		if lo.Metadata.UpdatedAt != "" {
+			var err error
+			updatedAt, err = time.Parse(time.RFC3339, lo.Metadata.UpdatedAt)
+			if err != nil {
+				fmt.Printf("Warning: Invalid updatedAt time for %s: %s (using current time)\n", loadout, err)
+				updatedAt = time.Now()
+			}
+		} else {
+			// Use current time if empty
+			updatedAt = time.Now()
 		}
 
-		loadedAt, err := time.Parse(time.RFC3339, lo.Metadata.LoadedAt)
-		if err != nil {
-			fmt.Printf(
-				"Error parsing loadedAt time %s: %s\n",
-				lo.Metadata.UpdatedAt, err,
-			)
-			os.Exit(1)
+		if lo.Metadata.LoadedAt != "" {
+			var err error
+			loadedAt, err = time.Parse(time.RFC3339, lo.Metadata.LoadedAt)
+			if err != nil {
+				fmt.Printf("Warning: Invalid loadedAt time for %s: %s (using current time)\n", loadout, err)
+				loadedAt = time.Now()
+			}
+		} else {
+			// Use current time if empty
+			loadedAt = time.Now()
 		}
 
 		var activeEntries = []string{}
@@ -145,8 +158,8 @@ func ListEnvtabLoadouts(glob string) {
 			updatedAtTime,
 			loadedAtTime,
 			lo.Metadata.Login,
-			len(activeEntries),
 			len(lo.Entries),
+			len(activeEntries),
 			loadout,
 			lo.Metadata.Tags)
 	}
