@@ -170,6 +170,107 @@ UpdatedAt  LoadedAt  Login  Active  Total  Name     Tags
 23:08:32   22:59:13  false  0       1      example  []
 ```
 
+## Encrypting Sensitive Values
+
+`envtab` supports encrypting sensitive values using SOPS (Secrets OPerationS). This allows you to securely store secrets like API keys, passwords, and tokens in your loadouts.
+
+### Prerequisites
+
+1. Install SOPS: https://github.com/getsops/sops
+2. Configure SOPS with your preferred encryption backend (AWS KMS, GCP KMS, Azure Key Vault, age, PGP, etc.)
+3. Set up your `.sops.yaml` configuration file (optional, but recommended)
+
+### Using the Sensitive Flag
+
+The `-s` or `--sensitive` flag encrypts individual values with SOPS:
+
+```text
+$ envtab add production -s API_KEY=sk_live_1234567890abcdef
+$ envtab add production -s DB_PASSWORD=super_secret_password
+```
+
+When you view the loadout, encrypted values are hidden by default:
+
+```text
+$ envtab cat production
+metadata:
+  createdAt: "2025-11-26T00:00:00Z"
+  ...
+entries:
+  API_KEY: SOPS:value: ENC[AES256_GCM,data:...,iv:...,tag:...,type:str]
+    sops:
+      gcp_kms: [...]
+      ...
+  DB_PASSWORD: SOPS:value: ENC[AES256_GCM,data:...,iv:...,tag:...,type:str]
+    sops:
+      gcp_kms: [...]
+      ...
+```
+
+### Viewing Decrypted Values
+
+To view decrypted sensitive values, use the `-s` flag with the `show` command:
+
+```text
+$ envtab show production
+production -------------------------------------------------------- [ 2 / 2 ]
+   API_KEY=***encrypted***
+   DB_PASSWORD=***encrypted***
+
+$ envtab show production -s
+production -------------------------------------------------------- [ 2 / 2 ]
+   API_KEY=sk_live_1234567890abcdef
+   DB_PASSWORD=super_secret_password
+```
+
+### File-Level Encryption
+
+You can also encrypt entire loadout files with SOPS using the `--sops-file` flag:
+
+```text
+$ envtab add secrets --sops-file API_KEY=mykey DB_PASSWORD=mypass
+```
+
+This encrypts the entire file, including metadata. The file can be edited directly with `sops`:
+
+```text
+$ sops ~/.envtab/secrets.yaml
+```
+
+### Automatic Decryption
+
+Encrypted values are automatically decrypted when exporting:
+
+```text
+$ envtab export production
+export API_KEY=sk_live_1234567890abcdef
+export DB_PASSWORD=super_secret_password
+```
+
+### Editing Encrypted Loadouts
+
+When editing a loadout with encrypted values, they are automatically decrypted for editing and re-encrypted when saved:
+
+```text
+$ envtab edit production
+# Values appear as plaintext in the editor
+# After saving, they are automatically re-encrypted
+```
+
+### Configuration
+
+Configure SOPS by creating a `.sops.yaml` file in your project root or home directory:
+
+```yaml
+creation_rules:
+  - path_regex: .*\.yaml$
+    kms: 'arn:aws:kms:us-east-1:123456789012:key/12345678-1234-1234-1234-123456789012'
+    pgp: >-
+      FBC7B9E2A4F9289AC0C1D4843D16CEE4A27381B4
+```
+
+For more details, see [SOPS_INTEGRATION.md](SOPS_INTEGRATION.md).
+
 ## TODO
 
 - Support environment variables in show; exported with eval $(envtab export loadout)
