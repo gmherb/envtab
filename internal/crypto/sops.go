@@ -104,8 +104,7 @@ func SOPSReencryptFile(filePath string) error {
 	}
 
 	// Use sops to re-encrypt in place with current keys
-	// sops -i re-encrypts the file in-place using current keys
-	cmd := exec.Command("sops", "-i", filePath)
+	cmd := exec.Command("sops", "-r", filePath)
 	var stderr bytes.Buffer
 	cmd.Stderr = &stderr
 

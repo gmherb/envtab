@@ -4,7 +4,7 @@ NAME := envtab
 
 .PHONY: test
 test:
-	@go test -v -coverpkg ./... -coverprofile=profile.cov ./...
+	@PATH="$$HOME/go/bin:$$PATH" go test -v -p 1 -timeout 30s -coverpkg ./... -coverprofile=profile.cov ./...
 	@go tool cover -func profile.cov
 
 .PHONY: build
