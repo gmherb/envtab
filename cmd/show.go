@@ -11,8 +11,8 @@ import (
 
 	"github.com/fatih/color"
 	"github.com/gmherb/envtab/internal/crypto"
-	"github.com/gmherb/envtab/internal/envtab"
 	"github.com/gmherb/envtab/internal/env"
+	"github.com/gmherb/envtab/internal/envtab"
 	"github.com/spf13/cobra"
 )
 
