@@ -6,6 +6,7 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/fatih/color"
@@ -16,17 +17,18 @@ import (
 )
 
 var showCmd = &cobra.Command{
-	Use:                   "show",
+	Use:                   "show [LOADOUT_PATTERN...]",
 	Short:                 "Show active loadouts",
-	Long:                  `Show each loadout with active entries (environment variables).`,
-	Args:                  cobra.NoArgs,
+	Long:                  `Show each loadout with active entries (environment variables). Optional glob patterns can be provided to filter results. If multiple patterns are provided, loadouts matching any pattern will be shown.`,
+	Args:                  cobra.ArbitraryArgs,
 	SuggestFor:            []string{"status"},
 	Aliases:               []string{"sh", "sho"},
 	DisableFlagsInUseLine: true,
+	Example:               `  envtab show\n  envtab show aws-*\n  envtab show production\n  envtab show aws-* gcp-*`,
 	Run: func(cmd *cobra.Command, args []string) {
 		logger.Debug("show called")
 		showSensitive, _ := cmd.Flags().GetBool("sensitive")
-		showActiveLoadouts(showSensitive)
+		showActiveLoadouts(showSensitive, args)
 	},
 }
 
@@ -35,12 +37,27 @@ func init() {
 	showCmd.Flags().BoolP("sensitive", "s", false, "Show decrypted sensitive values (SOPS encrypted)")
 }
 
-func showActiveLoadouts(showSensitive bool) {
+func showActiveLoadouts(showSensitive bool, patterns []string) {
 	envtabSlice := envtab.GetEnvtabSlice("")
 	environment := env.NewEnv()
 	environment.Populate()
 
 	for _, loadout := range envtabSlice {
+
+		// Filter by patterns if provided
+		if len(patterns) > 0 {
+			matched := false
+			for _, pattern := range patterns {
+				m, _ := filepath.Match(pattern, loadout)
+				if m {
+					matched = true
+					break
+				}
+			}
+			if !matched {
+				continue
+			}
+		}
 
 		lo, err := envtab.ReadLoadout(loadout)
 		if err != nil {
