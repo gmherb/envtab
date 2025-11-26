@@ -352,3 +352,25 @@ func EditLoadout(name string) error {
 	return nil
 }
 
+// ListLoadouts returns a list of all loadout names
+// For file backend, this scans the envtab directory for YAML files
+func ListLoadouts() ([]string, error) {
+	envtabPath := config.InitEnvtab("")
+
+	var loadouts []string
+	err := filepath.Walk(envtabPath, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+		if filepath.Ext(path) == ".yaml" {
+			loadouts = append(loadouts, filepath.Base(path[:len(path)-5]))
+		}
+		return nil
+	})
+	if err != nil {
+		return nil, fmt.Errorf("error reading envtab directory %s: %w", envtabPath, err)
+	}
+
+	return loadouts, nil
+}
+

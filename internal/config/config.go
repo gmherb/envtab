@@ -38,31 +38,4 @@ func InitEnvtab(path string) string {
 	return envtabPath
 }
 
-// Find all YAML files in the envtab directory, remove the extension, and return them as a slice
-func GetEnvtabSlice(path string) []string {
-	var envtabPath string
-
-	if path == "" {
-		envtabPath = getEnvtabPath()
-	} else {
-		envtabPath = InitEnvtab(path)
-	}
-
-	var loadouts []string
-	err := filepath.Walk(envtabPath, func(path string, info os.FileInfo, err error) error {
-		if err != nil {
-			return err
-		}
-		if filepath.Ext(path) == ".yaml" {
-			loadouts = append(loadouts, filepath.Base(path[:len(path)-5]))
-		}
-		return nil
-	})
-	if err != nil {
-		fmt.Printf("Error reading envtab loadout %s: %s\n", envtabPath, err)
-		os.Exit(1)
-	}
-
-	return loadouts
-}
 

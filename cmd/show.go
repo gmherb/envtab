@@ -11,7 +11,6 @@ import (
 
 	"github.com/fatih/color"
 	"github.com/gmherb/envtab/internal/backends"
-	"github.com/gmherb/envtab/internal/config"
 	"github.com/gmherb/envtab/internal/crypto"
 	"github.com/gmherb/envtab/internal/env"
 	"github.com/spf13/cobra"
@@ -39,7 +38,11 @@ func init() {
 }
 
 func showActiveLoadouts(showSensitive bool, patterns []string) {
-	envtabSlice := config.GetEnvtabSlice("")
+	envtabSlice, err := backends.ListLoadouts()
+	if err != nil {
+		fmt.Printf("Error listing loadouts: %s\n", err)
+		os.Exit(1)
+	}
 	environment := env.NewEnv()
 	environment.Populate()
 

@@ -8,7 +8,6 @@ import (
 	"os"
 
 	"github.com/gmherb/envtab/internal/backends"
-	"github.com/gmherb/envtab/internal/config"
 	"github.com/gmherb/envtab/internal/login"
 	"github.com/spf13/cobra"
 )
@@ -59,7 +58,11 @@ func init() {
 }
 
 func exportLoginLoadouts() {
-	loadouts := config.GetEnvtabSlice("")
+	loadouts, err := backends.ListLoadouts()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "ERROR: Failure listing loadouts: %s\n", err)
+		os.Exit(1)
+	}
 
 	for _, loadout := range loadouts {
 

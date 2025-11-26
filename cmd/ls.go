@@ -12,7 +12,6 @@ import (
 	"time"
 
 	"github.com/gmherb/envtab/internal/backends"
-	"github.com/gmherb/envtab/internal/config"
 	"github.com/gmherb/envtab/internal/crypto"
 	"github.com/gmherb/envtab/internal/env"
 
@@ -54,8 +53,11 @@ func init() {
 }
 
 func PrintEnvtabLoadouts(patterns []string) {
-	envtabPath := config.InitEnvtab("")
-	loadouts := config.GetEnvtabSlice(envtabPath)
+	loadouts, err := backends.ListLoadouts()
+	if err != nil {
+		fmt.Printf("Error listing loadouts: %s\n", err)
+		os.Exit(1)
+	}
 
 	tw := tabwriter.NewWriter(os.Stdout, 0, 8, 2, ' ', 0)
 	for _, loadout := range loadouts {
@@ -80,7 +82,11 @@ func PrintEnvtabLoadouts(patterns []string) {
 }
 
 func ListEnvtabLoadouts(patterns []string) {
-	envtabSlice := config.GetEnvtabSlice("")
+	envtabSlice, err := backends.ListLoadouts()
+	if err != nil {
+		fmt.Printf("Error listing loadouts: %s\n", err)
+		os.Exit(1)
+	}
 	environment := env.NewEnv()
 	environment.Populate()
 
