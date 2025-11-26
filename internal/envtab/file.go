@@ -5,6 +5,7 @@ import (
 	"os/exec"
 	"path/filepath"
 
+	"github.com/gmherb/envtab/internal/crypto"
 	"github.com/gmherb/envtab/internal/utils"
 	yaml "gopkg.in/yaml.v2"
 )
@@ -27,6 +28,24 @@ func AddEntryToLoadout(name string, key string, value string, tags []string) err
 	return WriteLoadout(name, loadout)
 }
 
+// AddEntryToLoadoutWithSOPS writes a key-value pair to a loadout
+// If useSOPS is true, encrypts the entire file with SOPS
+func AddEntryToLoadoutWithSOPS(name string, key string, value string, tags []string, useSOPS bool) error {
+
+	// Read the existing entries if file exists
+	loadout, err := ReadLoadout(name)
+	if err != nil && !os.IsNotExist(err) {
+		return err
+	} else if os.IsNotExist(err) {
+		loadout = InitLoadout()
+	}
+
+	loadout.UpdateEntry(key, value)
+	loadout.UpdateTags(tags)
+
+	return WriteLoadoutWithEncryption(name, loadout, useSOPS)
+}
+
 // Remove a loadout file
 func RemoveLoadout(name string) error {
 
@@ -41,13 +60,25 @@ func RemoveLoadout(name string) error {
 }
 
 // Read a loadout from file and return a Loadout struct
+// Automatically handles SOPS-encrypted files
 func ReadLoadout(name string) (*Loadout, error) {
 
 	filePath := filepath.Join(InitEnvtab(""), name+".yaml")
 
-	content, err := os.ReadFile(filePath)
-	if err != nil {
-		return nil, err
+	var content []byte
+	var err error
+
+	// Check if file is SOPS encrypted
+	if crypto.IsSOPSEncrypted(filePath) {
+		content, err = crypto.SOPSDecryptFile(filePath)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		content, err = os.ReadFile(filePath)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	var loadout Loadout
@@ -75,7 +106,14 @@ func RenameLoadout(oldName, newName string) error {
 }
 
 // Write a Loadout struct to file
+// If useSOPS is true, encrypts the entire file with SOPS
 func WriteLoadout(name string, loadout *Loadout) error {
+	return WriteLoadoutWithEncryption(name, loadout, false)
+}
+
+// WriteLoadoutWithEncryption writes a Loadout struct to file
+// If useSOPS is true, encrypts the entire file with SOPS
+func WriteLoadoutWithEncryption(name string, loadout *Loadout, useSOPS bool) error {
 
 	filePath := filepath.Join(InitEnvtab(""), name+".yaml")
 
@@ -84,9 +122,30 @@ func WriteLoadout(name string, loadout *Loadout) error {
 		return err
 	}
 
-	err = os.WriteFile(filePath, data, 0600)
-	if err != nil {
-		return err
+	if useSOPS {
+		// Write to temp file first, then encrypt
+		tmpFile := filePath + ".tmp"
+		err = os.WriteFile(tmpFile, data, 0600)
+		if err != nil {
+			return err
+		}
+
+		encrypted, err := crypto.SOPSEncryptFile(tmpFile)
+		if err != nil {
+			os.Remove(tmpFile)
+			return err
+		}
+
+		err = os.WriteFile(filePath, encrypted, 0600)
+		os.Remove(tmpFile)
+		if err != nil {
+			return err
+		}
+	} else {
+		err = os.WriteFile(filePath, data, 0600)
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil
