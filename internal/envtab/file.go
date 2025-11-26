@@ -27,6 +27,17 @@ func AddEntryToLoadout(name string, key string, value string, tags []string) err
 	loadout.UpdateEntry(key, value)
 	loadout.UpdateTags(tags)
 
+	// Check if file is SOPS-encrypted to preserve encryption
+	filePath := filepath.Join(InitEnvtab(""), name+".yaml")
+	isSOPSEncrypted := false
+	if _, err := os.Stat(filePath); err == nil {
+		isSOPSEncrypted = crypto.IsSOPSEncrypted(filePath)
+	}
+
+	// Preserve SOPS encryption if the file was originally encrypted
+	if isSOPSEncrypted {
+		return WriteLoadoutWithEncryption(name, loadout, true)
+	}
 	return WriteLoadout(name, loadout)
 }
 
@@ -74,11 +85,25 @@ func ReadLoadout(name string) (*Loadout, error) {
 	if crypto.IsSOPSEncrypted(filePath) {
 		content, err = crypto.SOPSDecryptFile(filePath)
 		if err != nil {
-			// Provide helpful error for key rotation
-			if strings.Contains(strings.ToLower(err.Error()), "keys may have been rotated") {
+			// Provide helpful error messages
+			errStr := err.Error()
+			if strings.Contains(strings.ToLower(errStr), "sops command not found") {
+				return nil, fmt.Errorf("SOPS is not installed. Install SOPS to read encrypted loadouts: https://github.com/getsops/sops")
+			}
+			if strings.Contains(strings.ToLower(errStr), "keys may have been rotated") {
 				return nil, fmt.Errorf("cannot decrypt loadout: encryption keys may have been rotated. Use 'envtab reencrypt %s' to re-encrypt with current keys: %w", name, err)
 			}
-			return nil, fmt.Errorf("failed to decrypt SOPS-encrypted loadout: %w", err)
+			if strings.Contains(strings.ToLower(errStr), "not a valid sops file") || 
+			   strings.Contains(strings.ToLower(errStr), "no sops metadata found") {
+				// False positive - file contains "sops:" but isn't actually encrypted
+				// Fall back to reading as plain text
+				content, err = os.ReadFile(filePath)
+				if err != nil {
+					return nil, err
+				}
+			} else {
+				return nil, fmt.Errorf("failed to decrypt SOPS-encrypted loadout: %w", err)
+			}
 		}
 	} else {
 		content, err = os.ReadFile(filePath)
@@ -148,9 +173,9 @@ func WriteLoadoutWithEncryption(name string, loadout *Loadout, useSOPS bool) err
 			return err
 		}
 	} else {
-		err = os.WriteFile(filePath, data, 0600)
-		if err != nil {
-			return err
+	err = os.WriteFile(filePath, data, 0600)
+	if err != nil {
+		return err
 		}
 	}
 
@@ -158,21 +183,30 @@ func WriteLoadoutWithEncryption(name string, loadout *Loadout, useSOPS bool) err
 }
 
 // Enter an interactive session to edit a loadout file
+// Automatically handles SOPS-encrypted files and preserves encryption on save
 func EditLoadout(name string) error {
-
-	var loadout Loadout
-	var editedLoadout Loadout
 
 	filePath := filepath.Join(InitEnvtab(""), name+".yaml")
 	tempFilePath := filePath + ".tmp"
 
-	data, err := os.ReadFile(filePath)
+	// Check if file is SOPS-encrypted to preserve encryption on save
+	isSOPSEncrypted := crypto.IsSOPSEncrypted(filePath)
+
+	// Read the loadout (handles SOPS decryption automatically)
+	loadout, err := ReadLoadout(name)
 	if err != nil {
 		return err
 	}
 
-	// Load yaml file into a Loadout struct
-	err = yaml.Unmarshal(data, &loadout)
+	// Decrypt all SOPS-encrypted values for editing
+	// Keep track of which keys were encrypted so we can re-encrypt them on save
+	encryptedKeys, err := loadout.DecryptSOPSValues()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "WARNING: Some SOPS values could not be decrypted: %s\n", err)
+	}
+
+	// Marshal to get YAML for editing (now with decrypted values)
+	data, err := yaml.Marshal(loadout)
 	if err != nil {
 		return err
 	}
@@ -192,6 +226,8 @@ func EditLoadout(name string) error {
 		editor = "vim"
 	}
 
+	var editedLoadout *Loadout
+
 	// Loop until valid answer is given or user aborts
 	for {
 
@@ -210,7 +246,8 @@ func EditLoadout(name string) error {
 		}
 
 		// Load yaml file into a Loadout struct
-		err = yaml.Unmarshal(data, &editedLoadout)
+		editedLoadout = &Loadout{}
+		err = yaml.Unmarshal(data, editedLoadout)
 
 		// If the contents of the file could not be parsed
 		// Ask the user to continue editing the file or abort
@@ -234,10 +271,22 @@ func EditLoadout(name string) error {
 	editedLoadout.Metadata.LoadedAt = loadedAt
 
 	// Only overwrite the loadout when modified
-	if CompareLoadouts(loadout, editedLoadout) {
+	if CompareLoadouts(*loadout, *editedLoadout) {
 		editedLoadout.UpdateUpdatedAt()
 
-		return WriteLoadout(name, &editedLoadout)
+		// Re-encrypt values that were originally SOPS-encrypted
+		if len(encryptedKeys) > 0 {
+			err := editedLoadout.ReencryptSOPSValues(encryptedKeys)
+			if err != nil {
+				return fmt.Errorf("failed to re-encrypt SOPS values: %w", err)
+			}
+		}
+
+		// Preserve SOPS encryption if the file was originally encrypted
+		if isSOPSEncrypted {
+			return WriteLoadoutWithEncryption(name, editedLoadout, true)
+		}
+		return WriteLoadout(name, editedLoadout)
 	}
 
 	// Remove the temp file

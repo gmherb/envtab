@@ -11,22 +11,19 @@ import (
 
 // SOPSEncryptFile encrypts a file using sops command-line tool
 // Returns the encrypted content as bytes
+// SOPS encrypts YAML files in-place, preserving structure and adding sops: metadata
+// It does NOT wrap content in data: | - that only happens for binary/blob encryption
+// For YAML files, SOPS encrypts values in-place and adds sops: metadata at the top
+// It preserves the original structure (metadata:, entries:, etc.)
 func SOPSEncryptFile(filePath string) ([]byte, error) {
 	// Check if sops is available
 	if _, err := exec.LookPath("sops"); err != nil {
 		return nil, fmt.Errorf("sops command not found: %w", err)
 	}
 
-	// Read the file content
-	content, err := os.ReadFile(filePath)
-	if err != nil {
-		return nil, fmt.Errorf("failed to read file: %w", err)
-	}
-
-	// Use sops to encrypt the content
-	// sops -e reads from stdin and outputs encrypted content
-	cmd := exec.Command("sops", "-e", "/dev/stdin")
-	cmd.Stdin = bytes.NewReader(content)
+	// Use sops to encrypt the file directly
+	// sops -e encrypts the file and outputs the encrypted YAML
+	cmd := exec.Command("sops", "-e", filePath)
 	cmd.Stderr = os.Stderr
 
 	encrypted, err := cmd.Output()
@@ -43,24 +40,38 @@ func SOPSEncryptFile(filePath string) ([]byte, error) {
 func SOPSDecryptFile(filePath string) ([]byte, error) {
 	// Check if sops is available
 	if _, err := exec.LookPath("sops"); err != nil {
-		return nil, fmt.Errorf("sops command not found: %w", err)
+		return nil, fmt.Errorf("sops command not found. Install SOPS: https://github.com/getsops/sops: %w", err)
 	}
 
 	// Use sops to decrypt the file
 	// sops -d reads from file and outputs decrypted content
 	cmd := exec.Command("sops", "-d", filePath)
-	cmd.Stderr = os.Stderr
+	var stderr bytes.Buffer
+	cmd.Stderr = &stderr
 
 	decrypted, err := cmd.Output()
 	if err != nil {
+		// Get stderr output for better error messages
+		stderrStr := stderr.String()
+		
 		// Check if error is due to key rotation or missing keys
 		if exitError, ok := err.(*exec.ExitError); ok {
-			stderr := string(exitError.Stderr)
-			if contains(stderr, "no decryption key") || 
-			   contains(stderr, "key not found") ||
-			   contains(stderr, "access denied") ||
-			   contains(stderr, "InvalidKeyException") {
+			if contains(stderrStr, "no decryption key") || 
+			   contains(stderrStr, "key not found") ||
+			   contains(stderrStr, "access denied") ||
+			   contains(stderrStr, "InvalidKeyException") ||
+			   contains(stderrStr, "no decryption key found") {
 				return nil, fmt.Errorf("decryption failed: keys may have been rotated or access denied. Try re-encrypting with current keys: %w", err)
+			}
+			// Check if file might not actually be SOPS-encrypted
+			if contains(stderrStr, "no sops metadata found") ||
+			   contains(stderrStr, "not a valid sops file") ||
+			   contains(stderrStr, "Error decrypting") {
+				return nil, fmt.Errorf("file may not be SOPS-encrypted or is corrupted. SOPS error: %s", stderrStr)
+			}
+			// Include stderr in error message for debugging
+			if stderrStr != "" {
+				return nil, fmt.Errorf("sops decryption failed: %s (exit status %d)", strings.TrimSpace(stderrStr), exitError.ExitCode())
 			}
 		}
 		return nil, fmt.Errorf("sops decryption failed: %w", err)
@@ -106,17 +117,35 @@ func contains(s, substr string) bool {
 }
 
 // IsSOPSEncrypted checks if a file is encrypted with sops
-// by checking if it starts with sops metadata
+// by checking if it contains sops metadata at the top level
 func IsSOPSEncrypted(filePath string) bool {
 	content, err := os.ReadFile(filePath)
 	if err != nil {
 		return false
 	}
 
-	// SOPS encrypted files typically start with "sops:" in YAML
-	// or have specific JSON structure
-	return bytes.Contains(content, []byte("sops:")) ||
-		bytes.Contains(content, []byte("\"sops\""))
+	// SOPS encrypted YAML files have "sops:" as a top-level key
+	// Check if it appears at the beginning of a line (not just anywhere)
+	lines := bytes.Split(content, []byte("\n"))
+	for _, line := range lines {
+		trimmed := bytes.TrimSpace(line)
+		// Check for "sops:" at the start of a line (top-level key)
+		if bytes.HasPrefix(trimmed, []byte("sops:")) {
+			return true
+		}
+		// Also check for JSON format
+		if bytes.Contains(trimmed, []byte("\"sops\"")) {
+			return true
+		}
+		// If we've seen content beyond the sops metadata, stop checking
+		// (sops metadata is always at the top)
+		if len(trimmed) > 0 && !bytes.HasPrefix(trimmed, []byte("#")) && 
+		   !bytes.HasPrefix(trimmed, []byte("sops")) {
+			break
+		}
+	}
+
+	return false
 }
 
 // SOPSEncryptValue encrypts a single value using sops

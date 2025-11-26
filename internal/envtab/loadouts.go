@@ -144,6 +144,47 @@ func (l *Loadout) UpdateLoadedAt() error {
 	return nil
 }
 
+// DecryptSOPSValues decrypts all SOPS-encrypted values in the loadout entries
+// Returns a map of keys that were encrypted (for re-encryption on save)
+func (l *Loadout) DecryptSOPSValues() (map[string]bool, error) {
+	encryptedKeys := make(map[string]bool)
+	for key, value := range l.Entries {
+		if strings.HasPrefix(value, "SOPS:") {
+			decrypted, err := crypto.SOPSDecryptValue(value)
+			if err != nil {
+				// If decryption fails, keep the encrypted value and mark it
+				// This allows editing other values even if some can't be decrypted
+				fmt.Fprintf(os.Stderr, "WARNING: Cannot decrypt %s - keeping encrypted value: %s\n", key, err)
+				encryptedKeys[key] = true
+				continue
+			}
+			l.Entries[key] = decrypted
+			encryptedKeys[key] = true
+		}
+	}
+	return encryptedKeys, nil
+}
+
+// ReencryptSOPSValues re-encrypts values for keys that were originally encrypted
+func (l *Loadout) ReencryptSOPSValues(encryptedKeys map[string]bool) error {
+	for key := range encryptedKeys {
+		value, exists := l.Entries[key]
+		if !exists {
+			continue
+		}
+		// Only re-encrypt if the value doesn't already start with SOPS:
+		// (user might have manually edited it to be encrypted)
+		if !strings.HasPrefix(value, "SOPS:") {
+			encrypted, err := crypto.SOPSEncryptValue(value)
+			if err != nil {
+				return fmt.Errorf("failed to re-encrypt %s: %w", key, err)
+			}
+			l.Entries[key] = encrypted
+		}
+	}
+	return nil
+}
+
 func (l *Loadout) PrintLoadout() error {
 
 	data, err := yaml.Marshal(l)
