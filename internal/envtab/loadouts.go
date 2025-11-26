@@ -6,6 +6,7 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/gmherb/envtab/internal/crypto"
 	"github.com/gmherb/envtab/internal/tags"
 	"github.com/gmherb/envtab/internal/utils"
 	yaml "gopkg.in/yaml.v2"
@@ -39,11 +40,13 @@ func (l Loadout) Export() {
 
 	re := regexp.MustCompile(`\$PATH`)
 	reEnc := regexp.MustCompile(`^ENC:`)
+	reSOPS := regexp.MustCompile(`^SOPS:`)
 
 	for key, value := range l.Entries {
 		if value != "" {
 			match := re.MatchString(value)
 			encrypted := reEnc.MatchString(value)
+			sopsEncrypted := reSOPS.MatchString(value)
 			if key == "PATH" && match {
 
 				newPath := re.ReplaceAllString(value, "")
@@ -65,8 +68,16 @@ func (l Loadout) Export() {
 
 				os.Setenv("PATH", strings.Join(paths, string(os.PathListSeparator)))
 				fmt.Printf("export PATH=%s\n", os.Getenv("PATH"))
+			} else if sopsEncrypted {
+				// Decrypt SOPS-encrypted value
+				decrypted, err := crypto.SOPSDecryptValue(value)
+				if err != nil {
+					fmt.Fprintf(os.Stderr, "ERROR: Failed to decrypt SOPS value for %s: %s\n", key, err)
+					continue
+				}
+				fmt.Printf("export %s=%s\n", key, decrypted)
 			} else if encrypted {
-				// TODO DECRYPYT
+				// TODO DECRYPT GCP KMS
 				println("DEBUG: value for [" + key + "] is encrypted.")
 				fmt.Printf("export %s=%s\n", key, value)
 			} else {

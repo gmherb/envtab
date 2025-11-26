@@ -44,9 +44,13 @@ Multiple tags can be provided using space or comma as a separator.`,
 		)
 
 		const EncryptedPrefix = "ENC:"
+		const SOPSValuePrefix = "SOPS:"
 		gcpKeyName := os.Getenv("ENVTAB_GCP_KMS_KEY")
+		useSOPS := os.Getenv("ENVTAB_USE_SOPS") == "true"
 
-		encrypt, _ := cmd.Flags().GetBool("encrypt")
+		sensitive, _ := cmd.Flags().GetBool("sensitive")
+		sopsValue, _ := cmd.Flags().GetBool("sops-value")
+		sopsFile, _ := cmd.Flags().GetBool("sops-file")
 
 		if len(args) == 2 && !strings.Contains(args[1], "=") {
 			fmt.Println("DEBUG: No value provided for your envtab entry. No equal sign detected and only 2 args provided.")
@@ -74,12 +78,38 @@ Multiple tags can be provided using space or comma as a separator.`,
 		fmt.Printf("DEBUG: Name: %s, Key: %s, Value: %s, tags: %s.\n", name, key, value, newTags)
 
 		var err error
-		if encrypt {
+		var finalValue string
+
+		// Determine encryption method
+		if sopsValue {
+			// Encrypt individual value with SOPS
+			encryptedValue, err := crypto.SOPSEncryptValue(value)
+			if err != nil {
+				fmt.Printf("ERROR: Failed to encrypt value with SOPS: %s\n", err)
+				os.Exit(1)
+			}
+			finalValue = encryptedValue
+		} else if sensitive && gcpKeyName != "" {
+			// Use GCP KMS encryption (existing behavior)
 			ciphertext := crypto.GcpKmsEncrypt(gcpKeyName, value)
-			ciphertextB64 := EncryptedPrefix + base64.StdEncoding.EncodeToString(ciphertext)
-			err = envtab.AddEntryToLoadout(name, key, ciphertextB64, newTags)
+			finalValue = EncryptedPrefix + base64.StdEncoding.EncodeToString(ciphertext)
+		} else if sensitive {
+			// If sensitive but no GCP key, try SOPS value encryption
+			encryptedValue, err := crypto.SOPSEncryptValue(value)
+			if err != nil {
+				fmt.Printf("ERROR: Failed to encrypt value with SOPS: %s\n", err)
+				os.Exit(1)
+			}
+			finalValue = encryptedValue
 		} else {
-			err = envtab.AddEntryToLoadout(name, key, value, newTags)
+			finalValue = value
+		}
+
+		// Write to loadout (with file-level SOPS encryption if requested)
+		if sopsFile || useSOPS {
+			err = envtab.AddEntryToLoadoutWithSOPS(name, key, finalValue, newTags, true)
+		} else {
+			err = envtab.AddEntryToLoadout(name, key, finalValue, newTags)
 		}
 		if err != nil {
 			fmt.Printf("ERROR: Error writing entry to file [%s]: %s\n", name, err)
@@ -91,5 +121,6 @@ Multiple tags can be provided using space or comma as a separator.`,
 func init() {
 	rootCmd.AddCommand(addCmd)
 	addCmd.Flags().BoolP("sensitive", "s", false, "Add sensitive value (encrypted based on settings)")
-
+	addCmd.Flags().Bool("sops-value", false, "Encrypt individual value with SOPS")
+	addCmd.Flags().Bool("sops-file", false, "Encrypt entire loadout file with SOPS")
 }
