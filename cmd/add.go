@@ -11,22 +11,25 @@ import (
 
 	"github.com/gmherb/envtab/internal/crypto"
 	"github.com/gmherb/envtab/internal/envtab"
-	tagz "github.com/gmherb/envtab/internal/tags"
+	"github.com/gmherb/envtab/internal/tags"
 	"github.com/spf13/cobra"
 )
 
 var addCmd = &cobra.Command{
-	Use:   "add LOADOUT_NAME KEY=VALUE [TAG1 TAG2,TAG3 ...]",
+	Use:   "add LOADOUT_NAME [-s|--sensitive] KEY=VALUE [TAG1 TAG2,TAG3 ...]",
 	Short: "Add an entry to a envtab loadout",
 	Long: `Add an environment variable key-pair as an entry in an envtab
-loadout.
-
-Add tags to your envtab loadout by adding them after the key and value. Multiple
-tags can be provided using space or comma as a separator.`,
+loadout. By default it is cleartext, however, the 
+-s|--sensitive flag can be used to encrypt the value.
+Add tags to your envtab loadout by adding them after the key and value.
+Multiple tags can be provided using space or comma as a separator.`,
 	Example: `  envtab add myloadout MY_ENV_VAR=myvalue
+  envtab add myloadout -s MY_ENV_VAR=myvalue
   envtab add myloadout MY_ENV_VAR=myvalue tag1,tag2,tag3
+  envtab add myloadout -s MY_ENV_VAR=myvalue tag1,tag2,tag3
   envtab add myloadout MY_ENV_VAR=myvalue tag1 tag2 tag3
-  envtab add myloadout MY_ENV_VAR=myvalue tag1,tag2, tag3 tag4,tag5`,
+  envtab add myloadout MY_ENV_VAR=myvalue tag1,tag2, tag3 tag4,tag5
+  envtab add myloadout MY_ENV_VAR=myvalue -s tag1,tag2, tag3 tag4,tag5`,
 	DisableFlagsInUseLine: true,
 	Args:                  cobra.MinimumNArgs(2),
 	Aliases:               []string{"a", "ad"},
@@ -34,10 +37,10 @@ tags can be provided using space or comma as a separator.`,
 		fmt.Println("DEBUG: add command called")
 
 		var (
-			name  string   // envtab loadout name
-			key   string   // Environment variable key
-			value string   // Environment variable value
-			tags  []string // Tags to append to envtab loadout
+			name    string   // envtab loadout name
+			key     string   // Environment variable key
+			value   string   // Environment variable value
+			newTags []string // Tags to append to envtab loadout
 		)
 
 		const EncryptedPrefix = "ENC:"
@@ -55,28 +58,28 @@ tags can be provided using space or comma as a separator.`,
 		if strings.Contains(args[1], "=") {
 			fmt.Println("DEBUG: Equal sign detected in second argument. Splitting into key and value.")
 			key, value = strings.Split(args[1], "=")[0], strings.Split(args[1], "=")[1]
-			tags = args[2:]
+			newTags = args[2:]
 
 		} else {
 			fmt.Println("DEBUG: No equal sign detected in second argument. Assigning second argument as key.")
 			key = args[1]
 			value = args[2]
-			tags = args[3:]
+			newTags = args[3:]
 		}
 
-		tags = tagz.SplitTags(tags)
-		tags = tagz.RemoveEmptyTags(tags)
-		tags = tagz.RemoveDuplicateTags(tags)
+		newTags = tags.SplitTags(newTags)
+		newTags = tags.RemoveEmptyTags(newTags)
+		newTags = tags.RemoveDuplicateTags(newTags)
 
-		fmt.Printf("DEBUG: Name: %s, Key: %s, Value: %s, tags: %s.\n", name, key, value, tags)
+		fmt.Printf("DEBUG: Name: %s, Key: %s, Value: %s, tags: %s.\n", name, key, value, newTags)
 
 		var err error
 		if encrypt {
 			ciphertext := crypto.GcpKmsEncrypt(gcpKeyName, value)
 			ciphertextB64 := EncryptedPrefix + base64.StdEncoding.EncodeToString(ciphertext)
-			err = envtab.AddEntryToLoadout(name, key, ciphertextB64, tags)
+			err = envtab.AddEntryToLoadout(name, key, ciphertextB64, newTags)
 		} else {
-			err = envtab.AddEntryToLoadout(name, key, value, tags)
+			err = envtab.AddEntryToLoadout(name, key, value, newTags)
 		}
 		if err != nil {
 			fmt.Printf("ERROR: Error writing entry to file [%s]: %s\n", name, err)
@@ -87,6 +90,6 @@ tags can be provided using space or comma as a separator.`,
 
 func init() {
 	rootCmd.AddCommand(addCmd)
-	addCmd.Flags().BoolP("encrypt", "e", false, "Encrypt the entry value")
+	addCmd.Flags().BoolP("sensitive", "s", false, "Add sensitive value (encrypted based on settings)")
 
 }
