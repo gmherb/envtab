@@ -5,6 +5,11 @@ import (
 	"strings"
 )
 
+// DecryptFunc is a function type for decrypting values
+// This allows the env package to work with encrypted values without
+// directly depending on crypto implementations
+type DecryptFunc func(string) (string, error)
+
 type Env struct {
 	Env map[string]string
 }
@@ -35,7 +40,25 @@ func (e *Env) Get(key string) string {
 }
 
 func (e *Env) Compare(key string, value string) bool {
+	return e.CompareWithDecrypt(key, value, nil)
+}
+
+// CompareWithDecrypt compares a key-value pair, optionally decrypting the value first
+// If decryptFunc is provided and value is encrypted (starts with "SOPS:"), it will decrypt first
+func (e *Env) CompareWithDecrypt(key string, value string, decryptFunc DecryptFunc) bool {
 	match := false
+
+	// Decrypt if needed and decryptFunc is provided
+	if decryptFunc != nil {
+		if strings.HasPrefix(value, "SOPS:") {
+			decrypted, err := decryptFunc(value)
+			if err != nil {
+				// If decryption fails, can't match - return false
+				return false
+			}
+			value = decrypted
+		}
+	}
 
 	if strings.Contains(value, "$PATH") {
 		//println("DEBUG: entry contains $PATH")

@@ -42,7 +42,7 @@ Encrypt individual values with SOPS:
 # Encrypt a single value
 envtab add myloadout --sops-value SECRET_KEY=mysecret
 
-# Combine with sensitive flag (falls back to SOPS if GCP KMS not configured)
+# Combine with sensitive flag (uses SOPS encryption)
 envtab add myloadout -s API_KEY=apikey123
 ```
 
@@ -81,7 +81,6 @@ creation_rules:
 ### Environment Variables
 
 - `ENVTAB_USE_SOPS=true`: Enable file-level SOPS encryption by default
-- `ENVTAB_GCP_KMS_KEY`: GCP KMS key for GCP encryption (existing)
 
 ## Examples
 
@@ -185,17 +184,16 @@ Configure these in your `.sops.yaml` file.
 
 ## Migration
 
-### From GCP KMS to SOPS
+### Migration from Other Encryption Methods
+
+If you have existing encrypted values, you can migrate to SOPS:
 
 ```bash
-# Old way (GCP KMS per-value)
-envtab add myloadout -s SECRET=value
-
-# New way (SOPS file-level)
-envtab add myloadout --sops-file SECRET=value
-
-# Or value-level
+# Re-add values with SOPS encryption
 envtab add myloadout --sops-value SECRET=value
+
+# Or use file-level encryption
+envtab add myloadout --sops-file SECRET=value
 ```
 
 ## Key Rotation
@@ -230,7 +228,7 @@ envtab add myloadout --sops-value SECRET=newvalue
 
 ### Prevention
 
-- Use key management systems that support key versioning (AWS KMS, GCP KMS)
+- Use key management systems that support key versioning (AWS KMS, GCP KMS via SOPS)
 - Keep old keys accessible during rotation period
 - Use multiple encryption keys in SOPS config for redundancy
 

@@ -44,18 +44,19 @@ func (l Loadout) Export() {
 	}
 
 	re := regexp.MustCompile(`\$PATH`)
-	reEnc := regexp.MustCompile(`^ENC:`)
 	reSOPS := regexp.MustCompile(`^SOPS:`)
 
-	for key, value := range l.Entries {
+		for key, value := range l.Entries {
 		if value != "" {
 			match := re.MatchString(value)
-			encrypted := reEnc.MatchString(value)
 			sopsEncrypted := reSOPS.MatchString(value)
 			if key == "PATH" && match {
 
 				newPath := re.ReplaceAllString(value, "")
 				newPath = strings.Trim(newPath, ":")
+				for strings.Contains(newPath, "::") {
+					newPath = strings.ReplaceAll(newPath, "::", ":")
+				}
 
 				println("DEBUG: Found potential new PATH(s) [" + newPath + "].")
 
@@ -88,10 +89,6 @@ func (l Loadout) Export() {
 					continue
 				}
 				fmt.Printf("export %s=%s\n", key, decrypted)
-			} else if encrypted {
-				// TODO DECRYPT GCP KMS
-				println("DEBUG: value for [" + key + "] is encrypted.")
-				fmt.Printf("export %s=%s\n", key, value)
 			} else {
 				fmt.Printf("export %s=%s\n", key, value)
 			}

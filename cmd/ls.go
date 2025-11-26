@@ -11,6 +11,7 @@ import (
 	"text/tabwriter"
 	"time"
 
+	"github.com/gmherb/envtab/internal/crypto"
 	"github.com/gmherb/envtab/internal/envtab"
 	"github.com/gmherb/envtab/internal/env"
 
@@ -115,9 +116,16 @@ func ListEnvtabLoadouts(glob string) {
 		}
 
 		var activeEntries = []string{}
-		for key, value := range lo.Entries {
+		// Create decrypt function for comparing encrypted values
+		decryptFunc := func(encryptedValue string) (string, error) {
+			if strings.HasPrefix(encryptedValue, "SOPS:") {
+				return crypto.SOPSDecryptValue(encryptedValue)
+			}
+			return encryptedValue, nil
+		}
 
-			if environment.Compare(key, value) {
+		for key, value := range lo.Entries {
+			if environment.CompareWithDecrypt(key, value, decryptFunc) {
 				activeEntries = append(activeEntries, key+"="+value)
 			}
 		}

@@ -4,7 +4,6 @@ Copyright © 2024 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
-	"encoding/base64"
 	"fmt"
 	"os"
 	"strings"
@@ -43,9 +42,6 @@ Multiple tags can be provided using space or comma as a separator.`,
 			newTags []string // Tags to append to envtab loadout
 		)
 
-		const EncryptedPrefix = "ENC:"
-		const SOPSValuePrefix = "SOPS:"
-		gcpKeyName := os.Getenv("ENVTAB_GCP_KMS_KEY")
 		useSOPS := os.Getenv("ENVTAB_USE_SOPS") == "true"
 
 		sensitive, _ := cmd.Flags().GetBool("sensitive")
@@ -81,20 +77,8 @@ Multiple tags can be provided using space or comma as a separator.`,
 		var finalValue string
 
 		// Determine encryption method
-		if sopsValue {
+		if sopsValue || sensitive {
 			// Encrypt individual value with SOPS
-			encryptedValue, err := crypto.SOPSEncryptValue(value)
-			if err != nil {
-				fmt.Printf("ERROR: Failed to encrypt value with SOPS: %s\n", err)
-				os.Exit(1)
-			}
-			finalValue = encryptedValue
-		} else if sensitive && gcpKeyName != "" {
-			// Use GCP KMS encryption (existing behavior)
-			ciphertext := crypto.GcpKmsEncrypt(gcpKeyName, value)
-			finalValue = EncryptedPrefix + base64.StdEncoding.EncodeToString(ciphertext)
-		} else if sensitive {
-			// If sensitive but no GCP key, try SOPS value encryption
 			encryptedValue, err := crypto.SOPSEncryptValue(value)
 			if err != nil {
 				fmt.Printf("ERROR: Failed to encrypt value with SOPS: %s\n", err)

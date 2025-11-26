@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/fatih/color"
+	"github.com/gmherb/envtab/internal/crypto"
 	"github.com/gmherb/envtab/internal/envtab"
 	"github.com/gmherb/envtab/internal/env"
 	"github.com/spf13/cobra"
@@ -20,19 +21,21 @@ var showCmd = &cobra.Command{
 	Long:                  `Show each loadout with active entries (environment variables).`,
 	Args:                  cobra.NoArgs,
 	SuggestFor:            []string{"status"},
-	Aliases:               []string{"s", "sh", "sho"},
+	Aliases:               []string{"sh", "sho"},
 	DisableFlagsInUseLine: true,
 	Run: func(cmd *cobra.Command, args []string) {
 		println("DEBUG: show called")
-		showActiveLoadouts()
+		showSensitive, _ := cmd.Flags().GetBool("sensitive")
+		showActiveLoadouts(showSensitive)
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(showCmd)
+	showCmd.Flags().BoolP("sensitive", "s", false, "Show decrypted sensitive values (SOPS encrypted)")
 }
 
-func showActiveLoadouts() {
+func showActiveLoadouts(showSensitive bool) {
 	envtabSlice := envtab.GetEnvtabSlice("")
 	environment := env.NewEnv()
 	environment.Populate()
@@ -46,9 +49,34 @@ func showActiveLoadouts() {
 		}
 
 		var activeEntries = []string{}
+		// Create decrypt function for comparing encrypted values
+		decryptFunc := func(encryptedValue string) (string, error) {
+			if strings.HasPrefix(encryptedValue, "SOPS:") {
+				return crypto.SOPSDecryptValue(encryptedValue)
+			}
+			return encryptedValue, nil
+		}
+
+		// Create display function that conditionally shows decrypted values
+		displayValue := func(value string) string {
+			if strings.HasPrefix(value, "SOPS:") {
+				if showSensitive {
+					decrypted, err := crypto.SOPSDecryptValue(value)
+					if err != nil {
+						return "***encrypted***"
+					}
+					return decrypted
+				}
+				return "***encrypted***"
+			}
+			return value
+		}
+
 		for key, value := range lo.Entries {
-			if environment.Compare(key, value) {
-				activeEntries = append(activeEntries, key+"="+value)
+			if environment.CompareWithDecrypt(key, value, decryptFunc) {
+				// Display value (decrypted if showSensitive is true)
+				displayVal := displayValue(value)
+				activeEntries = append(activeEntries, key+"="+displayVal)
 			}
 		}
 
