@@ -180,13 +180,13 @@ UpdatedAt  LoadedAt  Login  Active  Total  Name     Tags
 2. Configure SOPS with your preferred encryption backend (AWS KMS, GCP KMS, Azure Key Vault, age, PGP, etc.)
 3. Set up your `.sops.yaml` configuration file (optional, but recommended)
 
-### Using the Sensitive Flag
+### Using Value Encryption
 
-The `-s` or `--sensitive` flag encrypts individual values with SOPS:
+The `-v` or `--encrypt-value` flag encrypts individual values with SOPS:
 
 ```text
-$ envtab add production -s API_KEY=sk_live_1234567890abcdef
-$ envtab add production -s DB_PASSWORD=super_secret_password
+$ envtab add production -v API_KEY=sk_live_1234567890abcdef
+$ envtab add production -v DB_PASSWORD=super_secret_password
 ```
 
 When you view the loadout, encrypted values are hidden by default:
@@ -225,10 +225,10 @@ production -------------------------------------------------------- [ 2 / 2 ]
 
 ### File-Level Encryption
 
-You can also encrypt entire loadout files with SOPS using the `--sops-file` flag:
+You can also encrypt entire loadout files with SOPS using the `--encrypt-file` flag (or `-f`):
 
 ```text
-$ envtab add secrets --sops-file API_KEY=mykey DB_PASSWORD=mypass
+$ envtab add secrets --encrypt-file API_KEY=mykey DB_PASSWORD=mypass
 ```
 
 This encrypts the entire file, including metadata. The file can be edited directly with `sops`:

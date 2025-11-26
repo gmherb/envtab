@@ -9,6 +9,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/gmherb/envtab/internal/utils"
 	yaml "gopkg.in/yaml.v2"
 )
 
@@ -65,17 +66,17 @@ func SOPSDecryptFile(filePath string) ([]byte, error) {
 
 		if exitError, ok := err.(*exec.ExitError); ok {
 			// Check for key rotation or access errors
-			if contains(stderrStr, "no decryption key") ||
-				contains(stderrStr, "key not found") ||
-				contains(stderrStr, "access denied") ||
-				contains(stderrStr, "InvalidKeyException") ||
-				contains(stderrStr, "no decryption key found") {
+			if utils.Contains(stderrStr, "no decryption key") ||
+				utils.Contains(stderrStr, "key not found") ||
+				utils.Contains(stderrStr, "access denied") ||
+				utils.Contains(stderrStr, "InvalidKeyException") ||
+				utils.Contains(stderrStr, "no decryption key found") {
 				return nil, fmt.Errorf("decryption failed: keys may have been rotated or access denied. Try re-encrypting with current keys: %w", err)
 			}
 			// Check if file might not be SOPS-encrypted
-			if contains(stderrStr, "no sops metadata found") ||
-				contains(stderrStr, "not a valid sops file") ||
-				contains(stderrStr, "Error decrypting") {
+			if utils.Contains(stderrStr, "no sops metadata found") ||
+				utils.Contains(stderrStr, "not a valid sops file") ||
+				utils.Contains(stderrStr, "Error decrypting") {
 				return nil, fmt.Errorf("file may not be SOPS-encrypted or is corrupted. SOPS error: %s", stderrStr)
 			}
 			// Include stderr for debugging
@@ -119,15 +120,10 @@ func SOPSReencryptFile(filePath string) error {
 	return nil
 }
 
-// contains checks if string contains substring (case-insensitive)
-func contains(s, substr string) bool {
-	return strings.Contains(strings.ToLower(s), strings.ToLower(substr))
-}
-
 // IsSOPSEncrypted checks if a file is encrypted with sops
 // by parsing the YAML/JSON and checking if a top-level "sops" or "data" key exists
 // For file-level SOPS encryption:
-//   - Files encrypted with --sops-file typically have "data:" as a top-level key (binary/blob mode)
+//   - Files encrypted with --encrypt-file typically have "data:" as a top-level key (binary/blob mode)
 //   - Files may also have "sops:" metadata at the top level
 //
 // For value-level SOPS encryption, values start with "SOPS:" prefix (handled separately)
@@ -205,7 +201,7 @@ func SOPSDecryptValue(encryptedValue string) (string, error) {
 
 	decrypted, err := SOPSDecryptFile(tmpFile.Name())
 	if err != nil {
-		if contains(err.Error(), "keys may have been rotated") {
+		if utils.Contains(err.Error(), "keys may have been rotated") {
 			return "", fmt.Errorf("cannot decrypt: encryption keys may have been rotated. The value was encrypted with different keys. %w", err)
 		}
 		return "", err

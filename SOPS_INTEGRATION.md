@@ -22,11 +22,10 @@ Encrypt an entire loadout file with SOPS:
 
 ```bash
 # Create a new loadout with file-level SOPS encryption
-envtab add myloadout --sops-file MY_VAR=value
+envtab add myloadout --encrypt-file MY_VAR=value
 
-# Or set environment variable to always use SOPS
-export ENVTAB_USE_SOPS=true
-envtab add myloadout MY_VAR=value
+# Use the --encrypt-file flag to encrypt the entire file
+envtab add myloadout --encrypt-file MY_VAR=value
 ```
 
 **Benefits:**
@@ -40,10 +39,10 @@ Encrypt individual values with SOPS:
 
 ```bash
 # Encrypt a single value
-envtab add myloadout --sops-value SECRET_KEY=mysecret
+envtab add myloadout -v SECRET_KEY=mysecret
 
-# Combine with sensitive flag (uses SOPS encryption)
-envtab add myloadout -s API_KEY=apikey123
+# Or use the long form
+envtab add myloadout --encrypt-value API_KEY=apikey123
 ```
 
 **Benefits:**
@@ -80,7 +79,7 @@ creation_rules:
 
 ### Environment Variables
 
-- `ENVTAB_USE_SOPS=true`: Enable file-level SOPS encryption by default
+None currently required. Use the `--encrypt-file` flag to enable file-level encryption.
 
 ## Examples
 
@@ -88,7 +87,7 @@ creation_rules:
 
 ```bash
 # Create encrypted loadout
-envtab add production --sops-file \
+envtab add production --encrypt-file \
   DB_PASSWORD=secret123 \
   API_KEY=key456
 
@@ -105,7 +104,7 @@ envtab export production
 # Mix encrypted and plaintext values
 envtab add staging \
   DB_HOST=localhost \
-  --sops-value DB_PASSWORD=secret123 \
+  -v DB_PASSWORD=secret123 \
   DEBUG=true
 
 # Only DB_PASSWORD is encrypted
@@ -127,7 +126,7 @@ creation_rules:
 EOF
 
 # Use SOPS encryption
-envtab add secrets --sops-file API_KEY=mykey
+envtab add secrets --encrypt-file API_KEY=mykey
 ```
 
 ## Implementation Details
@@ -167,7 +166,6 @@ SOPS encryption keys can be rotated (AWS KMS key rotation, age key changes, etc.
 
 - `SOPSEncryptValue()`: Encrypts a single value (preserves full SOPS metadata)
 - `SOPSDecryptValue()`: Decrypts a SOPS-encrypted value (uses preserved metadata)
-- `SOPSCanDecryptValue()`: Checks if a value can be decrypted
 - Values prefixed with `SOPS:` are automatically decrypted on export
 
 ### Backend Support
@@ -209,7 +207,7 @@ You'll need to re-add the values with current keys:
 envtab rm myloadout  # or edit manually
 
 # Re-add with current keys
-envtab add myloadout --sops-value SECRET=newvalue
+envtab add myloadout -v SECRET=newvalue
 ```
 
 ### Prevention
@@ -237,7 +235,7 @@ Install SOPS: `brew install sops` or download from https://github.com/getsops/so
 - This means the encryption keys used to encrypt the data are no longer available
 - Re-encrypt the loadout with current keys (see Key Rotation section above)
 - For file-level encryption: `sops -i -e ~/.envtab/myloadout.yaml`
-- For value-level encryption: Re-add the values with `--sops-value` flag
+- For value-level encryption: Re-add the values with `--encrypt-value` (or `-v`) flag
 
 ## Security Considerations
 

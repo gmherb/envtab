@@ -5,6 +5,8 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/gmherb/envtab/internal/utils"
 )
 
 func TestValidateLoadout(t *testing.T) {
@@ -540,9 +542,9 @@ func TestContains(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := contains(tt.s, tt.sub)
+			got := utils.Contains(tt.s, tt.sub)
 			if got != tt.want {
-				t.Errorf("contains() = %v, want %v", got, tt.want)
+				t.Errorf("Contains() = %v, want %v", got, tt.want)
 			}
 		})
 	}

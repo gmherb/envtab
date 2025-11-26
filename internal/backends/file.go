@@ -374,3 +374,25 @@ func ListLoadouts() ([]string, error) {
 	return loadouts, nil
 }
 
+// IsLoadoutFileEncrypted checks if a loadout file is encrypted at the file level
+func IsLoadoutFileEncrypted(name string) bool {
+	filePath := filepath.Join(config.InitEnvtab(""), name+".yaml")
+	if _, err := os.Stat(filePath); os.IsNotExist(err) {
+		return false
+	}
+	return crypto.IsSOPSEncrypted(filePath)
+}
+
+// HasValueEncryptedEntries checks if a loadout has any value-encrypted entries (SOPS: prefix)
+func HasValueEncryptedEntries(lo *loadout.Loadout) bool {
+	if lo == nil {
+		return false
+	}
+	for _, value := range lo.Entries {
+		if strings.HasPrefix(value, "SOPS:") {
+			return true
+		}
+	}
+	return false
+}
+

@@ -13,11 +13,6 @@ import (
 	yaml "gopkg.in/yaml.v2"
 )
 
-// Helper function to check if string contains substring
-func contains(s, substr string) bool {
-	return strings.Contains(strings.ToLower(s), strings.ToLower(substr))
-}
-
 type LoadoutMetadata struct {
 	CreatedAt   string   `json:"createdAt" yaml:"createdAt"`
 	LoadedAt    string   `json:"loadedAt" yaml:"loadedAt"`
@@ -154,7 +149,7 @@ func (l Loadout) Export() {
 				decrypted, err := crypto.SOPSDecryptValue(value)
 				if err != nil {
 					// Check if it's a key rotation issue
-					if contains(err.Error(), "keys may have been rotated") {
+					if utils.Contains(err.Error(), "keys may have been rotated") {
 						fmt.Fprintf(os.Stderr, "WARNING: Cannot decrypt %s - encryption keys may have been rotated. Skipping.\n", key)
 						fmt.Fprintf(os.Stderr, "         To fix: re-encrypt the loadout with current keys using 'envtab reencrypt'\n")
 					} else {
