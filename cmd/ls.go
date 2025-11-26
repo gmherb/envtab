@@ -12,8 +12,8 @@ import (
 	"time"
 
 	"github.com/gmherb/envtab/internal/crypto"
-	"github.com/gmherb/envtab/internal/envtab"
 	"github.com/gmherb/envtab/internal/env"
+	"github.com/gmherb/envtab/internal/envtab"
 
 	"github.com/spf13/cobra"
 )
@@ -34,7 +34,7 @@ metadata.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		logger.Debug("list called")
 
-		if cmd.Flags("long").Value.String() == "true" {
+		if long, _ := cmd.Flags().GetBool("long"); long {
 			logger.Debug("long listing format")
 			if len(args) > 0 {
 				ListEnvtabLoadouts(args[0])
@@ -103,7 +103,7 @@ func ListEnvtabLoadouts(glob string) {
 		// Handle empty timestamps gracefully
 		var updatedAt time.Time
 		var loadedAt time.Time
-		
+
 		if lo.Metadata.UpdatedAt != "" {
 			var err error
 			updatedAt, err = time.Parse(time.RFC3339, lo.Metadata.UpdatedAt)

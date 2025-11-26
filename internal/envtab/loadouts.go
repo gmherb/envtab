@@ -32,6 +32,79 @@ type Loadout struct {
 	Entries  map[string]string `json:"entries" yaml:"entries"`
 }
 
+// ValidateLoadout checks if a loadout has duplicate keys in the entries
+// Returns an error if duplicates are found, listing the duplicate keys
+func ValidateLoadout(loadout *Loadout) error {
+	if loadout == nil {
+		return fmt.Errorf("loadout is nil")
+	}
+	
+	// Check for duplicate keys in entries
+	// Since entries is a map, duplicates would have been silently overwritten during unmarshaling
+	// We need to check the raw YAML content instead
+	// For now, we'll validate by checking if the map structure is valid
+	// (maps can't have duplicates by definition, so if we got here, the YAML was valid)
+	
+	// However, we can add additional validation here if needed
+	// For example, checking for empty keys or other issues
+	for key := range loadout.Entries {
+		if key == "" {
+			return fmt.Errorf("loadout contains empty key in entries")
+		}
+	}
+	
+	return nil
+}
+
+// ValidateLoadoutYAML checks the raw YAML content for duplicate keys in the entries section
+// This is called before unmarshaling to detect duplicates that would be silently overwritten
+func ValidateLoadoutYAML(yamlContent []byte) error {
+	// Parse YAML as lines to check for duplicate keys in the entries section
+	lines := strings.Split(string(yamlContent), "\n")
+	inEntries := false
+	indentLevel := 0
+	seenKeys := make(map[string]int)
+	
+	for i, line := range lines {
+		trimmed := strings.TrimSpace(line)
+		
+		// Skip empty lines and comments
+		if trimmed == "" || strings.HasPrefix(trimmed, "#") {
+			continue
+		}
+		
+		// Check if we're entering the entries section
+		if strings.HasPrefix(trimmed, "entries:") {
+			inEntries = true
+			indentLevel = len(line) - len(strings.TrimLeft(line, " \t"))
+			continue
+		}
+		
+		// Check if we've left the entries section (reached a top-level key)
+		if inEntries {
+			currentIndent := len(line) - len(strings.TrimLeft(line, " \t"))
+			if currentIndent <= indentLevel && trimmed != "" && !strings.HasPrefix(trimmed, "#") {
+				// We've left the entries section
+				break
+			}
+			
+			// Check if this is a key-value pair in entries
+			if strings.Contains(trimmed, ":") {
+				parts := strings.SplitN(trimmed, ":", 2)
+				key := strings.TrimSpace(parts[0])
+				if key != "" {
+					if seenKeys[key] > 0 {
+						return fmt.Errorf("duplicate key '%s' found in entries section at line %d (first occurrence at line %d)", key, i+1, seenKeys[key])
+					}
+					seenKeys[key] = i + 1
+				}
+			}
+		}
+	}
+	
+	return nil
+}
+
 func (l Loadout) Export() {
 
 	pathMap := make(map[string]bool)

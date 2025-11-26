@@ -290,6 +290,17 @@ func EditLoadout(name string) error {
 			return err
 		}
 
+		// Validate YAML for duplicate keys before unmarshaling
+		err = ValidateLoadoutYAML(data)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "ERROR: %s\n", err)
+			usersChoice := utils.PromptForAnswer("The file contains duplicate keys. Do you want to continue editing to fix the errors? Enter 'yes' to continue to edit or 'no' to abort and discard changes?")
+			if !usersChoice {
+				return nil
+			}
+			continue // Continue editing
+		}
+
 		// Load yaml file into a Loadout struct
 		editedLoadout = &Loadout{}
 		err = yaml.Unmarshal(data, editedLoadout)
