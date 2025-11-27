@@ -22,6 +22,10 @@ automatically by running "envtab login --enable". You can disable login
 by running "envtab login --disable".`,
 	Args:    cobra.NoArgs,
 	Aliases: []string{"lo", "log", "logi"},
+	Example: `  envtab login --status
+  envtab login --enable
+  envtab login --disable
+  envtab login --status`,
 	Run: func(cmd *cobra.Command, args []string) {
 		logger.Debug("login called")
 

@@ -24,7 +24,10 @@ var showCmd = &cobra.Command{
 	SuggestFor:            []string{"status"},
 	Aliases:               []string{"sh", "sho"},
 	DisableFlagsInUseLine: true,
-	Example:               `  envtab show\n  envtab show aws-*\n  envtab show production\n  envtab show aws-* gcp-*`,
+	Example: `  envtab show
+  envtab show aws-*
+  envtab show production
+  envtab show aws-* gcp-*`,
 	Run: func(cmd *cobra.Command, args []string) {
 		logger.Debug("show called")
 		showSensitive, _ := cmd.Flags().GetBool("sensitive")

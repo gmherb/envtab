@@ -15,20 +15,20 @@ import (
 )
 
 var addCmd = &cobra.Command{
-	Use:   "add LOADOUT_NAME [-v|--encrypt-value] KEY=VALUE [TAG1 TAG2,TAG3 ...]",
+	Use:   "add LOADOUT_NAME [-e|--encrypt-value] [-f|--encrypt-file] KEY=VALUE [TAG1 TAG2,TAG3 ...]",
 	Short: "Add an entry to a envtab loadout",
 	Long: `Add an environment variable key-pair as an entry in an envtab
 loadout. By default it is cleartext, however, the 
--v|--encrypt-value flag can be used to encrypt the value.
+-e|--encrypt-value flag can be used to encrypt the value.
 Add tags to your envtab loadout by adding them after the key and value.
 Multiple tags can be provided using space or comma as a separator.`,
 	Example: `  envtab add myloadout MY_ENV_VAR=myvalue
-  envtab add myloadout -v MY_ENV_VAR=myvalue
+  envtab add myloadout -e MY_ENV_VAR=myvalue
   envtab add myloadout MY_ENV_VAR=myvalue tag1,tag2,tag3
-  envtab add myloadout -v MY_ENV_VAR=myvalue tag1,tag2,tag3
+  envtab add myloadout -e MY_ENV_VAR=myvalue tag1,tag2,tag3
   envtab add myloadout MY_ENV_VAR=myvalue tag1 tag2 tag3
   envtab add myloadout MY_ENV_VAR=myvalue tag1,tag2, tag3 tag4,tag5
-  envtab add myloadout MY_ENV_VAR=myvalue -v tag1,tag2, tag3 tag4,tag5`,
+  envtab add myloadout MY_ENV_VAR=myvalue -e tag1,tag2, tag3 tag4,tag5`,
 	DisableFlagsInUseLine: true,
 	Args:                  cobra.MinimumNArgs(2),
 	Aliases:               []string{"a", "ad"},
@@ -133,6 +133,6 @@ Multiple tags can be provided using space or comma as a separator.`,
 
 func init() {
 	rootCmd.AddCommand(addCmd)
-	addCmd.Flags().BoolP("encrypt-value", "v", false, "Encrypt individual value with SOPS")
+	addCmd.Flags().BoolP("encrypt-value", "e", false, "Encrypt individual value with SOPS")
 	addCmd.Flags().BoolP("encrypt-file", "f", false, "Encrypt entire loadout file with SOPS")
 }
