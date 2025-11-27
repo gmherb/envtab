@@ -11,8 +11,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// mkCmd represents the make command
-var mkCmd = &cobra.Command{
+// makeCmd represents the make command
+var makeCmd = &cobra.Command{
 	Use:   "make LOADOUT_NAME TEMPLATE_NAME",
 	Short: "Make loadout from a template",
 	Long: `Make loadouts from templates. Predefined templates:
@@ -35,7 +35,7 @@ You can also create custom templates in ~/.envtab/templates/.`,
 	SuggestFor: []string{"create", "new"},
 	Aliases:    []string{"m", "mk"},
 	Run: func(cmd *cobra.Command, args []string) {
-		logger.Debug("mk called")
+		logger.Debug("make called")
 
 		loadoutName := args[0]
 		templateName := args[1]
@@ -53,5 +53,6 @@ You can also create custom templates in ~/.envtab/templates/.`,
 }
 
 func init() {
-	rootCmd.AddCommand(mkCmd)
+	rootCmd.AddCommand(makeCmd)
 }
+
