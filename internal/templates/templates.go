@@ -6,9 +6,9 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/gmherb/envtab/internal/backends"
 	"github.com/gmherb/envtab/internal/config"
 	"github.com/gmherb/envtab/internal/loadout"
-	yaml "gopkg.in/yaml.v2"
 )
 
 type LoadoutTemplate struct {
@@ -24,30 +24,38 @@ func MakeLoadoutFromTemplate(templateName string, force bool) loadout.Loadout {
 	lo := loadout.InitLoadout()
 	var template LoadoutTemplate
 	var found bool
+	var isDotenvTemplate bool // Track if we loaded from .env file
 
-	// First, check embedded templates
-	if embeddedTemplate, exists := envtabTemplates.Templates[templateName]; exists {
-		template = embeddedTemplate
+	// First, check for user-provided .env template files (custom templates)
+	dotenvPath := filepath.Join(config.InitEnvtab(""), "templates/"+templateName+".env")
+	if _, err := os.Stat(dotenvPath); err == nil {
+		slog.Debug("using .env template", "template", templateName, "path", dotenvPath)
+
+		data, err := os.ReadFile(dotenvPath)
+		if err != nil {
+			fmt.Printf("ERROR: Failure reading template [%s]: %s\n", templateName, err)
+			os.Exit(1)
+		}
+		// Parse .env file using reusable function from backends
+		entries, err := backends.ParseDotenvContent(data)
+		if err != nil {
+			fmt.Printf("ERROR: Failure parsing .env template [%s]: %s\n", templateName, err)
+			os.Exit(1)
+		}
+		// Populate loadout entries directly with values from .env
+		for key, value := range entries {
+			lo.Entries[key] = value
+		}
+		// Set description
+		template.Description = fmt.Sprintf("Template from .env file: %s", templateName)
+		isDotenvTemplate = true
 		found = true
-		slog.Debug("using embedded template", "template", templateName)
 	} else {
-		// Fall back to file-based templates
-		templatePath := filepath.Join(config.InitEnvtab(""), "templates/"+templateName+".yml")
-		if _, err := os.Stat(templatePath); err == nil {
-			slog.Debug("using file template", "template", templateName, "path", templatePath)
-
-			data, err := os.ReadFile(templatePath)
-			if err != nil {
-				fmt.Printf("ERROR: Failure reading template [%s]: %s\n", templateName, err)
-				os.Exit(1)
-			}
-			// load yaml file into LoadoutTemplate struct
-			err = yaml.Unmarshal(data, &template)
-			if err != nil {
-				fmt.Printf("ERROR: Failure parsing template [%s]: %s\n", templateName, err)
-				os.Exit(1)
-			}
+		// Fall back to embedded templates
+		if embeddedTemplate, exists := envtabTemplates.Templates[templateName]; exists {
+			template = embeddedTemplate
 			found = true
+			slog.Debug("using embedded template", "template", templateName)
 		}
 	}
 
@@ -70,8 +78,12 @@ func MakeLoadoutFromTemplate(templateName string, force bool) loadout.Loadout {
 
 	lo.Metadata.Description = template.Description
 
-	for _, entry := range template.Entries {
-		lo.Entries[entry] = ""
+	// Only populate from template.Entries if we didn't load from .env file
+	// (for .env files, we already populated with actual values above)
+	if !isDotenvTemplate {
+		for _, entry := range template.Entries {
+			lo.Entries[entry] = ""
+		}
 	}
 
 	return *lo

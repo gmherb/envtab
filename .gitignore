@@ -1,0 +1,5 @@
+# envtab binary
+envtab
+
+# dotenv files
+*.env

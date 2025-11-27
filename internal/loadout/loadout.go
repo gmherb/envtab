@@ -318,4 +318,3 @@ func CompareLoadouts(old Loadout, new Loadout) bool {
 	}
 	return false
 }
-
