@@ -37,5 +37,3 @@ func InitEnvtab(path string) string {
 	}
 	return envtabPath
 }
-
-

@@ -11,9 +11,9 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// mkCmd represents the mk command
+// mkCmd represents the make command
 var mkCmd = &cobra.Command{
-	Use:   "mk LOADOUT_NAME TEMPLATE_NAME",
+	Use:   "make LOADOUT_NAME TEMPLATE_NAME",
 	Short: "Make loadout from a template",
 	Long: `Make loadouts from templates. Predefined templates:
 
@@ -30,18 +30,17 @@ Network:      proxy, wireguard
 Utils:        sops, yq, jq, jo, etcd, k6
 
 You can also create custom templates in ~/.envtab/templates/.`,
-	Example:    `  envtab mk myloadout aws`,
+	Example:    `  envtab make myloadout aws`,
 	Args:       cobra.ExactArgs(2),
 	SuggestFor: []string{"create", "new"},
-	Aliases:    []string{"m", "make"},
+	Aliases:    []string{"m", "mk"},
 	Run: func(cmd *cobra.Command, args []string) {
 		logger.Debug("mk called")
 
 		loadoutName := args[0]
 		templateName := args[1]
-		force, _ := cmd.Flags().GetBool("force")
 
-		loadout := templates.MakeLoadoutFromTemplate(templateName, force)
+		loadout := templates.MakeLoadoutFromTemplate(templateName, false)
 
 		err := backends.WriteLoadout(loadoutName, &loadout)
 		if err != nil {
@@ -55,5 +54,4 @@ You can also create custom templates in ~/.envtab/templates/.`,
 
 func init() {
 	rootCmd.AddCommand(mkCmd)
-	mkCmd.Flags().BoolP("force", "f", false, "overwrite any existing loadouts")
 }

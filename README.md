@@ -22,9 +22,9 @@ Available Commands:
   export      Export envtab loadout
   help        Help about any command
   login       Export all login loadouts
-  ls          List all envtab loadouts
-  mk          Make loadout from a template
-  rm          Remove envtab loadout(s)
+  list        List all envtab loadouts
+  make        Make loadout from a template
+  remove      Remove envtab loadout(s)
   show        Show active loadouts
 
 Flags:
@@ -165,7 +165,7 @@ CONFIG_DIR=/home/gmherb/conf
 
 # Unfortunately, no match in `show` or `list` at this time.
 $ envtab show
-$ envtab ls -l example
+$ envtab list -l example
 UpdatedAt  LoadedAt  Login  Active  Total  Name     Tags
 23:08:32   22:59:13  false  0       1      example  []
 ```

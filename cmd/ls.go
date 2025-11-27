@@ -19,19 +19,19 @@ import (
 )
 
 var lsCmd = &cobra.Command{
-	Use:   "ls [LOADOUT_PATTERN...]",
+	Use:   "list [LOADOUT_PATTERN...]",
 	Short: "List all envtab loadouts",
 	Long: `List all envtab loadouts. Optional glob patterns can be provided to narrow results. If multiple patterns are provided, loadouts matching any pattern will be shown. If the --long flag is provided, then
 print the long listing format which includes the loadout name, tags, and other
 metadata.`,
-	Example: `  envtab ls
-  envtab ls -l
-  envtab ls --long
-  envtab ls dev*
-  envtab ls -l *staging*
-  envtab ls aws-* gcp-*`,
+	Example: `  envtab list
+  envtab list -l
+  envtab list --long
+  envtab list dev*
+  envtab list -l *staging*
+  envtab list aws-* gcp-*`,
 	Args:    cobra.ArbitraryArgs,
-	Aliases: []string{"l", "list"},
+	Aliases: []string{"l", "ls"},
 	Run: func(cmd *cobra.Command, args []string) {
 		logger.Debug("list called")
 

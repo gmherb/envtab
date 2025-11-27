@@ -9,14 +9,14 @@ import (
 )
 
 var rmCmd = &cobra.Command{
-	Use:   "rm LOADOUT_NAME [LOADOUT_NAME ...]",
+	Use:   "remove LOADOUT_NAME [LOADOUT_NAME ...]",
 	Short: "Remove envtab loadout(s)",
 	Long:  `Remove envtab loadout(s)`,
-	Example: `  envtab rm myloadout
-  envtab rm myloadout1 myloadout2 myloadout3`,
+	Example: `  envtab remove myloadout
+  envtab remove myloadout1 myloadout2 myloadout3`,
 	Args:       cobra.MinimumNArgs(1),
 	SuggestFor: []string{"delete", "del"},
-	Aliases:    []string{"r", "remove"},
+	Aliases:    []string{"r", "rm"},
 	Run: func(cmd *cobra.Command, args []string) {
 		logger.Debug("rm called")
 		for _, loadout := range args {

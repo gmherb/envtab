@@ -204,7 +204,7 @@ envtab reencrypt myloadout
 You'll need to re-add the values with current keys:
 ```bash
 # Remove old encrypted value
-envtab rm myloadout  # or edit manually
+envtab remove myloadout  # or edit manually
 
 # Re-add with current keys
 envtab add myloadout -v SECRET=newvalue
