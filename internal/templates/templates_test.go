@@ -317,7 +317,7 @@ func TestMakeLoadoutFromTemplate_AllEmbeddedTemplates(t *testing.T) {
 		"helm", "ansible", "packer", "vagrant", "jira-cli",
 		"python", "go", "rust", "c", "git", "github", "gitlab",
 		"proxy", "wireguard", "sops", "yq", "jq", "jo",
-		"etcd", "k6",
+		"etcd", "k6", "openstack",
 	}
 
 	// Use a temporary directory to avoid conflicts with actual envtab config

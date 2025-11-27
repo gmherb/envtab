@@ -17,7 +17,7 @@ var makeCmd = &cobra.Command{
 	Short: "Make loadout from a template",
 	Long: `Make loadouts from templates. Predefined templates:
 
-Cloud:        aws, gcp, azure
+Cloud:        aws, gcp, openstack, azure
 Databases:    pgsql, mysql, mongodb, elasticsearch
 MQ/Msg:       kafka, rabbitmq
 Cache:        redis, memcached
@@ -55,4 +55,3 @@ You can also create custom templates in ~/.envtab/templates/.`,
 func init() {
 	rootCmd.AddCommand(makeCmd)
 }
-
