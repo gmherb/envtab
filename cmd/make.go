@@ -5,11 +5,14 @@ package cmd
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/gmherb/envtab/internal/backends"
 	"github.com/gmherb/envtab/internal/templates"
 	"github.com/spf13/cobra"
 )
+
+var forceFlag bool
 
 // makeCmd represents the make command
 var makeCmd = &cobra.Command{
@@ -40,11 +43,26 @@ You can also create custom templates in ~/.envtab/templates/.`,
 		loadoutName := args[0]
 		templateName := args[1]
 
-		loadout := templates.MakeLoadoutFromTemplate(templateName, false)
+		// Check if loadout already exists
+		_, err := backends.ReadLoadout(loadoutName)
+		if err == nil {
+			// Loadout exists
+			if !forceFlag {
+				fmt.Printf("ERROR: Loadout [%s] already exists. Use --force to overwrite.\n", loadoutName)
+				os.Exit(1)
+			}
+		} else if !os.IsNotExist(err) {
+			// Some other error occurred
+			fmt.Printf("ERROR: %s\n", err)
+			os.Exit(1)
+		}
 
-		err := backends.WriteLoadout(loadoutName, &loadout)
+		loadout := templates.MakeLoadoutFromTemplate(templateName)
+
+		err = backends.WriteLoadout(loadoutName, &loadout)
 		if err != nil {
 			fmt.Printf("ERROR: %s\n", err)
+			os.Exit(1)
 		}
 
 		fmt.Printf("Loadout [%s] created from template [%s]\n", loadoutName, templateName)
@@ -53,5 +71,6 @@ You can also create custom templates in ~/.envtab/templates/.`,
 }
 
 func init() {
+	makeCmd.Flags().BoolVarP(&forceFlag, "force", "f", false, "overwrite existing loadout")
 	rootCmd.AddCommand(makeCmd)
 }

@@ -79,7 +79,7 @@ func getEmbeddedTemplates() LoadoutTemplates {
 	return *embeddedTemplates
 }
 
-func MakeLoadoutFromTemplate(templateName string, force bool) loadout.Loadout {
+func MakeLoadoutFromTemplate(templateName string) loadout.Loadout {
 	lo := loadout.InitLoadout()
 	var template LoadoutTemplate
 	var found bool

@@ -79,7 +79,7 @@ func TestMakeLoadoutFromTemplate_EmbeddedTemplate(t *testing.T) {
 			os.Remove(envFile) // Remove if exists, ignore error
 
 			// Call the function
-			lo := MakeLoadoutFromTemplate(tt.templateName, false)
+			lo := MakeLoadoutFromTemplate(tt.templateName)
 
 			// Verify loadout is not nil
 			if lo.Entries == nil {
@@ -161,7 +161,7 @@ KEY5=value5
 	}
 
 	// Call the function
-	lo := MakeLoadoutFromTemplate(templateName, false)
+	lo := MakeLoadoutFromTemplate(templateName)
 
 	// Verify loadout is not nil
 	if lo.Entries == nil {
@@ -235,7 +235,7 @@ ANOTHER_KEY=another_value
 	}
 
 	// Call the function
-	lo := MakeLoadoutFromTemplate(templateName, false)
+	lo := MakeLoadoutFromTemplate(templateName)
 
 	// Verify that .env template takes precedence (should have custom keys, not AWS keys)
 	if lo.Entries["CUSTOM_KEY"] != "custom_value" {
@@ -296,7 +296,7 @@ KEY2=value2
 	// Note: This test verifies that the function handles parsing errors
 	// The function calls os.Exit(1) on error, so we can't test the error path directly
 	// But we can verify that valid entries are still parsed
-	lo := MakeLoadoutFromTemplate(templateName, false)
+	lo := MakeLoadoutFromTemplate(templateName)
 
 	// The function should still parse valid entries
 	if lo.Entries["KEY1"] != "value1" {
@@ -344,7 +344,7 @@ func TestMakeLoadoutFromTemplate_AllEmbeddedTemplates(t *testing.T) {
 			envFile := filepath.Join(templatesDir, templateName+".env")
 			os.Remove(envFile) // Remove if exists, ignore error
 
-			lo := MakeLoadoutFromTemplate(templateName, false)
+			lo := MakeLoadoutFromTemplate(templateName)
 
 			// Verify loadout is initialized
 			if lo.Entries == nil {
@@ -390,7 +390,7 @@ func TestMakeLoadoutFromTemplate_LoadoutStructure(t *testing.T) {
 	_ = config.InitEnvtab("")
 
 	// Test with embedded template
-	lo := MakeLoadoutFromTemplate("aws", false)
+	lo := MakeLoadoutFromTemplate("aws")
 
 	// Verify it's a valid loadout structure
 	if lo.Metadata.CreatedAt == "" {
@@ -410,43 +410,6 @@ func TestMakeLoadoutFromTemplate_LoadoutStructure(t *testing.T) {
 	}
 	if lo.Entries == nil {
 		t.Error("MakeLoadoutFromTemplate() should initialize Entries")
-	}
-}
-
-func TestMakeLoadoutFromTemplate_ForceParameter(t *testing.T) {
-	// The force parameter is currently not used in the function
-	// but we test that it doesn't cause issues
-	tmpDir, err := os.MkdirTemp("", "envtab-test-*")
-	if err != nil {
-		t.Fatalf("Failed to create temp dir: %v", err)
-	}
-	defer os.RemoveAll(tmpDir)
-
-	// Save original HOME
-	originalHome := os.Getenv("HOME")
-	defer os.Setenv("HOME", originalHome)
-
-	// Set HOME to temp directory so config.InitEnvtab("") uses it
-	os.Setenv("HOME", tmpDir)
-
-	// Initialize envtab directory
-	_ = config.InitEnvtab("")
-
-	// Test with force=true
-	lo1 := MakeLoadoutFromTemplate("aws", true)
-	if lo1.Entries == nil {
-		t.Fatal("MakeLoadoutFromTemplate() with force=true returned loadout with nil Entries")
-	}
-
-	// Test with force=false
-	lo2 := MakeLoadoutFromTemplate("aws", false)
-	if lo2.Entries == nil {
-		t.Fatal("MakeLoadoutFromTemplate() with force=false returned loadout with nil Entries")
-	}
-
-	// Both should work the same way (force is not currently used)
-	if len(lo1.Entries) != len(lo2.Entries) {
-		t.Error("MakeLoadoutFromTemplate() should behave the same regardless of force parameter")
 	}
 }
 
