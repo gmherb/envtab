@@ -1,10 +1,13 @@
 package templates
 
 import (
+	"embed"
 	"fmt"
 	"log/slog"
 	"os"
 	"path/filepath"
+	"strings"
+	"sync"
 
 	"github.com/gmherb/envtab/internal/backends"
 	"github.com/gmherb/envtab/internal/config"
@@ -18,6 +21,62 @@ type LoadoutTemplate struct {
 
 type LoadoutTemplates struct {
 	Templates map[string]LoadoutTemplate `json:"templates" yaml:"templates"`
+}
+
+//go:embed embedded/*.env
+var embeddedTemplatesFS embed.FS
+
+var (
+	embeddedTemplates     *LoadoutTemplates
+	embeddedTemplatesOnce sync.Once
+)
+
+// getEmbeddedTemplates loads templates from embedded .env files
+func getEmbeddedTemplates() LoadoutTemplates {
+	embeddedTemplatesOnce.Do(func() {
+		templates := make(map[string]LoadoutTemplate)
+
+		entries, err := embeddedTemplatesFS.ReadDir("embedded")
+		if err != nil {
+			// If we can't read the embedded directory, return empty templates
+			embeddedTemplates = &LoadoutTemplates{Templates: templates}
+			return
+		}
+
+		for _, entry := range entries {
+			name := entry.Name()
+			if !strings.HasSuffix(name, ".env") {
+				continue
+			}
+
+			templateName := strings.TrimSuffix(name, ".env")
+			data, err := embeddedTemplatesFS.ReadFile("embedded/" + name)
+			if err != nil {
+				continue
+			}
+
+			// Parse .env file to get keys
+			envEntries, err := backends.ParseDotenvContent(data)
+			if err != nil {
+				continue
+			}
+
+			// Convert map keys to slice (entries list)
+			keys := make([]string, 0, len(envEntries))
+			for key := range envEntries {
+				keys = append(keys, key)
+			}
+
+			templates[templateName] = LoadoutTemplate{
+				Description: fmt.Sprintf("Template: %s", templateName),
+				Entries:     keys,
+			}
+		}
+
+		embeddedTemplates = &LoadoutTemplates{Templates: templates}
+	})
+
+	return *embeddedTemplates
 }
 
 func MakeLoadoutFromTemplate(templateName string, force bool) loadout.Loadout {
@@ -52,7 +111,8 @@ func MakeLoadoutFromTemplate(templateName string, force bool) loadout.Loadout {
 		found = true
 	} else {
 		// Fall back to embedded templates
-		if embeddedTemplate, exists := envtabTemplates.Templates[templateName]; exists {
+		embeddedTemplates := getEmbeddedTemplates()
+		if embeddedTemplate, exists := embeddedTemplates.Templates[templateName]; exists {
 			template = embeddedTemplate
 			found = true
 			slog.Debug("using embedded template", "template", templateName)
@@ -62,8 +122,9 @@ func MakeLoadoutFromTemplate(templateName string, force bool) loadout.Loadout {
 	if !found {
 		fmt.Printf("ERROR: Template [%s] not found. Available templates: ", templateName)
 		// List available templates
-		templateNames := make([]string, 0, len(envtabTemplates.Templates))
-		for name := range envtabTemplates.Templates {
+		embeddedTemplates := getEmbeddedTemplates()
+		templateNames := make([]string, 0, len(embeddedTemplates.Templates))
+		for name := range embeddedTemplates.Templates {
 			templateNames = append(templateNames, name)
 		}
 		for i, name := range templateNames {

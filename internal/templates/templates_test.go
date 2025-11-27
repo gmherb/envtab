@@ -25,7 +25,7 @@ func TestMakeLoadoutFromTemplate_EmbeddedTemplate(t *testing.T) {
 				"AWS_DEFAULT_REGION",
 				"AWS_PROFILE",
 			},
-			expectedDesc:   "Amazon Web Services Template",
+			expectedDesc:   "Template: aws",
 			expectedValues: map[string]string{},
 		},
 		{
@@ -36,7 +36,7 @@ func TestMakeLoadoutFromTemplate_EmbeddedTemplate(t *testing.T) {
 				"GCLOUD_PROJECT",
 				"GOOGLE_CLOUD_PROJECT",
 			},
-			expectedDesc:   "Google Cloud Platform Template",
+			expectedDesc:   "Template: gcp",
 			expectedValues: map[string]string{},
 		},
 		{
@@ -49,7 +49,7 @@ func TestMakeLoadoutFromTemplate_EmbeddedTemplate(t *testing.T) {
 				"PGUSER",
 				"PGPASSWORD",
 			},
-			expectedDesc:   "PostgreSQL Database Template",
+			expectedDesc:   "Template: pgsql",
 			expectedValues: map[string]string{},
 		},
 	}
