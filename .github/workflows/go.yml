@@ -17,7 +17,7 @@ jobs:
     - uses: actions/checkout@v4
 
     - name: Debug workspace
-      run: pwd; ls -la; find . -maxdepth 6 -type f -name "*.env" -print; ls -ltr templates/embedded/
+      run: pwd; ls -la; find . -maxdepth 6 -type f -name "*.env" -print; ls -ltr internal/templates/embedded/
 
 
     - name: Set up Go
