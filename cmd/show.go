@@ -22,7 +22,7 @@ var showCmd = &cobra.Command{
 	Long:                  `Show each loadout with active entries (environment variables). Optional glob patterns can be provided to filter results. If multiple patterns are provided, loadouts matching any pattern will be shown.`,
 	Args:                  cobra.ArbitraryArgs,
 	SuggestFor:            []string{"status"},
-	Aliases:               []string{"sh", "sho"},
+	Aliases:               []string{"s", "sh", "sho"},
 	DisableFlagsInUseLine: true,
 	Example: `  envtab show
   envtab show aws-*
