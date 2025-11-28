@@ -237,6 +237,8 @@ This encrypts the entire file, including metadata. The file can be edited direct
 $ sops ~/.envtab/secrets.yaml
 ```
 
+NOTE: File encryption will be faster if multiple encrypted values exist in a single loadout.
+
 ### Automatic Decryption
 
 Encrypted values are automatically decrypted when exporting:
