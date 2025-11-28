@@ -148,7 +148,14 @@ func (l Loadout) Export() {
 				// SOPS metadata is preserved in the encrypted value string
 				decrypted, err := crypto.SOPSDecryptValue(value)
 				if err != nil {
-					// Check if it's a key rotation issue
+					// Check if SOPS is not available - skip silently in that case
+					// This allows shell scripts to continue working even without SOPS
+					errStr := err.Error()
+					if strings.Contains(strings.ToLower(errStr), "sops command not found") {
+						slog.Debug("skipping encrypted entry - SOPS not available", "key", key)
+						continue
+					}
+					// For other decryption failures, show error messages
 					if utils.Contains(err.Error(), "keys may have been rotated") {
 						fmt.Fprintf(os.Stderr, "WARNING: Cannot decrypt %s - encryption keys may have been rotated. Skipping.\n", key)
 						fmt.Fprintf(os.Stderr, "         To fix: re-encrypt the loadout with current keys using 'envtab reencrypt'\n")

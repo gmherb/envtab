@@ -91,7 +91,8 @@ func ReadLoadout(name string) (*loadout.Loadout, error) {
 			// Provide helpful error messages
 			errStr := err.Error()
 			if strings.Contains(strings.ToLower(errStr), "sops command not found") {
-				return nil, fmt.Errorf("SOPS is not installed. Install SOPS to read encrypted loadouts: https://github.com/getsops/sops")
+				// Return a special error that can be handled gracefully
+				return nil, fmt.Errorf("SOPS_NOT_INSTALLED: SOPS is not installed. Install SOPS to read encrypted loadouts: https://github.com/getsops/sops")
 			}
 			if strings.Contains(strings.ToLower(errStr), "keys may have been rotated") {
 				return nil, fmt.Errorf("cannot decrypt loadout: encryption keys may have been rotated. Use 'envtab reencrypt %s' to re-encrypt with current keys: %w", name, err)
@@ -450,4 +451,3 @@ func ImportFromDotenv(loadout *loadout.Loadout, dotenvFile string) error {
 
 	return nil
 }
-

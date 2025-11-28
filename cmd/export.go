@@ -6,6 +6,7 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/gmherb/envtab/internal/backends"
 	"github.com/gmherb/envtab/internal/config"
@@ -42,6 +43,12 @@ var exportCmd = &cobra.Command{
 
 			loadout, err := backends.ReadLoadout(loadoutName)
 			if err != nil {
+				// Skip loadout if SOPS is not installed (for encrypted loadouts)
+				errStr := err.Error()
+				if strings.Contains(errStr, "SOPS_NOT_INSTALLED") {
+					fmt.Fprintf(os.Stderr, "WARNING: Skipping loadout %s - SOPS is not installed. Install SOPS to read encrypted loadouts: https://github.com/getsops/sops\n", loadoutName)
+					continue
+				}
 				fmt.Printf("ERROR: Failure reading loadout [%s]: %s\n", loadoutName, err)
 				os.Exit(1)
 			}
