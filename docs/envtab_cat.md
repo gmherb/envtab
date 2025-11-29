@@ -4,7 +4,7 @@ Concatenate envtab loadouts to stdout
 
 ### Synopsis
 
-Concatenate envtab loadouts to stdout.
+Concatenate envtab loadouts to stdout. By default, shows encrypted values as-is. Use --decrypt to decrypt file-level and value-level encrypted entries.
 
 ```
 envtab cat LOADOUT_NAME [LOADOUT_NAME ...] [flags]
@@ -15,11 +15,14 @@ envtab cat LOADOUT_NAME [LOADOUT_NAME ...] [flags]
 ```
   envtab cat myloadout
   envtab cat myloadout1 myloadout2 myloadout3
+  envtab cat myloadout --decrypt
+  envtab cat myloadout --decrypt --output decrypted.yaml
 ```
 
 ### Options
 
 ```
+  -d, --decrypt         Decrypt file-level and value-level encrypted entries (default: show encrypted values)
   -h, --help            help for cat
   -o, --output string   Write loadout YAML to file instead of stdout (only for single loadout)
 ```

@@ -12,6 +12,7 @@ build: docs
 	@go build -o $(NAME)
 	@chmod +x $(NAME)
 
+.PHONY: docs
 docs:
 	@go run ./tools/gen-docs.go
 
