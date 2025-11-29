@@ -17,7 +17,7 @@
   - [Viewing Decrypted Values](#viewing-decrypted-values)
   - [Automatic Decryption](#automatic-decryption)
   - [Editing Encrypted Loadouts](#editing-encrypted-loadouts)
-- [Importing from URLs and sharing via Git](#importing-from-urls-and-sharing-via-git)
+- [Importing Loadouts and dotenv Files](#importing-loadouts-and-dotenv-files)
 - [Generating CLI documentation](#generating-cli-documentation)
 - [TODO](#todo)
 
@@ -273,7 +273,7 @@ $ envtab edit production
 # After saving, they are automatically re-encrypted
 ```
 
-# Importing Loadouts and dotenv
+# Importing Loadouts and dotenv Files
 
 envtab imports entire loadouts from .yaml files. It also can import variables from .env files.
 
