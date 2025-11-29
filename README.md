@@ -16,7 +16,6 @@
 - [Importing from URLs and sharing via Git](#importing-from-urls-and-sharing-via-git)
 - [Generating CLI documentation](#generating-cli-documentation)
 - [TODO](#todo)
-- [Done](#done)
 
 ## Usage
 
