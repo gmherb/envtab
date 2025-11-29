@@ -21,6 +21,7 @@ Available Commands:
   edit        Edit envtab loadout
   export      Export envtab loadout
   help        Help about any command
+  import      Import environment variables from a .env file
   login       Export all login loadouts
   list        List all envtab loadouts
   make        Make loadout from a template
