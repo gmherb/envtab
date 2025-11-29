@@ -5,6 +5,7 @@ package cmd
 
 import (
 	"fmt"
+	"log/slog"
 	"os"
 	"strings"
 
@@ -33,7 +34,7 @@ Multiple tags can be provided using space or comma as a separator.`,
 	Args:                  cobra.MinimumNArgs(2),
 	Aliases:               []string{"a", "ad"},
 	Run: func(cmd *cobra.Command, args []string) {
-		logger.Debug("add command called")
+		slog.Debug("add command called")
 
 		var (
 			name    string   // envtab loadout name
@@ -46,19 +47,19 @@ Multiple tags can be provided using space or comma as a separator.`,
 		encryptFile, _ := cmd.Flags().GetBool("encrypt-file")
 
 		if len(args) == 2 && !strings.Contains(args[1], "=") {
-			logger.Debug("No value provided for your envtab entry. No equal sign detected and only 2 args provided.")
+			slog.Debug("No value provided for your envtab entry. No equal sign detected and only 2 args provided.")
 			cmd.Usage()
 			os.Exit(1)
 		}
 
 		name = args[0]
 		if strings.Contains(args[1], "=") {
-			logger.Debug("Equal sign detected in second argument. Splitting into key and value.")
+			slog.Debug("Equal sign detected in second argument. Splitting into key and value.")
 			key, value = strings.Split(args[1], "=")[0], strings.Split(args[1], "=")[1]
 			newTags = args[2:]
 
 		} else {
-			logger.Debug("No equal sign detected in second argument. Assigning second argument as key.")
+			slog.Debug("No equal sign detected in second argument. Assigning second argument as key.")
 			key = args[1]
 			value = args[2]
 			newTags = args[3:]
@@ -68,7 +69,7 @@ Multiple tags can be provided using space or comma as a separator.`,
 		newTags = tags.RemoveEmptyTags(newTags)
 		newTags = tags.RemoveDuplicateTags(newTags)
 
-		logger.Debug("parsing arguments", "name", name, "key", key, "value", "[REDACTED]", "tags", newTags)
+		slog.Debug("parsing arguments", "name", name, "key", key, "value", "[REDACTED]", "tags", newTags)
 
 		// Check if loadout exists and determine encryption type
 		isFileEncrypted := backends.IsLoadoutFileEncrypted(name)

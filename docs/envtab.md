@@ -9,7 +9,7 @@ Take control of your environment.
 ### Options
 
 ```
-      --config string   config file (default is $HOME/.envtab/.envtab.yaml)
+      --config string   config file (default is $HOME/.envtab/.envtab.yaml) (default "c")
   -h, --help            help for envtab
 ```
 

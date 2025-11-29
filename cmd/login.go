@@ -5,6 +5,7 @@ package cmd
 
 import (
 	"fmt"
+	"log/slog"
 	"os"
 	"strings"
 
@@ -28,24 +29,24 @@ by running "envtab login --disable".`,
   envtab login --disable
   envtab login --status`,
 	Run: func(cmd *cobra.Command, args []string) {
-		logger.Debug("login called")
+		slog.Debug("login called")
 
 		enable, _ := cmd.Flags().GetBool("enable")
 		disable, _ := cmd.Flags().GetBool("disable")
 		status, _ := cmd.Flags().GetBool("status")
 
 		if enable {
-			logger.Debug("enabling login")
+			slog.Debug("enabling login")
 			login.EnableLogin()
 			return
 		}
 		if disable {
-			logger.Debug("disabling login")
+			slog.Debug("disabling login")
 			login.DisableLogin()
 			return
 		}
 		if status {
-			logger.Debug("showing status")
+			slog.Debug("showing status")
 			login.ShowLoginStatus()
 			return
 		}
@@ -84,10 +85,10 @@ func exportLoginLoadouts() {
 		}
 
 		if lo.Metadata.Login {
-			logger.Debug("loadout has login enabled", "loadout", loadout)
+			slog.Debug("loadout has login enabled", "loadout", loadout)
 			lo.Export()
 		} else {
-			logger.Debug("loadout has login disabled", "loadout", loadout)
+			slog.Debug("loadout has login disabled", "loadout", loadout)
 		}
 	}
 }

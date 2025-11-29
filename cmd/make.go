@@ -5,6 +5,7 @@ package cmd
 
 import (
 	"fmt"
+	"log/slog"
 	"os"
 
 	"github.com/gmherb/envtab/internal/backends"
@@ -36,9 +37,9 @@ You can also create custom templates in ~/.envtab/templates/.`,
 	Example:    `  envtab make myloadout aws`,
 	Args:       cobra.ExactArgs(2),
 	SuggestFor: []string{"create", "new"},
-	Aliases:    []string{"m", "mk"},
+	Aliases:    []string{"m", "mk", "ma", "mak"},
 	Run: func(cmd *cobra.Command, args []string) {
-		logger.Debug("make called")
+		slog.Debug("make called")
 
 		loadoutName := args[0]
 		templateName := args[1]

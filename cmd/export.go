@@ -5,6 +5,7 @@ package cmd
 
 import (
 	"fmt"
+	"log/slog"
 	"os"
 	"strings"
 
@@ -25,7 +26,7 @@ var exportCmd = &cobra.Command{
 	SuggestFor:            []string{"load", "source", "."},
 	Aliases:               []string{"ex", "exp", "expo"},
 	Run: func(cmd *cobra.Command, args []string) {
-		logger.Debug("export called")
+		slog.Debug("export called")
 
 		envtabPath := config.InitEnvtab("")
 
@@ -34,7 +35,7 @@ var exportCmd = &cobra.Command{
 			loadoutName := arg
 			loadoutPath := envtabPath + `/` + loadoutName + `.yaml`
 
-			logger.Debug("exporting loadout", "loadout", loadoutName, "path", loadoutPath)
+			slog.Debug("exporting loadout", "loadout", loadoutName, "path", loadoutPath)
 
 			if _, err := os.Stat(loadoutPath); os.IsNotExist(err) {
 				fmt.Printf("ERROR: Loadout [%s] does not exist\n", loadoutName)

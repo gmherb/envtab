@@ -4,7 +4,9 @@ Show active loadouts
 
 ### Synopsis
 
-Show each loadout with active entries (environment variables). Optional glob patterns can be provided to filter results. If multiple patterns are provided, loadouts matching any pattern will be shown.
+Show each loadout with active entries (environment variables).
+Optional glob patterns can be provided to filter results.
+If multiple patterns are provided, loadouts matching any pattern will be shown.
 
 ```
 envtab show [LOADOUT_PATTERN...]
@@ -29,7 +31,7 @@ envtab show [LOADOUT_PATTERN...]
 ### Options inherited from parent commands
 
 ```
-      --config string   config file (default is $HOME/.envtab/.envtab.yaml)
+      --config string   config file (default is $HOME/.envtab/.envtab.yaml) (default "c")
 ```
 
 ### SEE ALSO

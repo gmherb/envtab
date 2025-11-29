@@ -4,6 +4,8 @@ Copyright © 2024 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
+	"log/slog"
+
 	"github.com/gmherb/envtab/internal/backends"
 	"github.com/spf13/cobra"
 )
@@ -18,9 +20,9 @@ var removeCmd = &cobra.Command{
 	SuggestFor: []string{"delete", "del"},
 	Aliases:    []string{"r", "rm"},
 	Run: func(cmd *cobra.Command, args []string) {
-		logger.Debug("remove called")
+		slog.Debug("remove called")
 		for _, loadout := range args {
-			logger.Debug("removing loadout", "loadout", loadout)
+			slog.Debug("removing loadout", "loadout", loadout)
 			backends.RemoveLoadout(loadout)
 		}
 	},

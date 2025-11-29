@@ -5,6 +5,7 @@ package cmd
 
 import (
 	"fmt"
+	"log/slog"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -36,16 +37,16 @@ If no options are provided, enter editor to manually edit a envtab loadout.`,
 	Args:    cobra.ExactArgs(1),
 	Aliases: []string{"ed", "edi"},
 	Run: func(cmd *cobra.Command, args []string) {
-		logger.Debug("edit called")
+		slog.Debug("edit called")
 
 		loadoutName := args[0]
-		logger.Debug("editing loadout", "loadout", loadoutName)
+		slog.Debug("editing loadout", "loadout", loadoutName)
 
 		loadoutModified := false
 
 		// If --name is set, rename the loadout
 		if name, _ := cmd.Flags().GetString("name"); name != "" {
-			logger.Debug("renaming loadout", "old", loadoutName, "new", name)
+			slog.Debug("renaming loadout", "old", loadoutName, "new", name)
 			err := backends.RenameLoadout(loadoutName, name)
 			if err != nil {
 				fmt.Printf("ERROR: Failure renaming loadout [%s] to [%s]: %s\n", loadoutName, name, err)
@@ -69,21 +70,21 @@ If no options are provided, enter editor to manually edit a envtab loadout.`,
 
 		// If --description is set, update the loadout description
 		if description, _ := cmd.Flags().GetString("description"); description != "" {
-			logger.Debug("updating loadout description", "loadout", loadoutName, "description", description)
+			slog.Debug("updating loadout description", "loadout", loadoutName, "description", description)
 			lo.UpdateDescription(description)
 			loadoutModified = true
 		}
 
 		// If --login is set, enable loadout on login
 		if login, _ := cmd.Flags().GetBool("login"); login {
-			logger.Debug("enabling loadout on login", "loadout", loadoutName)
+			slog.Debug("enabling loadout on login", "loadout", loadoutName)
 			lo.UpdateLogin(true)
 			loadoutModified = true
 		}
 
 		// If --no-login is set, disable loadout on login
 		if noLogin, _ := cmd.Flags().GetBool("no-login"); noLogin {
-			logger.Debug("disabling loadout on login", "loadout", loadoutName)
+			slog.Debug("disabling loadout on login", "loadout", loadoutName)
 			lo.UpdateLogin(false)
 			loadoutModified = true
 		}
@@ -96,14 +97,14 @@ If no options are provided, enter editor to manually edit a envtab loadout.`,
 			newTags = tags.RemoveEmptyTags(newTags)
 			newTags = tags.RemoveDuplicateTags(newTags)
 
-			logger.Debug("updating loadout tags", "loadout", loadoutName, "tags", newTags)
+			slog.Debug("updating loadout tags", "loadout", loadoutName, "tags", newTags)
 
 			lo.UpdateTags(newTags)
 			loadoutModified = true
 		}
 
 		if loadoutModified {
-			logger.Debug("writing loadout", "loadout", loadoutName)
+			slog.Debug("writing loadout", "loadout", loadoutName)
 
 			// Preserve SOPS encryption if the file was originally encrypted
 			if isSOPSEncrypted {

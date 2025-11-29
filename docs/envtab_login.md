@@ -34,7 +34,7 @@ envtab login [flags]
 ### Options inherited from parent commands
 
 ```
-      --config string   config file (default is $HOME/.envtab/.envtab.yaml)
+      --config string   config file (default is $HOME/.envtab/.envtab.yaml) (default "c")
 ```
 
 ### SEE ALSO

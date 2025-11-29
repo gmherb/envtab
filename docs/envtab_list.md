@@ -4,9 +4,10 @@ List all envtab loadouts
 
 ### Synopsis
 
-List all envtab loadouts. Optional glob patterns can be provided to narrow results. If multiple patterns are provided, loadouts matching any pattern will be shown. If the --long flag is provided, then
-print the long listing format which includes the loadout name, tags, and other
-metadata.
+List all envtab loadouts. Optional glob patterns can be provided to
+narrow results. If multiple patterns are provided, loadouts matching any
+pattern will be shown. If the --long flag is provided, then print the long
+listing format which includes the loadout name, tags, and other metadata.
 
 ```
 envtab list [LOADOUT_PATTERN...] [flags]
@@ -33,7 +34,7 @@ envtab list [LOADOUT_PATTERN...] [flags]
 ### Options inherited from parent commands
 
 ```
-      --config string   config file (default is $HOME/.envtab/.envtab.yaml)
+      --config string   config file (default is $HOME/.envtab/.envtab.yaml) (default "c")
 ```
 
 ### SEE ALSO

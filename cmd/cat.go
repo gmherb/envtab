@@ -5,6 +5,7 @@ package cmd
 
 import (
 	"fmt"
+	"log/slog"
 	"os"
 	"path/filepath"
 	"strings"
@@ -21,15 +22,18 @@ var catDecrypt bool
 var catCmd = &cobra.Command{
 	Use:   "cat LOADOUT_NAME [LOADOUT_NAME ...]",
 	Short: "Concatenate envtab loadouts to stdout",
-	Long:  `Concatenate envtab loadouts to stdout. By default, shows encrypted values as-is. Use --decrypt to decrypt file-level and value-level encrypted entries.`,
+	Long: `Concatenate envtab loadouts to stdout.
+By default, shows encrypted values/files. If the --decrypt flag is provided,
+then the values/files will be decrypted and shown in cleartext.`,
 	Example: `  envtab cat myloadout
   envtab cat myloadout1 myloadout2 myloadout3
   envtab cat myloadout --decrypt
   envtab cat myloadout --decrypt --output decrypted.yaml`,
-	Args:    cobra.MinimumNArgs(1),
-	Aliases: []string{"c", "ca", "print"},
+	Args:       cobra.MinimumNArgs(1),
+	SuggestFor: []string{"print", "display"},
+	Aliases:    []string{"c", "ca"},
 	Run: func(cmd *cobra.Command, args []string) {
-		logger.Debug("cat called")
+		slog.Debug("cat called with args", "args", args)
 
 		// If --output is set, enforce exactly one loadout and write to file
 		if catOutputPath != "" {

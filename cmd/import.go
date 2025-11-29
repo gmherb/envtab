@@ -5,12 +5,13 @@ package cmd
 
 import (
 	"fmt"
+	"io"
+	"log/slog"
 	"net/http"
+	"net/url"
 	"os"
 	"path"
 	"time"
-	"net/url"
-	"io"
 
 	"github.com/gmherb/envtab/internal/backends"
 	"github.com/gmherb/envtab/internal/loadout"
@@ -22,7 +23,8 @@ import (
 var importCmd = &cobra.Command{
 	Use:   "import",
 	Short: "Import environment variables or loadouts",
-	Long:  `Import environment variables from a .env file (merge) or a full loadout from YAML (.yaml|.yml). Supports local files and HTTP(S) URLs.`,
+	Long: `Import environment variables from a .env file (merge) or a full
+loadout from YAML (.yaml|.yml). Supports local files and HTTP(S) URLs.`,
 	Example: `  # Local .env into existing loadout (merge)
   envtab import myloadout ./config.env
 
@@ -35,6 +37,7 @@ var importCmd = &cobra.Command{
   # Remote YAML loadout (replace/create)
   envtab import myloadout --url https://raw.githubusercontent.com/org/repo/branch/loadouts/prod.yaml`,
 	Args: func(cmd *cobra.Command, args []string) error {
+		slog.Debug("import called with args", "args", args)
 		if importURL != "" {
 			if len(args) != 1 {
 				return fmt.Errorf("when using --url, provide exactly one argument: LOADOUT_NAME")
@@ -48,13 +51,13 @@ var importCmd = &cobra.Command{
 	},
 	Aliases: []string{"i", "im", "imp", "import"},
 	Run: func(cmd *cobra.Command, args []string) {
-		logger.Debug("import called")
+		slog.Debug("import called")
 		loadoutName := args[0]
 
 		// URL-based import path
 		if importURL != "" {
 			if err := importFromURL(loadoutName, importURL); err != nil {
-				logger.Error("failure importing from URL", "url", importURL, "error", err)
+				slog.Error("failure importing from URL", "url", importURL, "error", err)
 				os.Exit(1)
 			}
 			return
@@ -67,43 +70,43 @@ var importCmd = &cobra.Command{
 		case ".env":
 			lo, err := backends.ReadLoadout(loadoutName)
 			if err != nil && !os.IsNotExist(err) {
-				logger.Error("failure reading loadout", "loadout", loadoutName, "error", err)
+				slog.Error("failure reading loadout", "loadout", loadoutName, "error", err)
 				os.Exit(1)
 			}
 			if os.IsNotExist(err) {
 				lo = loadout.InitLoadout()
 			}
 			if err := backends.ImportFromDotenv(lo, inputPath); err != nil {
-				logger.Error("failure importing from dotenv file", "file", inputPath, "error", err)
+				slog.Error("failure importing from dotenv file", "file", inputPath, "error", err)
 				os.Exit(1)
 			}
 			if err := backends.WriteLoadout(loadoutName, lo); err != nil {
-				logger.Error("failure writing loadout", "loadout", loadoutName, "error", err)
+				slog.Error("failure writing loadout", "loadout", loadoutName, "error", err)
 				os.Exit(1)
 			}
 			fmt.Printf("Imported environment variables from [%s] into loadout [%s]\n", inputPath, loadoutName)
 		case ".yaml", ".yml":
 			data, err := os.ReadFile(inputPath)
 			if err != nil {
-				logger.Error("failure reading YAML file", "file", inputPath, "error", err)
+				slog.Error("failure reading YAML file", "file", inputPath, "error", err)
 				os.Exit(1)
 			}
 			if err := loadout.ValidateLoadoutYAML(data); err != nil {
-				logger.Error("invalid loadout YAML", "file", inputPath, "error", err)
+				slog.Error("invalid loadout YAML", "file", inputPath, "error", err)
 				os.Exit(1)
 			}
 			var lo loadout.Loadout
 			if err := yaml.Unmarshal(data, &lo); err != nil {
-				logger.Error("failure parsing loadout YAML", "file", inputPath, "error", err)
+				slog.Error("failure parsing loadout YAML", "file", inputPath, "error", err)
 				os.Exit(1)
 			}
 			if err := backends.WriteLoadout(loadoutName, &lo); err != nil {
-				logger.Error("failure writing loadout", "loadout", loadoutName, "error", err)
+				slog.Error("failure writing loadout", "loadout", loadoutName, "error", err)
 				os.Exit(1)
 			}
 			fmt.Printf("Imported loadout YAML from [%s] into loadout [%s]\n", inputPath, loadoutName)
 		default:
-			logger.Error("unsupported file extension; expected .env, .yaml, or .yml", "file", inputPath)
+			slog.Error("unsupported file extension; expected .env, .yaml, or .yml", "file", inputPath)
 			os.Exit(1)
 		}
 	},

@@ -4,7 +4,8 @@ Import environment variables or loadouts
 
 ### Synopsis
 
-Import environment variables from a .env file (merge) or a full loadout from YAML (.yaml|.yml). Supports local files and HTTP(S) URLs.
+Import environment variables from a .env file (merge) or a full
+loadout from YAML (.yaml|.yml). Supports local files and HTTP(S) URLs.
 
 ```
 envtab import [flags]
@@ -36,7 +37,7 @@ envtab import [flags]
 ### Options inherited from parent commands
 
 ```
-      --config string   config file (default is $HOME/.envtab/.envtab.yaml)
+      --config string   config file (default is $HOME/.envtab/.envtab.yaml) (default "c")
 ```
 
 ### SEE ALSO

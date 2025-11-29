@@ -4,7 +4,9 @@ Concatenate envtab loadouts to stdout
 
 ### Synopsis
 
-Concatenate envtab loadouts to stdout. By default, shows encrypted values as-is. Use --decrypt to decrypt file-level and value-level encrypted entries.
+Concatenate envtab loadouts to stdout.
+By default, shows encrypted values/files. If the --decrypt flag is provided,
+then the values/files will be decrypted and shown in cleartext.
 
 ```
 envtab cat LOADOUT_NAME [LOADOUT_NAME ...] [flags]
@@ -30,7 +32,7 @@ envtab cat LOADOUT_NAME [LOADOUT_NAME ...] [flags]
 ### Options inherited from parent commands
 
 ```
-      --config string   config file (default is $HOME/.envtab/.envtab.yaml)
+      --config string   config file (default is $HOME/.envtab/.envtab.yaml) (default "c")
 ```
 
 ### SEE ALSO

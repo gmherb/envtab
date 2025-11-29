@@ -5,6 +5,7 @@ package cmd
 
 import (
 	"fmt"
+	"log/slog"
 	"os"
 	"path/filepath"
 	"strings"
@@ -12,8 +13,8 @@ import (
 	"time"
 
 	"github.com/gmherb/envtab/internal/backends"
-	"github.com/gmherb/envtab/pkg/sops"
 	"github.com/gmherb/envtab/internal/env"
+	"github.com/gmherb/envtab/pkg/sops"
 
 	"github.com/spf13/cobra"
 )
@@ -21,9 +22,10 @@ import (
 var listCmd = &cobra.Command{
 	Use:   "list [LOADOUT_PATTERN...]",
 	Short: "List all envtab loadouts",
-	Long: `List all envtab loadouts. Optional glob patterns can be provided to narrow results. If multiple patterns are provided, loadouts matching any pattern will be shown. If the --long flag is provided, then
-print the long listing format which includes the loadout name, tags, and other
-metadata.`,
+	Long: `List all envtab loadouts. Optional glob patterns can be provided to
+narrow results. If multiple patterns are provided, loadouts matching any
+pattern will be shown. If the --long flag is provided, then print the long
+listing format which includes the loadout name, tags, and other metadata.`,
 	Example: `  envtab list
   envtab list -l
   envtab list --long
@@ -31,16 +33,16 @@ metadata.`,
   envtab list -l *staging*
   envtab list aws-* gcp-*`,
 	Args:    cobra.ArbitraryArgs,
-	Aliases: []string{"l", "ls"},
+	Aliases: []string{"l", "ls", "lis"},
 	Run: func(cmd *cobra.Command, args []string) {
-		logger.Debug("list called")
+		slog.Debug("list called with args", "args", args)
 
 		if long, _ := cmd.Flags().GetBool("long"); long {
-			logger.Debug("long listing format")
+			slog.Debug("long listing format")
 			ListEnvtabLoadouts(args)
 
 		} else {
-			logger.Debug("short listing format")
+			slog.Debug("short listing format")
 			PrintEnvtabLoadouts(args)
 		}
 	},

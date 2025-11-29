@@ -5,6 +5,7 @@ package cmd
 
 import (
 	"fmt"
+	"log/slog"
 	"os"
 	"path/filepath"
 	"strings"
@@ -17,9 +18,11 @@ import (
 )
 
 var showCmd = &cobra.Command{
-	Use:                   "show [LOADOUT_PATTERN...]",
-	Short:                 "Show active loadouts",
-	Long:                  `Show each loadout with active entries (environment variables). Optional glob patterns can be provided to filter results. If multiple patterns are provided, loadouts matching any pattern will be shown.`,
+	Use:   "show [LOADOUT_PATTERN...]",
+	Short: "Show active loadouts",
+	Long: `Show each loadout with active entries (environment variables).
+Optional glob patterns can be provided to filter results.
+If multiple patterns are provided, loadouts matching any pattern will be shown.`,
 	Args:                  cobra.ArbitraryArgs,
 	SuggestFor:            []string{"status"},
 	Aliases:               []string{"s", "sh", "sho"},
@@ -29,7 +32,7 @@ var showCmd = &cobra.Command{
   envtab show production
   envtab show aws-* gcp-*`,
 	Run: func(cmd *cobra.Command, args []string) {
-		logger.Debug("show called")
+		slog.Debug("show called with args", "args", args)
 		showSensitive, _ := cmd.Flags().GetBool("sensitive")
 		showActiveLoadouts(showSensitive, args)
 	},
@@ -71,6 +74,7 @@ func showActiveLoadouts(showSensitive bool, patterns []string) {
 			// Skip loadout if SOPS is not installed (for encrypted loadouts)
 			errStr := err.Error()
 			if strings.Contains(errStr, "SOPS_NOT_INSTALLED") {
+				slog.Debug("SOPS not installed, skipping loadout", "loadout", loadout)
 				fmt.Fprintf(os.Stderr, "WARNING: Skipping loadout %s - SOPS is not installed. Install SOPS to read encrypted loadouts: https://github.com/getsops/sops\n", loadout)
 				continue
 			}

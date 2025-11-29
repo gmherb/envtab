@@ -14,10 +14,6 @@ import (
 	"github.com/spf13/viper"
 )
 
-// logger is a structured logger that writes to stderr
-// This allows separating debug logs from normal output (which goes to stdout)
-var logger *slog.Logger
-
 // cfgFile is the path to the config file
 var cfgFile string
 
@@ -48,12 +44,28 @@ func parseLogLevel() slog.Level {
 }
 
 func init() {
-	// Initialize logger to write to stderr
+	// Initialize default logger to write to stderr
 	// This ensures debug logs don't interfere with normal command output
 	// Log level can be configured via ENVTAB_LOG_LEVEL environment variable or config
-	logger = slog.New(slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{
-		Level: parseLogLevel(),
-	}))
+	// We'll set it up with env var first, then update after config is loaded
+	levelStr := strings.ToUpper(os.Getenv("ENVTAB_LOG_LEVEL"))
+	var level slog.Level
+	switch levelStr {
+	case "DEBUG":
+		level = slog.LevelDebug
+	case "INFO":
+		level = slog.LevelInfo
+	case "WARN", "WARNING":
+		level = slog.LevelWarn
+	case "ERROR":
+		level = slog.LevelError
+	default:
+		level = slog.LevelInfo
+	}
+
+	slog.SetDefault(slog.New(slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{
+		Level: level,
+	})))
 
 	// Initialize Viper
 	cobra.OnInitialize(initConfig)
@@ -96,10 +108,15 @@ func initConfig() {
 
 	// If a config file is found, read it in.
 	if err := viper.ReadInConfig(); err == nil {
-		logger.Debug("Using config file", "file", viper.ConfigFileUsed())
+		slog.Debug("Using config file", "file", viper.ConfigFileUsed())
+		// Update default logger with log level from config if it differs
+		configLevel := parseLogLevel()
+		slog.SetDefault(slog.New(slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{
+			Level: configLevel,
+		})))
 	} else {
 		// Config file not found; ignore if missing
-		logger.Debug("No config file found, using defaults", "error", err)
+		slog.Debug("No config file found, using defaults", "error", err)
 	}
 }
 
@@ -128,7 +145,7 @@ func init() {
 	// Cobra supports persistent flags, which, if defined here,
 	// will be global for your application.
 
-	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.envtab/.envtab.yaml)")
+	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "c", "config file (default is $HOME/.envtab/.envtab.yaml)")
 
 	// Cobra also supports local flags, which will only run
 	// when this action is called directly.
