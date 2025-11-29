@@ -13,8 +13,8 @@
   - [PATH](#path)
   - [Environment variables other than PATH](#environment-variables-other-than-path)
 - [Encrypting Sensitive Values](#encrypting-sensitive-values)
-- [Generating CLI documentation](#generating-cli-documentation)
 - [Importing from URLs and sharing via Git](#importing-from-urls-and-sharing-via-git)
+- [Generating CLI documentation](#generating-cli-documentation)
 - [TODO](#todo)
 - [Done](#done)
 
@@ -270,23 +270,8 @@ creation_rules:
 
 For more details, see [SOPS_INTEGRATION.md](SOPS_INTEGRATION.md).
 
-## Generating CLI documentation
 
-This project includes a small tool that uses Cobra's `doc` package to generate Markdown docs for all commands.
-
-- **Generate docs into the `docs/` directory**:
-
-  ```text
-  make docs
-  ```
-
-This runs `go run ./tools/gen-docs.go` and produces per-command Markdown files and a top-level `docs/envtab.md` that reflect the current CLI.*** End Patch```} -->
-*** End Patch
-  make docs
-
-This runs `go run ./tools/gen-docs.go` and produces per-command Markdown files and a top-level `docs/envtab.md` that reflect the current CLI.
-
-### Importing from URLs and sharing via Git
+## Importing from URLs and sharing via Git
 
 - **Import from local files (by extension)**:
 
@@ -316,16 +301,31 @@ This runs `go run ./tools/gen-docs.go` and produces per-command Markdown files a
 
 You can then commit and push these YAML files to GitHub or another Git host and share them with your team.
 
+## Generating CLI documentation
+
+This project includes a small tool that uses Cobra's `doc` package to generate Markdown docs for all commands.
+
+- **Generate docs into the `docs/` directory**:
+
+  ```text
+  make docs
+  ```
+
+This runs `go run ./tools/gen-docs.go` and produces per-command Markdown files and a top-level `docs/envtab.md` that reflect the current CLI.*** End Patch```} -->
+*** End Patch
+  make docs
+
+This runs `go run ./tools/gen-docs.go` and produces per-command Markdown files and a top-level `docs/envtab.md` that reflect the current CLI.
+
 ## TODO
 
-1. Support environment variables in show; exported with eval $(envtab export loadout)
-  1a. Can we resolve all environment variables like we do with PATH?
-  1b. Add loadout priority/number to support specific load order in case entries build upon environment variable expansion.
+- Support environment variables in show; exported with eval $(envtab export loadout)
+  - Can we resolve all environment variables like we do with PATH?
+  - Add loadout priority/number to support specific load order in case entries build upon environment variable expansion.
 - Add additional backends in addition to default (file backend).
   - File (Default)
   - Vault
 - Add ability to import/export various backends (import|export subCmd)
-  - First, support .env which will be used for templates.
   - Vault, S3, GCS
 
 ### Done
