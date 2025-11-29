@@ -122,12 +122,12 @@ export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/lo
 $ $(envtab export testld)
 $ envtab show
 testld -------------------------------------------------------------- [ 1 / 1 ]
-   PATH=$PATH:/some/bin
+   PATH=$PATH:/other/bin
 ```
 
 ## Environment variables other than PATH
 
-Currently, PATH is the only officially support environment variable. You can use other envrionment variables using eval however, do not expect `envtab show` to work properly.
+Currently, PATH is the only officially support environment variable. You can use other environment variables using eval however, do not expect `envtab show` to work properly.
 
 ### Eval
 
@@ -313,10 +313,6 @@ This project includes a small tool that uses Cobra's `doc` package to generate M
   make docs
   ```
 
-This runs `go run ./tools/gen-docs.go` and produces per-command Markdown files and a top-level `docs/envtab.md` that reflect the current CLI.*** End Patch```} -->
-*** End Patch
-  make docs
-
 This runs `go run ./tools/gen-docs.go` and produces per-command Markdown files and a top-level `docs/envtab.md` that reflect the current CLI.
 
 # TODO
@@ -333,7 +329,7 @@ This runs `go run ./tools/gen-docs.go` and produces per-command Markdown files a
 ## Done
 
 - Allow passing filter/pattern arg to the listCmd. (done w/ glob)
-- Add support for PATH environemnt variable (done)
+- Add support for PATH environment variable (done)
 - Fix show for PATH environment variable (done)
 - Fix Active/Total spacing in `ls` output when counts are double, or triple digits. (done)
 - Implement `-s|--sensitive` option to the addCmd to optionally encrypt values. (done)
