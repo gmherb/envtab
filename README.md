@@ -273,9 +273,11 @@ $ envtab edit production
 # After saving, they are automatically re-encrypted
 ```
 
-# Importing from URLs and sharing via Git
+# Importing Loadouts and dotenv
 
-- **Import from local files (by extension)**:
+envtab imports entire loadouts from .yaml files. It also can import variables from .env files.
+
+## Import from local files (by extension)
 
   ```text
   # Merge a .env into an existing/new loadout
@@ -285,7 +287,7 @@ $ envtab edit production
   envtab import myloadout ./prod.yaml
   ```
 
-- **Import from remote URLs (e.g., GitHub raw)**:
+## Import from remote URLs (e.g., GitHub raw)
 
   ```text
   # Merge .env from URL into an existing/new loadout
@@ -295,10 +297,10 @@ $ envtab edit production
   envtab import myloadout --url https://raw.githubusercontent.com/org/repo/branch/loadouts/prod.yaml
   ```
 
-- **Write a loadout YAML to a file for versioning in Git**:
+## Write a loadout YAML to a file for versioning in Git
 
   ```text
-  envtab cat myloadout --output ./loadouts/myloadout.yaml
+  envtab cat myloadout --output ./envtab-loadout-repo/myloadout.yaml
   ```
 
 You can then commit and push these YAML files to GitHub or another Git host and share them with your team.
