@@ -9,7 +9,7 @@ import (
 	"strings"
 
 	"github.com/gmherb/envtab/internal/config"
-	"github.com/gmherb/envtab/internal/crypto"
+	"github.com/gmherb/envtab/pkg/sops"
 	"github.com/gmherb/envtab/internal/loadout"
 	"github.com/gmherb/envtab/internal/utils"
 	yaml "gopkg.in/yaml.v2"
@@ -34,7 +34,7 @@ func AddEntryToLoadout(name string, key string, value string, tags []string) err
 	filePath := filepath.Join(config.InitEnvtab(""), name+".yaml")
 	isSOPSEncrypted := false
 	if _, err := os.Stat(filePath); err == nil {
-		isSOPSEncrypted = crypto.IsSOPSEncrypted(filePath)
+		isSOPSEncrypted = sops.IsSOPSEncrypted(filePath)
 	}
 
 	// Preserve SOPS encryption if the file was originally encrypted
@@ -85,8 +85,8 @@ func ReadLoadout(name string) (*loadout.Loadout, error) {
 	var err error
 
 	// Check if file is SOPS encrypted
-	if crypto.IsSOPSEncrypted(filePath) {
-		content, err = crypto.SOPSDecryptFile(filePath)
+	if sops.IsSOPSEncrypted(filePath) {
+		content, err = sops.SOPSDecryptFile(filePath)
 		if err != nil {
 			// Provide helpful error messages
 			errStr := err.Error()
@@ -209,7 +209,7 @@ func WriteLoadoutWithEncryption(name string, lo *loadout.Loadout, useSOPS bool) 
 			return err
 		}
 
-		encrypted, err := crypto.SOPSEncryptFile(tmpFile)
+		encrypted, err := sops.SOPSEncryptFile(tmpFile)
 		if err != nil {
 			os.Remove(tmpFile)
 			return err
@@ -238,7 +238,7 @@ func EditLoadout(name string) error {
 	tempFilePath := filePath + ".tmp"
 
 	// Check if file is SOPS-encrypted to preserve encryption on save
-	isSOPSEncrypted := crypto.IsSOPSEncrypted(filePath)
+	isSOPSEncrypted := sops.IsSOPSEncrypted(filePath)
 
 	// Read the loadout (handles SOPS decryption automatically)
 	lo, err := ReadLoadout(name)
@@ -381,7 +381,7 @@ func IsLoadoutFileEncrypted(name string) bool {
 	if _, err := os.Stat(filePath); os.IsNotExist(err) {
 		return false
 	}
-	return crypto.IsSOPSEncrypted(filePath)
+	return sops.IsSOPSEncrypted(filePath)
 }
 
 // HasValueEncryptedEntries checks if a loadout has any value-encrypted entries (SOPS: prefix)

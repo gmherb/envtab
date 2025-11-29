@@ -11,8 +11,8 @@ import (
 
 	"github.com/fatih/color"
 	"github.com/gmherb/envtab/internal/backends"
-	"github.com/gmherb/envtab/internal/crypto"
 	"github.com/gmherb/envtab/internal/env"
+	"github.com/gmherb/envtab/pkg/sops"
 	"github.com/spf13/cobra"
 )
 
@@ -82,7 +82,7 @@ func showActiveLoadouts(showSensitive bool, patterns []string) {
 		// Create decrypt function for comparing encrypted values
 		decryptFunc := func(encryptedValue string) (string, error) {
 			if strings.HasPrefix(encryptedValue, "SOPS:") {
-				return crypto.SOPSDecryptValue(encryptedValue)
+				return sops.SOPSDecryptValue(encryptedValue)
 			}
 			return encryptedValue, nil
 		}
@@ -91,7 +91,7 @@ func showActiveLoadouts(showSensitive bool, patterns []string) {
 		displayValue := func(value string) string {
 			if strings.HasPrefix(value, "SOPS:") {
 				if showSensitive {
-					decrypted, err := crypto.SOPSDecryptValue(value)
+					decrypted, err := sops.SOPSDecryptValue(value)
 					if err != nil {
 						return "***encrypted***"
 					}

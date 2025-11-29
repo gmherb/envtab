@@ -11,7 +11,7 @@ import (
 
 	"github.com/gmherb/envtab/internal/backends"
 	"github.com/gmherb/envtab/internal/config"
-	"github.com/gmherb/envtab/internal/crypto"
+	"github.com/gmherb/envtab/pkg/sops"
 	"github.com/gmherb/envtab/internal/loadout"
 	"github.com/gmherb/envtab/internal/tags"
 	"github.com/gmherb/envtab/internal/utils"
@@ -58,7 +58,7 @@ If no options are provided, enter editor to manually edit a envtab loadout.`,
 		// Check if file is SOPS-encrypted to preserve encryption on save
 		envtabPath := config.InitEnvtab("")
 		loadoutPath := filepath.Join(envtabPath, loadoutName+".yaml")
-		isSOPSEncrypted := crypto.IsSOPSEncrypted(loadoutPath)
+		isSOPSEncrypted := sops.IsSOPSEncrypted(loadoutPath)
 
 		// load the loadout
 		lo, err := backends.ReadLoadout(loadoutName)
@@ -145,7 +145,7 @@ func editLoadout(loadoutName string) error {
 	}
 
 	// Check if file is SOPS-encrypted to preserve encryption on save
-	isSOPSEncrypted := crypto.IsSOPSEncrypted(loadoutPath)
+	isSOPSEncrypted := sops.IsSOPSEncrypted(loadoutPath)
 
 	// Read the loadout (handles SOPS decryption automatically)
 	lo, err := backends.ReadLoadout(loadoutName)

@@ -7,7 +7,7 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/gmherb/envtab/internal/crypto"
+	"github.com/gmherb/envtab/pkg/sops"
 	"github.com/gmherb/envtab/internal/tags"
 	"github.com/gmherb/envtab/internal/utils"
 	yaml "gopkg.in/yaml.v2"
@@ -146,7 +146,7 @@ func (l Loadout) Export() {
 			} else if sopsEncrypted {
 				// Decrypt SOPS-encrypted value
 				// SOPS metadata is preserved in the encrypted value string
-				decrypted, err := crypto.SOPSDecryptValue(value)
+				decrypted, err := sops.SOPSDecryptValue(value)
 				if err != nil {
 					// Check if SOPS is not available - skip silently in that case
 					// This allows shell scripts to continue working even without SOPS
@@ -226,7 +226,7 @@ func (l *Loadout) DecryptSOPSValues() (map[string]bool, error) {
 	encryptedKeys := make(map[string]bool)
 	for key, value := range l.Entries {
 		if strings.HasPrefix(value, "SOPS:") {
-			decrypted, err := crypto.SOPSDecryptValue(value)
+			decrypted, err := sops.SOPSDecryptValue(value)
 			if err != nil {
 				// If decryption fails, keep the encrypted value and mark it
 				// This allows editing other values even if some can't be decrypted
@@ -251,7 +251,7 @@ func (l *Loadout) ReencryptSOPSValues(encryptedKeys map[string]bool) error {
 		// Only re-encrypt if the value doesn't already start with SOPS:
 		// (user might have manually edited it to be encrypted)
 		if !strings.HasPrefix(value, "SOPS:") {
-			encrypted, err := crypto.SOPSEncryptValue(value)
+			encrypted, err := sops.SOPSEncryptValue(value)
 			if err != nil {
 				return fmt.Errorf("failed to re-encrypt %s: %w", key, err)
 			}

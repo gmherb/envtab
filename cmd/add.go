@@ -9,7 +9,7 @@ import (
 	"strings"
 
 	"github.com/gmherb/envtab/internal/backends"
-	"github.com/gmherb/envtab/internal/crypto"
+	"github.com/gmherb/envtab/pkg/sops"
 	"github.com/gmherb/envtab/internal/tags"
 	"github.com/spf13/cobra"
 )
@@ -108,7 +108,7 @@ Multiple tags can be provided using space or comma as a separator.`,
 		// Note: If file is file-encrypted, the entire file will be encrypted regardless
 		if encryptValue && !isFileEncrypted {
 			// Encrypt individual value with SOPS (only if not file-encrypted)
-			encrypted, err := crypto.SOPSEncryptValue(value)
+			encrypted, err := sops.SOPSEncryptValue(value)
 			if err != nil {
 				fmt.Printf("ERROR: Failed to encrypt value with SOPS: %s\n", err)
 				os.Exit(1)
