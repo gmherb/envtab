@@ -10,6 +10,13 @@
   - [PATH](#path)
   - [Environment variables other than PATH](#environment-variables-other-than-path)
 - [Encrypting Sensitive Values](#encrypting-sensitive-values)
+  - [Prerequisites](#prerequisites)
+    - [Sops Configuration](#sops-configuration)
+  - [Value Encryption](#value-encryption)
+  - [File Encryption](#file-level-encryption)
+  - [Viewing Decrypted Values](#viewing-decrypted-values)
+  - [Automatic Decryption](#automatic-decryption)
+  - [Editing Encrypted Loadouts](#editing-encrypted-loadouts)
 - [Importing from URLs and sharing via Git](#importing-from-urls-and-sharing-via-git)
 - [Generating CLI documentation](#generating-cli-documentation)
 - [TODO](#todo)
@@ -163,17 +170,31 @@ UpdatedAt  LoadedAt  Login  Active  Total  Name     Tags
 23:08:32   22:59:13  false  0       1      example  []
 ```
 
-## Encrypting Sensitive Values
+# Encrypting Sensitive Values
 
 `envtab` supports encrypting sensitive values using SOPS (Secrets OPerationS). This allows you to securely store secrets like API keys, passwords, and tokens in your loadouts.
 
-### Prerequisites
+## Prerequisites
 
 1. Install SOPS: https://github.com/getsops/sops
 2. Configure SOPS with your preferred encryption backend (AWS KMS, GCP KMS, Azure Key Vault, age, PGP, etc.)
 3. Set up your `.sops.yaml` configuration file (optional, but recommended)
 
-### Using Value Encryption
+### Sops Configuration
+
+Configure SOPS by creating a `.sops.yaml` file in your project root or home directory:
+
+```yaml
+creation_rules:
+  - path_regex: .*\.yaml$
+    kms: 'arn:aws:kms:us-east-1:123456789012:key/12345678-1234-1234-1234-123456789012'
+    pgp: >-
+      FBC7B9E2A4F9289AC0C1D4843D16CEE4A27381B4
+```
+
+For more details, see [SOPS_INTEGRATION.md](SOPS_INTEGRATION.md).
+
+## Value Encryption
 
 The `-v` or `--encrypt-value` flag encrypts individual values with SOPS:
 
@@ -200,23 +221,7 @@ entries:
       ...
 ```
 
-### Viewing Decrypted Values
-
-To view decrypted sensitive values, use the `-s` flag with the `show` command:
-
-```text
-$ envtab show production
-production -------------------------------------------------------- [ 2 / 2 ]
-   API_KEY=***encrypted***
-   DB_PASSWORD=***encrypted***
-
-$ envtab show production -s
-production -------------------------------------------------------- [ 2 / 2 ]
-   API_KEY=sk_live_1234567890abcdef
-   DB_PASSWORD=super_secret_password
-```
-
-### File-Level Encryption
+## File-Level Encryption
 
 You can also encrypt entire loadout files with SOPS using the `--encrypt-file` flag (or `-f`):
 
@@ -232,7 +237,23 @@ $ sops ~/.envtab/secrets.yaml
 
 NOTE: File encryption will be faster if multiple encrypted values exist in a single loadout.
 
-### Automatic Decryption
+## Viewing Decrypted Values
+
+To view decrypted sensitive values, use the `-s` flag with the `show` command:
+
+```text
+$ envtab show production
+production -------------------------------------------------------- [ 2 / 2 ]
+   API_KEY=***encrypted***
+   DB_PASSWORD=***encrypted***
+
+$ envtab show production -s
+production -------------------------------------------------------- [ 2 / 2 ]
+   API_KEY=sk_live_1234567890abcdef
+   DB_PASSWORD=super_secret_password
+```
+
+## Automatic Decryption
 
 Encrypted values are automatically decrypted when exporting:
 
@@ -242,7 +263,7 @@ export API_KEY=sk_live_1234567890abcdef
 export DB_PASSWORD=super_secret_password
 ```
 
-### Editing Encrypted Loadouts
+## Editing Encrypted Loadouts
 
 When editing a loadout with encrypted values, they are automatically decrypted for editing and re-encrypted when saved:
 
@@ -251,21 +272,6 @@ $ envtab edit production
 # Values appear as plaintext in the editor
 # After saving, they are automatically re-encrypted
 ```
-
-### Sops Configuration
-
-Configure SOPS by creating a `.sops.yaml` file in your project root or home directory:
-
-```yaml
-creation_rules:
-  - path_regex: .*\.yaml$
-    kms: 'arn:aws:kms:us-east-1:123456789012:key/12345678-1234-1234-1234-123456789012'
-    pgp: >-
-      FBC7B9E2A4F9289AC0C1D4843D16CEE4A27381B4
-```
-
-For more details, see [SOPS_INTEGRATION.md](SOPS_INTEGRATION.md).
-
 
 # Importing from URLs and sharing via Git
 
