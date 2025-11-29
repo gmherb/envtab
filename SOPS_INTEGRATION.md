@@ -39,7 +39,7 @@ Encrypt individual values with SOPS:
 
 ```bash
 # Encrypt a single value
-envtab add myloadout -v SECRET_KEY=mysecret
+envtab add myloadout -e SECRET_KEY=mysecret
 
 # Or use the long form
 envtab add myloadout --encrypt-value API_KEY=apikey123
@@ -58,8 +58,8 @@ When exporting loadouts, SOPS-encrypted values are automatically decrypted:
 # Export will automatically decrypt SOPS values
 envtab export myloadout
 
-# Reading loadouts automatically handles SOPS-encrypted files
-envtab cat myloadout
+# Reading loadouts automatically handles SOPS-encrypted files when --decrypt option is provided
+envtab cat myloadout -d
 ```
 
 ## Configuration

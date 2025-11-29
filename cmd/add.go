@@ -1,5 +1,5 @@
 /*
-Copyright © 2024 NAME HERE <EMAIL ADDRESS>
+Copyright © 2024 Greg Herbster
 */
 package cmd
 
@@ -10,8 +10,8 @@ import (
 	"strings"
 
 	"github.com/gmherb/envtab/internal/backends"
-	"github.com/gmherb/envtab/pkg/sops"
 	"github.com/gmherb/envtab/internal/tags"
+	"github.com/gmherb/envtab/pkg/sops"
 	"github.com/spf13/cobra"
 )
 
@@ -36,28 +36,25 @@ Multiple tags can be provided using space or comma as a separator.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		slog.Debug("add command called")
 
-		var (
-			name    string   // envtab loadout name
-			key     string   // Environment variable key
-			value   string   // Environment variable value
-			newTags []string // Tags to append to envtab loadout
-		)
-
 		encryptValue, _ := cmd.Flags().GetBool("encrypt-value")
 		encryptFile, _ := cmd.Flags().GetBool("encrypt-file")
 
 		if len(args) == 2 && !strings.Contains(args[1], "=") {
-			slog.Debug("No value provided for your envtab entry. No equal sign detected and only 2 args provided.")
+			slog.Debug("No value provided for envtab entry. No equal sign detected and only 2 args provided.")
 			cmd.Usage()
 			os.Exit(1)
 		}
 
-		name = args[0]
+		// Parse arguments: name, key, value, and tags
+		name := args[0]
+		var key, value string
+		var newTags []string
+
 		if strings.Contains(args[1], "=") {
 			slog.Debug("Equal sign detected in second argument. Splitting into key and value.")
-			key, value = strings.Split(args[1], "=")[0], strings.Split(args[1], "=")[1]
+			parts := strings.SplitN(args[1], "=", 2)
+			key, value = parts[0], parts[1]
 			newTags = args[2:]
-
 		} else {
 			slog.Debug("No equal sign detected in second argument. Assigning second argument as key.")
 			key = args[1]
@@ -65,9 +62,8 @@ Multiple tags can be provided using space or comma as a separator.`,
 			newTags = args[3:]
 		}
 
-		newTags = tags.SplitTags(newTags)
-		newTags = tags.RemoveEmptyTags(newTags)
-		newTags = tags.RemoveDuplicateTags(newTags)
+		// Process tags
+		newTags = tags.RemoveDuplicateTags(tags.RemoveEmptyTags(tags.SplitTags(newTags)))
 
 		slog.Debug("parsing arguments", "name", name, "key", key, "value", "[REDACTED]", "tags", newTags)
 
@@ -75,58 +71,42 @@ Multiple tags can be provided using space or comma as a separator.`,
 		isFileEncrypted := backends.IsLoadoutFileEncrypted(name)
 		hasValueEncrypted := false
 
-		// Try to read existing loadout to check for value-encrypted entries
-		lo, readErr := backends.ReadLoadout(name)
-		if readErr == nil {
+		if lo, readErr := backends.ReadLoadout(name); readErr == nil {
 			hasValueEncrypted = backends.HasValueEncryptedEntries(lo)
 		}
 
 		// Handle encryption type conflicts
 		if isFileEncrypted {
-			// Loadout is file-encrypted, must use file encryption
 			if !encryptFile {
-				// Auto-enable file encryption to preserve existing encryption
 				encryptFile = true
 			}
 			if encryptValue {
-				// User tried to use value encryption on file-encrypted loadout
-				// Warn that it will be file-encrypted instead
 				fmt.Fprintf(os.Stderr, "WARNING: Loadout '%s' is file-encrypted. Value will be stored in file-encrypted format.\n", name)
 			}
 		} else if hasValueEncrypted && encryptFile {
-			// Loadout has value-encrypted entries, but user wants file encryption
-			// This is allowed - will convert to file encryption
 			fmt.Fprintf(os.Stderr, "WARNING: Converting loadout '%s' from value-encrypted to file-encrypted format.\n", name)
-		} else if hasValueEncrypted && encryptValue {
-			// Loadout has value-encrypted entries, user wants value encryption - OK
-			// No action needed
 		}
 
-		var err error
-		var finalValue string
-
-		// Determine encryption method for the value
-		// Note: If file is file-encrypted, the entire file will be encrypted regardless
+		// Encrypt value if requested (only if not file-encrypted)
+		finalValue := value
 		if encryptValue && !isFileEncrypted {
-			// Encrypt individual value with SOPS (only if not file-encrypted)
 			encrypted, err := sops.SOPSEncryptValue(value)
 			if err != nil {
-				fmt.Printf("ERROR: Failed to encrypt value with SOPS: %s\n", err)
+				fmt.Fprintf(os.Stderr, "ERROR: Failed to encrypt value with SOPS: %s\n", err)
 				os.Exit(1)
 			}
 			finalValue = encrypted
-		} else {
-			finalValue = value
 		}
 
-		// Write to loadout (with file-level SOPS encryption if requested or required)
+		// Write to loadout
+		var err error
 		if encryptFile {
 			err = backends.AddEntryToLoadoutWithSOPS(name, key, finalValue, newTags, true)
 		} else {
 			err = backends.AddEntryToLoadout(name, key, finalValue, newTags)
 		}
 		if err != nil {
-			fmt.Printf("ERROR: Error writing entry to file [%s]: %s\n", name, err)
+			fmt.Fprintf(os.Stderr, "ERROR: Error writing entry to file [%s]: %s\n", name, err)
 			os.Exit(1)
 		}
 	},
