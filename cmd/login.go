@@ -4,7 +4,6 @@ Copyright © 2024 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
-	"fmt"
 	"log/slog"
 	"os"
 	"strings"
@@ -66,7 +65,7 @@ func init() {
 func exportLoginLoadouts() {
 	loadouts, err := backends.ListLoadouts()
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "ERROR: Failure listing loadouts: %s\n", err)
+		slog.Error("failure listing loadouts", "error", err)
 		os.Exit(1)
 	}
 
@@ -77,10 +76,10 @@ func exportLoginLoadouts() {
 			// Skip loadout if SOPS is not installed (for encrypted loadouts)
 			errStr := err.Error()
 			if strings.Contains(errStr, "SOPS_NOT_INSTALLED") {
-				fmt.Fprintf(os.Stderr, "WARNING: Skipping loadout %s - SOPS is not installed. Install SOPS to read encrypted loadouts: https://github.com/getsops/sops\n", loadout)
+				slog.Warn("skipping loadout - SOPS not installed", "loadout", loadout)
 				continue
 			}
-			fmt.Fprintf(os.Stderr, "ERROR: Failure reading loadout [%s]: %s\n", loadout, err)
+			slog.Error("failure reading loadout", "loadout", loadout, "error", err)
 			os.Exit(1)
 		}
 

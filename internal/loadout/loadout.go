@@ -157,10 +157,10 @@ func (l Loadout) Export() {
 					}
 					// For other decryption failures, show error messages
 					if utils.Contains(err.Error(), "keys may have been rotated") {
-						fmt.Fprintf(os.Stderr, "WARNING: Cannot decrypt %s - encryption keys may have been rotated. Skipping.\n", key)
-						fmt.Fprintf(os.Stderr, "         To fix: re-encrypt the loadout with current keys using 'envtab reencrypt'\n")
+						slog.Warn("cannot decrypt - encryption keys may have been rotated", "key", key, "error", err)
+						slog.Debug("to fix: re-encrypt the loadout with current keys using 'envtab reencrypt'")
 					} else {
-						fmt.Fprintf(os.Stderr, "ERROR: Failed to decrypt SOPS value for %s: %s\n", key, err)
+						slog.Error("failure decrypting SOPS value", "key", key, "error", err)
 					}
 					continue
 				}
@@ -230,7 +230,7 @@ func (l *Loadout) DecryptSOPSValues() (map[string]bool, error) {
 			if err != nil {
 				// If decryption fails, keep the encrypted value and mark it
 				// This allows editing other values even if some can't be decrypted
-				fmt.Fprintf(os.Stderr, "WARNING: Cannot decrypt %s - keeping encrypted value: %s\n", key, err)
+				slog.Warn("cannot decrypt - keeping encrypted value", "key", key, "error", err)
 				encryptedKeys[key] = true
 				continue
 			}

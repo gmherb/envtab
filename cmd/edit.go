@@ -12,10 +12,10 @@ import (
 
 	"github.com/gmherb/envtab/internal/backends"
 	"github.com/gmherb/envtab/internal/config"
-	"github.com/gmherb/envtab/pkg/sops"
 	"github.com/gmherb/envtab/internal/loadout"
 	"github.com/gmherb/envtab/internal/tags"
 	"github.com/gmherb/envtab/internal/utils"
+	"github.com/gmherb/envtab/pkg/sops"
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v2"
 )
@@ -49,7 +49,7 @@ If no options are provided, enter editor to manually edit a envtab loadout.`,
 			slog.Debug("renaming loadout", "old", loadoutName, "new", name)
 			err := backends.RenameLoadout(loadoutName, name)
 			if err != nil {
-				fmt.Printf("ERROR: Failure renaming loadout [%s] to [%s]: %s\n", loadoutName, name, err)
+				slog.Error("failure renaming loadout", "old", loadoutName, "new", name, "error", err)
 				os.Exit(1)
 			}
 			loadoutName = name
@@ -64,7 +64,7 @@ If no options are provided, enter editor to manually edit a envtab loadout.`,
 		// load the loadout
 		lo, err := backends.ReadLoadout(loadoutName)
 		if err != nil {
-			fmt.Printf("ERROR: Failure reading loadout [%s]: %s\n", loadoutName, err)
+			slog.Error("failure reading loadout", "loadout", loadoutName, "error", err)
 			os.Exit(1)
 		}
 
@@ -113,7 +113,7 @@ If no options are provided, enter editor to manually edit a envtab loadout.`,
 				err = backends.WriteLoadout(loadoutName, lo)
 			}
 			if err != nil {
-				fmt.Printf("ERROR: Failure writing loadout [%s]: %s\n", loadoutName, err)
+				slog.Error("failure writing loadout", "loadout", loadoutName, "error", err)
 				os.Exit(1)
 			}
 		} else {
@@ -141,7 +141,7 @@ func editLoadout(loadoutName string) error {
 
 	// Check if the loadout exists
 	if _, err := os.Stat(loadoutPath); os.IsNotExist(err) {
-		fmt.Printf("ERROR: Loadout [%s] does not exist\n", loadoutName)
+		slog.Error("loadout does not exist", "loadout", loadoutName)
 		os.Exit(1)
 	}
 
@@ -158,7 +158,7 @@ func editLoadout(loadoutName string) error {
 	// Keep track of which keys were encrypted so we can re-encrypt them on save
 	encryptedKeys, err := lo.DecryptSOPSValues()
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "WARNING: Some SOPS values could not be decrypted: %s\n", err)
+		slog.Warn("some SOPS values could not be decrypted", "error", err)
 	}
 
 	// Marshal to get YAML for editing (now with decrypted values)
@@ -206,7 +206,7 @@ func editLoadout(loadoutName string) error {
 		// Validate YAML for duplicate keys before unmarshaling
 		err = loadout.ValidateLoadoutYAML(data)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "ERROR: %s\n", err)
+			slog.Error("invalid loadout YAML", "error", err)
 			usersChoice := utils.PromptForAnswer("The file contains duplicate keys. Do you want to continue editing to fix the errors? Enter 'yes' to continue to edit or 'no' to abort and discard changes?")
 			if !usersChoice {
 				return nil

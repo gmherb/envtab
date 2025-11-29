@@ -57,7 +57,7 @@ func init() {
 func PrintEnvtabLoadouts(patterns []string) {
 	loadouts, err := backends.ListLoadouts()
 	if err != nil {
-		fmt.Printf("Error listing loadouts: %s\n", err)
+		slog.Error("failure listing loadouts", "error", err)
 		os.Exit(1)
 	}
 
@@ -86,7 +86,7 @@ func PrintEnvtabLoadouts(patterns []string) {
 func ListEnvtabLoadouts(patterns []string) {
 	envtabSlice, err := backends.ListLoadouts()
 	if err != nil {
-		fmt.Printf("Error listing loadouts: %s\n", err)
+		slog.Error("failure listing loadouts", "error", err)
 		os.Exit(1)
 	}
 	environment := env.NewEnv()
@@ -117,10 +117,10 @@ func ListEnvtabLoadouts(patterns []string) {
 			// Skip loadout if SOPS is not installed (for encrypted loadouts)
 			errStr := err.Error()
 			if strings.Contains(errStr, "SOPS_NOT_INSTALLED") {
-				fmt.Fprintf(os.Stderr, "WARNING: Skipping loadout %s - SOPS is not installed. Install SOPS to read encrypted loadouts: https://github.com/getsops/sops\n", loadout)
+				slog.Warn("skipping loadout - SOPS not installed", "loadout", loadout)
 				continue
 			}
-			fmt.Printf("Error reading loadout %s: %s\n", loadout, err)
+			slog.Error("failure reading loadout", "loadout", loadout, "error", err)
 			os.Exit(1)
 		}
 
@@ -132,7 +132,7 @@ func ListEnvtabLoadouts(patterns []string) {
 			var err error
 			updatedAt, err = time.Parse(time.RFC3339, lo.Metadata.UpdatedAt)
 			if err != nil {
-				fmt.Printf("Warning: Invalid updatedAt time for %s: %s (using current time)\n", loadout, err)
+				slog.Warn("invalid updatedAt time, using current time", "loadout", loadout, "error", err)
 				updatedAt = time.Now()
 			}
 		} else {
@@ -144,7 +144,7 @@ func ListEnvtabLoadouts(patterns []string) {
 			var err error
 			loadedAt, err = time.Parse(time.RFC3339, lo.Metadata.LoadedAt)
 			if err != nil {
-				fmt.Printf("Warning: Invalid loadedAt time for %s: %s (using current time)\n", loadout, err)
+				slog.Warn("invalid loadedAt time, using current time", "loadout", loadout, "error", err)
 				loadedAt = time.Now()
 			}
 		} else {

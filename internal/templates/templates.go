@@ -92,13 +92,13 @@ func MakeLoadoutFromTemplate(templateName string) loadout.Loadout {
 
 		data, err := os.ReadFile(dotenvPath)
 		if err != nil {
-			fmt.Printf("ERROR: Failure reading template [%s]: %s\n", templateName, err)
+			slog.Error("failure reading template", "template", templateName, "error", err)
 			os.Exit(1)
 		}
 		// Parse .env file using reusable function from backends
 		entries, err := backends.ParseDotenvContent(data)
 		if err != nil {
-			fmt.Printf("ERROR: Failure parsing .env template [%s]: %s\n", templateName, err)
+			slog.Error("failure parsing .env template", "template", templateName, "error", err)
 			os.Exit(1)
 		}
 		// Populate loadout entries directly with values from .env
@@ -120,20 +120,13 @@ func MakeLoadoutFromTemplate(templateName string) loadout.Loadout {
 	}
 
 	if !found {
-		fmt.Printf("ERROR: Template [%s] not found. Available templates: ", templateName)
 		// List available templates
 		embeddedTemplates := getEmbeddedTemplates()
 		templateNames := make([]string, 0, len(embeddedTemplates.Templates))
 		for name := range embeddedTemplates.Templates {
 			templateNames = append(templateNames, name)
 		}
-		for i, name := range templateNames {
-			if i > 0 {
-				fmt.Print(", ")
-			}
-			fmt.Print(name)
-		}
-		fmt.Println()
+		slog.Error("template not found", "template", templateName, "available", templateNames)
 		os.Exit(1)
 	}
 

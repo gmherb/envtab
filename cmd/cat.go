@@ -39,7 +39,7 @@ then the values/files will be decrypted and shown in cleartext.`,
 		// If --output is set, enforce exactly one loadout and write to file
 		if catOutputPath != "" {
 			if len(args) != 1 {
-				fmt.Fprintf(os.Stderr, "ERROR: when using --output, provide exactly one LOADOUT_NAME\n")
+				slog.Error("when using --output, provide exactly one LOADOUT_NAME")
 				os.Exit(1)
 			}
 
@@ -51,12 +51,12 @@ then the values/files will be decrypted and shown in cleartext.`,
 			// Ensure parent directory exists if path includes directories
 			if dir := filepath.Dir(catOutputPath); dir != "." {
 				if err := os.MkdirAll(dir, 0755); err != nil {
-					fmt.Fprintf(os.Stderr, "ERROR: Failed to create directories for %s: %s\n", catOutputPath, err)
+					slog.Error("failure creating directories", "path", catOutputPath, "error", err)
 					os.Exit(1)
 				}
 			}
 			if err := os.WriteFile(catOutputPath, data, 0600); err != nil {
-				fmt.Fprintf(os.Stderr, "ERROR: Failed to write file %s: %s\n", catOutputPath, err)
+				slog.Error("failure writing file", "path", catOutputPath, "error", err)
 				os.Exit(1)
 			}
 
@@ -87,9 +87,9 @@ func getLoadoutDataForFile(loadoutName string) ([]byte, bool, error) {
 		data, err := os.ReadFile(filePath)
 		if err != nil {
 			if os.IsNotExist(err) {
-				fmt.Fprintf(os.Stderr, "ERROR: Loadout %s does not exist\n", loadoutName)
+				slog.Error("loadout does not exist", "loadout", loadoutName)
 			} else {
-				fmt.Fprintf(os.Stderr, "ERROR: Failed to read loadout file: %s\n", err)
+				slog.Error("failure reading loadout file", "loadout", loadoutName, "error", err)
 			}
 			return nil, false, err
 		}
@@ -113,7 +113,7 @@ func getLoadoutDataForFile(loadoutName string) ([]byte, bool, error) {
 	// Marshal to YAML
 	data, err := yaml.Marshal(loadout)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "ERROR: Failed to marshal loadout: %s\n", err)
+		slog.Error("failure marshaling loadout", "error", err)
 		return nil, false, err
 	}
 	return data, false, nil
@@ -129,9 +129,9 @@ func printLoadoutToStdout(loadoutName string) {
 		data, err := os.ReadFile(filePath)
 		if err != nil {
 			if os.IsNotExist(err) {
-				fmt.Fprintf(os.Stderr, "ERROR: Loadout %s does not exist\n", loadoutName)
+				slog.Error("loadout does not exist", "loadout", loadoutName)
 			} else {
-				fmt.Fprintf(os.Stderr, "ERROR: Failed to read loadout file: %s\n", err)
+				slog.Error("failure reading loadout file", "loadout", loadoutName, "error", err)
 			}
 			return
 		}
@@ -164,20 +164,20 @@ func readLoadoutWithErrorHandling(loadoutName string, exitOnError bool) (*loadou
 		errStr := err.Error()
 		if strings.Contains(errStr, "SOPS_NOT_INSTALLED") {
 			if exitOnError {
-				fmt.Fprintf(os.Stderr, "ERROR: Cannot read encrypted loadout without SOPS installed: %s\n", loadoutName)
+				slog.Error("cannot read encrypted loadout without SOPS installed", "loadout", loadoutName)
 				os.Exit(1)
 			}
-			fmt.Fprintf(os.Stderr, "WARNING: Skipping loadout %s - SOPS is not installed. Install SOPS to read encrypted loadouts: https://github.com/getsops/sops\n", loadoutName)
+			slog.Warn("skipping loadout - SOPS not installed", "loadout", loadoutName)
 			return nil, err
 		}
 		if os.IsNotExist(err) {
-			fmt.Fprintf(os.Stderr, "ERROR: Loadout %s does not exist\n", loadoutName)
+			slog.Error("loadout does not exist", "loadout", loadoutName)
 			if exitOnError {
 				os.Exit(1)
 			}
 			return nil, err
 		}
-		fmt.Fprintf(os.Stderr, "ERROR: %s\n", err)
+		slog.Error("failure reading loadout", "loadout", loadoutName, "error", err)
 		if exitOnError {
 			os.Exit(1)
 		}

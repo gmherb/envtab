@@ -4,7 +4,6 @@ Copyright © 2024 Greg Herbster
 package cmd
 
 import (
-	"fmt"
 	"log/slog"
 	"os"
 	"path/filepath"
@@ -88,7 +87,7 @@ func initConfig() {
 		// Find home directory.
 		home, err := os.UserHomeDir()
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "Error getting user's home directory: %s\n", err)
+			slog.Error("failure getting user's home directory", "error", err)
 			os.Exit(1)
 		}
 

@@ -1,7 +1,7 @@
 package config
 
 import (
-	"fmt"
+	"log/slog"
 	"os"
 	"os/user"
 	"path/filepath"
@@ -28,7 +28,7 @@ func getEnvtabPath() string {
 	// Default to home directory
 	usr, err := user.Current()
 	if err != nil {
-		fmt.Printf("Error getting user's home directory: %s\n", err)
+		slog.Error("failure getting user's home directory", "error", err)
 		os.Exit(1)
 	}
 

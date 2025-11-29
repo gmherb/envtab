@@ -4,7 +4,6 @@ Copyright © 2024 Greg Herbster
 package cmd
 
 import (
-	"fmt"
 	"log/slog"
 	"os"
 	"strings"
@@ -81,10 +80,10 @@ Multiple tags can be provided using space or comma as a separator.`,
 				encryptFile = true
 			}
 			if encryptValue {
-				fmt.Fprintf(os.Stderr, "WARNING: Loadout '%s' is file-encrypted. Value will be stored in file-encrypted format.\n", name)
+				slog.Warn("loadout is file-encrypted, value will be stored in file-encrypted format", "loadout", name)
 			}
 		} else if hasValueEncrypted && encryptFile {
-			fmt.Fprintf(os.Stderr, "WARNING: Converting loadout '%s' from value-encrypted to file-encrypted format.\n", name)
+			slog.Warn("converting loadout from value-encrypted to file-encrypted format", "loadout", name)
 		}
 
 		// Encrypt value if requested (only if not file-encrypted)
@@ -92,7 +91,7 @@ Multiple tags can be provided using space or comma as a separator.`,
 		if encryptValue && !isFileEncrypted {
 			encrypted, err := sops.SOPSEncryptValue(value)
 			if err != nil {
-				fmt.Fprintf(os.Stderr, "ERROR: Failed to encrypt value with SOPS: %s\n", err)
+				slog.Error("failure encrypting value with SOPS", "error", err)
 				os.Exit(1)
 			}
 			finalValue = encrypted
@@ -106,7 +105,7 @@ Multiple tags can be provided using space or comma as a separator.`,
 			err = backends.AddEntryToLoadout(name, key, finalValue, newTags)
 		}
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "ERROR: Error writing entry to file [%s]: %s\n", name, err)
+			slog.Error("failure writing entry to loadout", "loadout", name, "error", err)
 			os.Exit(1)
 		}
 	},

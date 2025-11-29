@@ -46,7 +46,7 @@ func init() {
 func showActiveLoadouts(showSensitive bool, patterns []string) {
 	envtabSlice, err := backends.ListLoadouts()
 	if err != nil {
-		fmt.Printf("Error listing loadouts: %s\n", err)
+		slog.Error("failure listing loadouts", "error", err)
 		os.Exit(1)
 	}
 	environment := env.NewEnv()
@@ -75,10 +75,10 @@ func showActiveLoadouts(showSensitive bool, patterns []string) {
 			errStr := err.Error()
 			if strings.Contains(errStr, "SOPS_NOT_INSTALLED") {
 				slog.Debug("SOPS not installed, skipping loadout", "loadout", loadout)
-				fmt.Fprintf(os.Stderr, "WARNING: Skipping loadout %s - SOPS is not installed. Install SOPS to read encrypted loadouts: https://github.com/getsops/sops\n", loadout)
+				slog.Warn("skipping loadout - SOPS not installed", "loadout", loadout)
 				continue
 			}
-			fmt.Printf("Error reading loadout %s: %s\n", loadout, err)
+			slog.Error("failure reading loadout", "loadout", loadout, "error", err)
 			os.Exit(1)
 		}
 

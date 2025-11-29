@@ -22,7 +22,7 @@ func detectLoginScript() string {
 
 	usr, err := user.Current()
 	if err != nil {
-		fmt.Printf("Error getting user's home directory: %s\n", err)
+		slog.Error("failure getting user's home directory", "error", err)
 		os.Exit(1)
 	}
 
@@ -53,7 +53,7 @@ func EnableLogin() {
 
 	content, err := os.ReadFile(loginScript)
 	if err != nil {
-		fmt.Printf("Error reading login script %s: %s\n", loginScript, err)
+		slog.Error("failure reading login script", "script", loginScript, "error", err)
 		os.Exit(1)
 	}
 
@@ -64,13 +64,13 @@ func EnableLogin() {
 
 	f, err := os.OpenFile(loginScript, os.O_APPEND|os.O_WRONLY, 0600)
 	if err != nil {
-		fmt.Printf("Error opening login script %s: %s\n", loginScript, err)
+		slog.Error("failure opening login script", "script", loginScript, "error", err)
 		os.Exit(1)
 	}
 	defer f.Close()
 
 	if _, err = f.WriteString("\n" + envtabLogin); err != nil {
-		fmt.Printf("Error writing to login script %s: %s\n", loginScript, err)
+		slog.Error("failure writing to login script", "script", loginScript, "error", err)
 		os.Exit(1)
 	}
 
@@ -79,7 +79,7 @@ func EnableLogin() {
 func DisableLogin() {
 	usr, err := user.Current()
 	if err != nil {
-		fmt.Printf("Error getting user's home directory: %s\n", err)
+		slog.Error("failure getting user's home directory", "error", err)
 		os.Exit(1)
 	}
 	for _, loginScript := range loginScripts {
@@ -96,7 +96,7 @@ func removeEnvtabFromScript(loginScript string) {
 		slog.Debug("login script does not exist", "script", loginScript)
 		return
 	} else if err != nil {
-		fmt.Printf("Error reading login script [%s]: %s\n", loginScript, err)
+		slog.Error("failure reading login script", "script", loginScript, "error", err)
 		os.Exit(1)
 	}
 
@@ -122,13 +122,13 @@ func removeEnvtabFromScript(loginScript string) {
 	// Overwrite the login script with the updated content
 	f, err := os.OpenFile(loginScript, os.O_WRONLY|os.O_TRUNC, 0600)
 	if err != nil {
-		fmt.Printf("Error opening login script [%s]: %s\n", loginScript, err)
+		slog.Error("failure opening login script", "script", loginScript, "error", err)
 		os.Exit(1)
 	}
 	defer f.Close()
 
 	if _, err = f.WriteString(output); err != nil {
-		fmt.Printf("Error writing to login script [%s]: %s\n", loginScript, err)
+		slog.Error("failure writing to login script", "script", loginScript, "error", err)
 		os.Exit(1)
 	}
 
@@ -137,7 +137,7 @@ func removeEnvtabFromScript(loginScript string) {
 func ShowLoginStatus() {
 	usr, err := user.Current()
 	if err != nil {
-		fmt.Printf("Error getting user's home directory: %s\n", err)
+		slog.Error("failure getting user's home directory", "error", err)
 		os.Exit(1)
 	}
 	var loginScriptPath string
@@ -151,7 +151,7 @@ func ShowLoginStatus() {
 		if os.IsNotExist(err) {
 			slog.Debug("login script does not exist", "script", loginScript)
 		} else if err != nil {
-			fmt.Printf("Error reading login script [%s]: %s\n", loginScript, err)
+			slog.Error("failure reading login script", "script", loginScript, "error", err)
 			os.Exit(1)
 		}
 

@@ -49,12 +49,12 @@ You can also create custom templates in ~/.envtab/templates/.`,
 		if err == nil {
 			// Loadout exists
 			if !forceFlag {
-				fmt.Printf("ERROR: Loadout [%s] already exists. Use --force to overwrite.\n", loadoutName)
+				slog.Error("loadout already exists", "loadout", loadoutName)
 				os.Exit(1)
 			}
 		} else if !os.IsNotExist(err) {
 			// Some other error occurred
-			fmt.Printf("ERROR: %s\n", err)
+			slog.Error("failure reading loadout", "error", err)
 			os.Exit(1)
 		}
 
@@ -62,7 +62,7 @@ You can also create custom templates in ~/.envtab/templates/.`,
 
 		err = backends.WriteLoadout(loadoutName, &loadout)
 		if err != nil {
-			fmt.Printf("ERROR: %s\n", err)
+			slog.Error("failure writing loadout", "loadout", loadoutName, "error", err)
 			os.Exit(1)
 		}
 

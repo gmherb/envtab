@@ -3,6 +3,7 @@ package backends
 import (
 	"encoding/json"
 	"fmt"
+	"log/slog"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -250,7 +251,7 @@ func EditLoadout(name string) error {
 	// Keep track of which keys were encrypted so we can re-encrypt them on save
 	encryptedKeys, err := lo.DecryptSOPSValues()
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "WARNING: Some SOPS values could not be decrypted: %s\n", err)
+		slog.Warn("some SOPS values could not be decrypted", "error", err)
 	}
 
 	// Marshal to get YAML for editing (now with decrypted values)
@@ -296,7 +297,7 @@ func EditLoadout(name string) error {
 		// Validate YAML for duplicate keys before unmarshaling
 		err = loadout.ValidateLoadoutYAML(data)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "ERROR: %s\n", err)
+			slog.Error("invalid loadout YAML", "error", err)
 			usersChoice := utils.PromptForAnswer("The file contains duplicate keys. Do you want to continue editing to fix the errors? Enter 'yes' to continue to edit or 'no' to abort and discard changes?")
 			if !usersChoice {
 				return nil
