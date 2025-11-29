@@ -104,7 +104,7 @@ envtab export production
 # Mix encrypted and plaintext values
 envtab add staging \
   DB_HOST=localhost \
-  -v DB_PASSWORD=secret123 \
+  -e DB_PASSWORD=secret123 \
   DEBUG=true
 
 # Only DB_PASSWORD is encrypted
@@ -207,7 +207,7 @@ You'll need to re-add the values with current keys:
 envtab remove myloadout  # or edit manually
 
 # Re-add with current keys
-envtab add myloadout -v SECRET=newvalue
+envtab add myloadout -e SECRET=newvalue
 ```
 
 ### Prevention
@@ -235,7 +235,7 @@ Install SOPS: `brew install sops` or download from https://github.com/getsops/so
 - This means the encryption keys used to encrypt the data are no longer available
 - Re-encrypt the loadout with current keys (see Key Rotation section above)
 - For file-level encryption: `sops -i -e ~/.envtab/myloadout.yaml`
-- For value-level encryption: Re-add the values with `--encrypt-value` (or `-v`) flag
+- For value-level encryption: Re-add the values with `--encrypt-value` (or `-e`) flag
 
 ## Security Considerations
 

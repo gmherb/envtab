@@ -196,11 +196,11 @@ For more details, see [SOPS_INTEGRATION.md](SOPS_INTEGRATION.md).
 
 ## Value Encryption
 
-The `-v` or `--encrypt-value` flag encrypts individual values with SOPS:
+The `-e` or `--encrypt-value` flag encrypts individual values with SOPS:
 
 ```text
-$ envtab add production -v API_KEY=sk_live_1234567890abcdef
-$ envtab add production -v DB_PASSWORD=super_secret_password
+$ envtab add production -e API_KEY=sk_live_1234567890abcdef
+$ envtab add production -e DB_PASSWORD=super_secret_password
 ```
 
 When you view the loadout, encrypted values are hidden by default:
