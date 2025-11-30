@@ -23,17 +23,16 @@ loadout. By default it is cleartext, however, the
 Add tags to your envtab loadout by adding them after the key and value.
 Multiple tags can be provided using space or comma as a separator.`,
 	Example: `  envtab add myloadout MY_ENV_VAR=myvalue
-  envtab add myloadout -e MY_ENV_VAR=myvalue
+  envtab add myloadout -e MY_ENV_VAR myvalue
+  envtab add myloadout -f MY_ENV_VAR=myvalue tag1,tag2,tag3
   envtab add myloadout MY_ENV_VAR=myvalue tag1,tag2,tag3
-  envtab add myloadout -e MY_ENV_VAR=myvalue tag1,tag2,tag3
-  envtab add myloadout MY_ENV_VAR=myvalue tag1 tag2 tag3
-  envtab add myloadout MY_ENV_VAR=myvalue tag1,tag2, tag3 tag4,tag5
   envtab add myloadout MY_ENV_VAR=myvalue -e tag1,tag2, tag3 tag4,tag5`,
 	DisableFlagsInUseLine: true,
 	Args:                  cobra.MinimumNArgs(2),
 	Aliases:               []string{"a", "ad"},
+	SuggestFor:            []string{"set"},
 	Run: func(cmd *cobra.Command, args []string) {
-		slog.Debug("add command called")
+		slog.Debug("add command called with args", "args", args)
 
 		encryptValue, _ := cmd.Flags().GetBool("encrypt-value")
 		encryptFile, _ := cmd.Flags().GetBool("encrypt-file")
