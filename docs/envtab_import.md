@@ -4,8 +4,8 @@ Import environment variables or loadouts
 
 ### Synopsis
 
-Import environment variables from a .env file (merge) or a full
-loadout from YAML (.yaml|.yml). Supports local files and HTTP(S) URLs.
+Import environment variables from a dotenv (.env) file (merge) or a
+full loadout from YAML (.yaml|.yml). Supports local files and HTTP(S) URLs.
 
 ```
 envtab import [flags]
@@ -14,16 +14,16 @@ envtab import [flags]
 ### Examples
 
 ```
-  # Local .env into existing loadout (merge)
+  # Local dotenv file (create or merge into existing loadout)
   envtab import myloadout ./config.env
 
-  # Local YAML loadout (replace/create)
+  # Local YAML loadout (create or replace loadout)
   envtab import myloadout ./prod.yaml
 
-  # Remote .env (merge)
+  # Remote dotenv file (create or merge into existing loadout)
   envtab import myloadout --url https://raw.githubusercontent.com/org/repo/branch/config.env
 
-  # Remote YAML loadout (replace/create)
+  # Remote YAML loadout (create or replace loadout)
   envtab import myloadout --url https://raw.githubusercontent.com/org/repo/branch/loadouts/prod.yaml
 ```
 
@@ -31,7 +31,7 @@ envtab import [flags]
 
 ```
   -h, --help         help for import
-  -u, --url string   Import from HTTP(S) URL (.env merges, .yaml|.yml replaces/creates)
+  -u, --url string   Import from HTTP(S) URL (.env creates or merges, .yaml|.yml creates or replaces)
 ```
 
 ### Options inherited from parent commands
