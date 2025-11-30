@@ -317,7 +317,7 @@ github.com/gmherb/envtab/cmd/root.go:156.13,167.2 2 0
 github.com/gmherb/envtab/cmd/root.go:170.34,172.2 1 0
 github.com/gmherb/envtab/cmd/show.go:34.47,38.3 3 0
 github.com/gmherb/envtab/cmd/show.go:41.13,44.2 2 0
-github.com/gmherb/envtab/cmd/show.go:46.64,48.16 2 0
+github.com/gmherb/envtab/cmd/show.go:46.58,48.16 2 0
 github.com/gmherb/envtab/cmd/show.go:48.16,51.3 2 0
 github.com/gmherb/envtab/cmd/show.go:52.2,55.38 3 0
 github.com/gmherb/envtab/cmd/show.go:55.38,58.24 1 0
@@ -336,8 +336,8 @@ github.com/gmherb/envtab/cmd/show.go:88.50,90.5 1 0
 github.com/gmherb/envtab/cmd/show.go:91.4,91.30 1 0
 github.com/gmherb/envtab/cmd/show.go:95.3,95.45 1 0
 github.com/gmherb/envtab/cmd/show.go:95.45,96.41 1 0
-github.com/gmherb/envtab/cmd/show.go:96.41,97.22 1 0
-github.com/gmherb/envtab/cmd/show.go:97.22,99.20 2 0
+github.com/gmherb/envtab/cmd/show.go:96.41,97.16 1 0
+github.com/gmherb/envtab/cmd/show.go:97.16,99.20 2 0
 github.com/gmherb/envtab/cmd/show.go:99.20,101.7 1 0
 github.com/gmherb/envtab/cmd/show.go:102.6,102.22 1 0
 github.com/gmherb/envtab/cmd/show.go:104.5,104.29 1 0

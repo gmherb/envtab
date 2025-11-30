@@ -24,8 +24,8 @@ envtab show [LOADOUT_PATTERN...]
 ### Options
 
 ```
-  -h, --help        help for show
-  -s, --sensitive   Show decrypted sensitive values (SOPS encrypted)
+  -d, --decrypt   Show sensitive values (decrypt SOPS encrypted values)
+  -h, --help      help for show
 ```
 
 ### Options inherited from parent commands

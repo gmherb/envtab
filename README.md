@@ -206,7 +206,7 @@ NOTE: File encryption will be faster if multiple encrypted values exist in a sin
 
 ## Viewing Decrypted Values
 
-To view decrypted sensitive values, use the `-s` flag with the `show` command:
+To view decrypted sensitive values, use the `-d` or `--decrypt` flag with the `show` command:
 
 ```text
 $ envtab show production
@@ -214,7 +214,7 @@ production -------------------------------------------------------- [ 2 / 2 ]
    API_KEY=***encrypted***
    DB_PASSWORD=***encrypted***
 
-$ envtab show production -s
+$ envtab show production -d
 production -------------------------------------------------------- [ 2 / 2 ]
    API_KEY=sk_live_1234567890abcdef
    DB_PASSWORD=super_secret_password

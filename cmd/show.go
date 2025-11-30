@@ -33,17 +33,17 @@ If multiple patterns are provided, loadouts matching any pattern will be shown.`
   envtab show aws-* gcp-*`,
 	Run: func(cmd *cobra.Command, args []string) {
 		slog.Debug("show called with args", "args", args)
-		showSensitive, _ := cmd.Flags().GetBool("sensitive")
-		showActiveLoadouts(showSensitive, args)
+		decrypt, _ := cmd.Flags().GetBool("decrypt")
+		showActiveLoadouts(decrypt, args)
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(showCmd)
-	showCmd.Flags().BoolP("sensitive", "s", false, "Show decrypted sensitive values (SOPS encrypted)")
+	showCmd.Flags().BoolP("decrypt", "d", false, "Show sensitive values (decrypt SOPS encrypted values)")
 }
 
-func showActiveLoadouts(showSensitive bool, patterns []string) {
+func showActiveLoadouts(decrypt bool, patterns []string) {
 	envtabSlice, err := backends.ListLoadouts()
 	if err != nil {
 		slog.Error("failure listing loadouts", "error", err)
@@ -94,7 +94,7 @@ func showActiveLoadouts(showSensitive bool, patterns []string) {
 		// Create display function that conditionally shows decrypted values
 		displayValue := func(value string) string {
 			if strings.HasPrefix(value, "SOPS:") {
-				if showSensitive {
+				if decrypt {
 					decrypted, err := sops.SOPSDecryptValue(value)
 					if err != nil {
 						return "***encrypted***"
@@ -108,7 +108,7 @@ func showActiveLoadouts(showSensitive bool, patterns []string) {
 
 		for key, value := range lo.Entries {
 			if environment.CompareWithDecrypt(key, value, decryptFunc) {
-				// Display value (decrypted if showSensitive is true)
+				// Display value (decrypted if decrypt is true)
 				displayVal := displayValue(value)
 				activeEntries = append(activeEntries, key+"="+displayVal)
 			}
