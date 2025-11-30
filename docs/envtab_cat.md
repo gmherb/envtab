@@ -32,7 +32,8 @@ envtab cat LOADOUT_NAME [LOADOUT_NAME ...] [flags]
 ### Options inherited from parent commands
 
 ```
-      --config string   config file (default is $HOME/.envtab/.envtab.yaml) (default "c")
+      --config string   config file (default is $HOME/.envtab/.envtab.yaml)
+  -v, --verbose         Show verbose output (enables debug/info/warn logs)
 ```
 
 ### SEE ALSO

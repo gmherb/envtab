@@ -37,7 +37,8 @@ envtab add LOADOUT_NAME [-e|--encrypt-value] [-f|--encrypt-file] KEY=VALUE [TAG1
 ### Options inherited from parent commands
 
 ```
-      --config string   config file (default is $HOME/.envtab/.envtab.yaml) (default "c")
+      --config string   config file (default is $HOME/.envtab/.envtab.yaml)
+  -v, --verbose         Show verbose output (enables debug/info/warn logs)
 ```
 
 ### SEE ALSO
