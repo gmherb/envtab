@@ -18,11 +18,9 @@ envtab add LOADOUT_NAME [-e|--encrypt-value] [-f|--encrypt-file] KEY=VALUE [TAG1
 
 ```
   envtab add myloadout MY_ENV_VAR=myvalue
-  envtab add myloadout -e MY_ENV_VAR=myvalue
+  envtab add myloadout -e MY_ENV_VAR myvalue
+  envtab add myloadout -f MY_ENV_VAR=myvalue tag1,tag2,tag3
   envtab add myloadout MY_ENV_VAR=myvalue tag1,tag2,tag3
-  envtab add myloadout -e MY_ENV_VAR=myvalue tag1,tag2,tag3
-  envtab add myloadout MY_ENV_VAR=myvalue tag1 tag2 tag3
-  envtab add myloadout MY_ENV_VAR=myvalue tag1,tag2, tag3 tag4,tag5
   envtab add myloadout MY_ENV_VAR=myvalue -e tag1,tag2, tag3 tag4,tag5
 ```
 
