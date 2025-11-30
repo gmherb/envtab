@@ -164,6 +164,4 @@ func ShowLoginStatus() {
 		}
 	}
 	fmt.Printf("disabled\n")
-	return
 }
-

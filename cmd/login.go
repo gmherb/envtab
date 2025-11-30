@@ -70,7 +70,6 @@ func exportLoginLoadouts() {
 	}
 
 	for _, loadout := range loadouts {
-
 		lo, err := backends.ReadLoadout(loadout)
 		if err != nil {
 			// Skip loadout if SOPS is not installed (for encrypted loadouts)

@@ -16,16 +16,10 @@ import (
 // cfgFile is the path to the config file
 var cfgFile string
 
-// parseLogLevel parses the log level from an environment variable or config
+// parseLogLevelFromString parses a log level string to slog.Level
 // Supported values: DEBUG, INFO, WARN, ERROR (case-insensitive)
-// Defaults to INFO if not set or invalid
-func parseLogLevel() slog.Level {
-	// Check config first, then environment variable
-	levelStr := viper.GetString("log.level")
-	if levelStr == "" {
-		levelStr = strings.ToUpper(os.Getenv("ENVTAB_LOG_LEVEL"))
-	}
-
+// Defaults to ERROR if not set or invalid
+func parseLogLevelFromString(levelStr string) slog.Level {
 	levelStr = strings.ToUpper(levelStr)
 	switch levelStr {
 	case "DEBUG":
@@ -37,30 +31,29 @@ func parseLogLevel() slog.Level {
 	case "ERROR":
 		return slog.LevelError
 	default:
-		// Default to INFO if not set or invalid
-		return slog.LevelInfo
+		return slog.LevelError
 	}
+}
+
+// parseLogLevel parses the log level from config or environment variable
+// Supported values: DEBUG, INFO, WARN, ERROR (case-insensitive)
+// Defaults to ERROR if not set or invalid
+func parseLogLevel() slog.Level {
+	// Check config first, then environment variable
+	levelStr := viper.GetString("log.level")
+	if levelStr == "" {
+		levelStr = os.Getenv("ENVTAB_LOG_LEVEL")
+	}
+	return parseLogLevelFromString(levelStr)
 }
 
 func init() {
 	// Initialize default logger to write to stderr
 	// This ensures debug logs don't interfere with normal command output
 	// Log level can be configured via ENVTAB_LOG_LEVEL environment variable or config
-	// We'll set it up with env var first, then update after config is loaded
-	levelStr := strings.ToUpper(os.Getenv("ENVTAB_LOG_LEVEL"))
-	var level slog.Level
-	switch levelStr {
-	case "DEBUG":
-		level = slog.LevelDebug
-	case "INFO":
-		level = slog.LevelInfo
-	case "WARN", "WARNING":
-		level = slog.LevelWarn
-	case "ERROR":
-		level = slog.LevelError
-	default:
-		level = slog.LevelInfo
-	}
+	// Defaults to ERROR if not set
+	levelStr := os.Getenv("ENVTAB_LOG_LEVEL")
+	level := parseLogLevelFromString(levelStr)
 
 	slog.SetDefault(slog.New(slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{
 		Level: level,
@@ -103,7 +96,7 @@ func initConfig() {
 	viper.AutomaticEnv() // read in environment variables that match
 
 	// Set defaults
-	viper.SetDefault("log.level", "INFO")
+	viper.SetDefault("log.level", "ERROR")
 
 	// If a config file is found, read it in.
 	if err := viper.ReadInConfig(); err == nil {
@@ -128,6 +121,27 @@ var rootCmd = &cobra.Command{
 	// Uncomment the following line if your bare application
 	// has an action associated with it:
 	// Run: func(cmd *cobra.Command, args []string) { },
+	PersistentPreRun: func(cmd *cobra.Command, args []string) {
+		// Check if ENVTAB_LOG_LEVEL is explicitly set - if so, respect it (don't override)
+		if explicitLevel := os.Getenv("ENVTAB_LOG_LEVEL"); explicitLevel != "" {
+			// ENVTAB_LOG_LEVEL was explicitly set, keep the level from initConfig()
+			// (which already processed it)
+			return
+		}
+
+		// No explicit ENVTAB_LOG_LEVEL, so apply --verbose flag logic
+		// Access persistent flag from root command
+		verbose, _ := cmd.Root().PersistentFlags().GetBool("verbose")
+		if verbose {
+			slog.SetDefault(slog.New(slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{
+				Level: slog.LevelDebug,
+			})))
+		} else {
+			slog.SetDefault(slog.New(slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{
+				Level: slog.LevelError,
+			})))
+		}
+	},
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
@@ -144,7 +158,8 @@ func init() {
 	// Cobra supports persistent flags, which, if defined here,
 	// will be global for your application.
 
-	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "c", "config file (default is $HOME/.envtab/.envtab.yaml)")
+	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.envtab/.envtab.yaml)")
+	rootCmd.PersistentFlags().BoolP("verbose", "v", false, "Show verbose output (enables debug/info/warn logs)")
 
 	// Cobra also supports local flags, which will only run
 	// when this action is called directly.
