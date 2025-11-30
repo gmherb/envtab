@@ -10,9 +10,9 @@ import (
 	"strings"
 
 	"github.com/gmherb/envtab/internal/config"
-	"github.com/gmherb/envtab/pkg/sops"
 	"github.com/gmherb/envtab/internal/loadout"
 	"github.com/gmherb/envtab/internal/utils"
+	"github.com/gmherb/envtab/pkg/sops"
 	yaml "gopkg.in/yaml.v2"
 )
 
