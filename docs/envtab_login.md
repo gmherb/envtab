@@ -4,10 +4,18 @@ Export all login loadouts
 
 ### Synopsis
 
-Export all loadouts which are enabled on login. This is typically
-run from a login script such as ~/.bash_profile or ~/.zprofile and can be setup
-automatically by running "envtab login --enable". You can disable login
-by running "envtab login --disable".
+Export all loadouts which are enabled on login.
+
+This is typically sourced from a login script such as ~/.profile.
+
+To setup login automatically, run:
+  envtab login --enable
+
+To disable login, run:
+  envtab login --disable
+
+To show the status of login, run:
+  envtab login --status
 
 ```
 envtab login [flags]
@@ -16,10 +24,10 @@ envtab login [flags]
 ### Examples
 
 ```
+  envtab login
   envtab login --status
   envtab login --enable
   envtab login --disable
-  envtab login --status
 ```
 
 ### Options
