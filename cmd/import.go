@@ -23,18 +23,18 @@ import (
 var importCmd = &cobra.Command{
 	Use:   "import",
 	Short: "Import environment variables or loadouts",
-	Long: `Import environment variables from a .env file (merge) or a full
-loadout from YAML (.yaml|.yml). Supports local files and HTTP(S) URLs.`,
-	Example: `  # Local .env into existing loadout (merge)
+	Long: `Import environment variables from a dotenv (.env) file (merge) or a
+full loadout from YAML (.yaml|.yml). Supports local files and HTTP(S) URLs.`,
+	Example: `  # Local dotenv file (create or merge into existing loadout)
   envtab import myloadout ./config.env
 
-  # Local YAML loadout (replace/create)
+  # Local YAML loadout (create or replace loadout)
   envtab import myloadout ./prod.yaml
 
-  # Remote .env (merge)
+  # Remote dotenv file (create or merge into existing loadout)
   envtab import myloadout --url https://raw.githubusercontent.com/org/repo/branch/config.env
 
-  # Remote YAML loadout (replace/create)
+  # Remote YAML loadout (create or replace loadout)
   envtab import myloadout --url https://raw.githubusercontent.com/org/repo/branch/loadouts/prod.yaml`,
 	Args: func(cmd *cobra.Command, args []string) error {
 		slog.Debug("import called with args", "args", args)
@@ -180,5 +180,5 @@ func importFromURL(loadoutName string, rawURL string) error {
 
 func init() {
 	rootCmd.AddCommand(importCmd)
-	importCmd.Flags().StringVarP(&importURL, "url", "u", "", "Import from HTTP(S) URL (.env merges, .yaml|.yml replaces/creates)")
+	importCmd.Flags().StringVarP(&importURL, "url", "u", "", "Import from HTTP(S) URL (.env creates or merges, .yaml|.yml creates or replaces)")
 }
