@@ -4,6 +4,17 @@
 ![diagram](diagram.png "Take control of your environment")
 
 - [Usage](#usage)
+- [Command Reference](#command-reference)
+  - [envtab add](docs/envtab_add.md)
+  - [envtab cat](docs/envtab_cat.md)
+  - [envtab edit](docs/envtab_edit.md)
+  - [envtab export](docs/envtab_export.md)
+  - [envtab import](docs/envtab_import.md)
+  - [envtab list](docs/envtab_list.md)
+  - [envtab login](docs/envtab_login.md)
+  - [envtab make](docs/envtab_make.md)
+  - [envtab remove](docs/envtab_remove.md)
+  - [envtab show](docs/envtab_show.md)
 - [Environment Variables in Values](#environment-variables-in-values)
   - [PATH](#path)
   - [Environment variables other than PATH](#environment-variables-other-than-path)
@@ -41,6 +52,23 @@ aws-prd ------------------------------------------------------------- [ 3 / 3 ]
 ```
 
 *Note: The same key pair value can be set in different loadouts. envtab shows each matching loadout.*
+
+# Command Reference
+
+Complete documentation for all `envtab` commands:
+
+- [`envtab add`](docs/envtab_add.md) - Add an entry to a envtab loadout
+- [`envtab cat`](docs/envtab_cat.md) - Concatenate envtab loadouts to stdout
+- [`envtab edit`](docs/envtab_edit.md) - Edit envtab loadout
+- [`envtab export`](docs/envtab_export.md) - Export envtab loadout(s)
+- [`envtab import`](docs/envtab_import.md) - Import environment variables or loadouts
+- [`envtab list`](docs/envtab_list.md) - List all envtab loadouts
+- [`envtab login`](docs/envtab_login.md) - Export all login loadouts
+- [`envtab make`](docs/envtab_make.md) - Make loadout from a template
+- [`envtab remove`](docs/envtab_remove.md) - Remove envtab loadout(s)
+- [`envtab show`](docs/envtab_show.md) - Show active loadouts
+
+See also: [`envtab.md`](docs/envtab.md) for top-level usage and flags.
 
 # Environment Variables in Values
 
