@@ -17,16 +17,24 @@ import (
 var loginCmd = &cobra.Command{
 	Use:   "login",
 	Short: "Export all login loadouts",
-	Long: `Export all loadouts which are enabled on login. This is typically
-run from a login script such as ~/.bash_profile or ~/.zprofile and can be setup
-automatically by running "envtab login --enable". You can disable login
-by running "envtab login --disable".`,
+	Long: `Export all loadouts which are enabled on login.
+
+This is typically sourced from a login script such as ~/.profile.
+
+To setup login automatically, run:
+  envtab login --enable
+
+To disable login, run:
+  envtab login --disable
+
+To show the status of login, run:
+  envtab login --status`,
 	Args:    cobra.NoArgs,
 	Aliases: []string{"lo", "log", "logi"},
-	Example: `  envtab login --status
+	Example: `  envtab login
+  envtab login --status
   envtab login --enable
-  envtab login --disable
-  envtab login --status`,
+  envtab login --disable`,
 	Run: func(cmd *cobra.Command, args []string) {
 		slog.Debug("login called")
 
