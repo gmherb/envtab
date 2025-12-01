@@ -16,6 +16,13 @@ import (
 // cfgFile is the path to the config file
 var cfgFile string
 
+// Version information set at build time via ldflags
+var (
+	Version   string
+	Commit    string
+	BuildDate string
+)
+
 // parseLogLevelFromString parses a log level string to slog.Level
 // Supported values: DEBUG, INFO, WARN, ERROR (case-insensitive)
 // Defaults to ERROR if not set or invalid
@@ -117,7 +124,7 @@ var rootCmd = &cobra.Command{
 	Use:     "envtab",
 	Short:   "Take control of your environment.",
 	Long:    `Take control of your environment.`,
-	Version: "0.0.0",
+	Version: getVersion(),
 	// Uncomment the following line if your bare application
 	// has an action associated with it:
 	// Run: func(cmd *cobra.Command, args []string) { },
@@ -169,4 +176,25 @@ func init() {
 // GetRootCmd exposes the root command for tooling (e.g., docs generators).
 func GetRootCmd() *cobra.Command {
 	return rootCmd
+}
+
+// getVersion returns a formatted version string
+func getVersion() string {
+	version := Version
+	// Append commit hash if it doesn't already contain it
+	if Commit != "" {
+		shortCommit := Commit
+		if len(shortCommit) > 7 {
+			shortCommit = shortCommit[:7]
+		}
+		// Check if version already contains this commit hash (from git describe)
+		if !strings.Contains(version, shortCommit) {
+			version += "+" + shortCommit
+		}
+	}
+	// Append build date if available
+	if BuildDate != "" {
+		version += " (built " + BuildDate + ")"
+	}
+	return version
 }
