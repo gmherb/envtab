@@ -310,6 +310,8 @@ This runs `go run ./tools/gen-docs.go` and produces per-command Markdown files a
 
 # TODO
 
+- Add --raw to loginCmd. This will place actual export entries instead of calling envtab.
+  - Safer, faster, but lacks encryption at rest.
 - Support environment variables in show; exported with eval $(envtab export loadout)
   - Can we resolve all environment variables like we do with PATH?
   - Add loadout priority/number to support specific load order in case entries build upon environment variable expansion.
