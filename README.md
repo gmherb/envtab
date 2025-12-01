@@ -3,6 +3,7 @@
 
 ![diagram](diagram.png "Take control of your environment")
 
+- [Installation](#installation)
 - [Usage](#usage)
 - [Environment Variables in Values](#environment-variables-in-values)
   - [PATH](#path)
@@ -18,6 +19,29 @@
 - [Importing Loadouts and dotenv Files](#importing-loadouts-and-dotenv-files)
 - [Generating CLI documentation](#generating-cli-documentation)
 - [TODO](#todo)
+
+# Installation
+
+## From Source
+
+### Prerequisites
+
+- Go 1.25 or later
+- Git (for version information)
+
+### Build and Install
+
+```bash
+git clone https://github.com/gmherb/envtab.git
+cd envtab; make install
+```
+
+*Installs to `/usr/local/bin/envtab`*
+
+```bash
+make build
+./envtab --version
+```
 
 # Usage
 
