@@ -24,6 +24,7 @@ func getEnvtabLoginLine() string {
 		slog.Error("failure getting executable path", "error", err)
 		os.Exit(1)
 	}
+	// os.Executable() may return a relative path on some systems, so ensure it's absolute
 	absPath, err := filepath.Abs(execPath)
 	if err != nil {
 		slog.Error("failure getting absolute path", "error", err)
@@ -115,6 +116,13 @@ func removeEnvtabFromScript(loginScript string) {
 		os.Exit(1)
 	}
 
+	// Get file info to preserve permissions
+	fileInfo, err := os.Stat(loginScript)
+	if err != nil {
+		slog.Error("failure getting file info", "script", loginScript, "error", err)
+		os.Exit(1)
+	}
+
 	envtabLoginLine := getEnvtabLoginLine()
 	// ignore if login script doesn't contain `envtabLoginLine`
 	if !strings.Contains(string(content), envtabLoginLine) {
@@ -135,8 +143,8 @@ func removeEnvtabFromScript(loginScript string) {
 	}
 	output := strings.Join(newlines, "\n")
 
-	// Overwrite the login script with the updated content
-	f, err := os.OpenFile(loginScript, os.O_WRONLY|os.O_TRUNC, 0600)
+	// Overwrite the login script with the updated content, preserving permissions
+	f, err := os.OpenFile(loginScript, os.O_WRONLY|os.O_TRUNC, fileInfo.Mode())
 	if err != nil {
 		slog.Error("failure opening login script", "script", loginScript, "error", err)
 		os.Exit(1)
@@ -166,6 +174,7 @@ func ShowLoginStatus() {
 		// ignore error if file doesn't exist
 		if os.IsNotExist(err) {
 			slog.Debug("login script does not exist", "script", loginScript)
+			continue
 		} else if err != nil {
 			slog.Error("failure reading login script", "script", loginScript, "error", err)
 			os.Exit(1)
