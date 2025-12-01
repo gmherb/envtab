@@ -4,3 +4,7 @@ envtab
 # dotenv files
 *.env
 !internal/templates/embedded/*.env
+
+# test coverage
+profile.cov
+*.cov

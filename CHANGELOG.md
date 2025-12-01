@@ -73,7 +73,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Build-time version management:
   - Version information from git tags
   - Commit hash and build date included in version string
-  - `make version` target to display version information
 
 ### Changed
 
