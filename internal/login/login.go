@@ -5,6 +5,7 @@ import (
 	"log/slog"
 	"os"
 	"os/user"
+	"path/filepath"
 	"strings"
 )
 
@@ -15,7 +16,21 @@ var loginScripts = []string{
 	".zprofile",
 	".login",
 }
-var envtabLoginLine = "$(envtab login)"
+
+// getEnvtabLoginLine returns the login line with the absolute path to the binary
+func getEnvtabLoginLine() string {
+	execPath, err := os.Executable()
+	if err != nil {
+		slog.Error("failure getting executable path", "error", err)
+		os.Exit(1)
+	}
+	absPath, err := filepath.Abs(execPath)
+	if err != nil {
+		slog.Error("failure getting absolute path", "error", err)
+		os.Exit(1)
+	}
+	return fmt.Sprintf("$(%s login)", absPath)
+}
 
 func detectLoginScript() string {
 	shell := os.Getenv("SHELL")
@@ -49,7 +64,7 @@ func detectLoginScript() string {
 func EnableLogin() {
 	loginScript := detectLoginScript()
 	slog.Debug("detected login script", "script", loginScript)
-	envtabLogin := "$(envtab login)"
+	envtabLogin := getEnvtabLoginLine()
 
 	content, err := os.ReadFile(loginScript)
 	if err != nil {
@@ -100,6 +115,7 @@ func removeEnvtabFromScript(loginScript string) {
 		os.Exit(1)
 	}
 
+	envtabLoginLine := getEnvtabLoginLine()
 	// ignore if login script doesn't contain `envtabLoginLine`
 	if !strings.Contains(string(content), envtabLoginLine) {
 		slog.Debug("login script does not contain envtab", "script", loginScript)
@@ -155,6 +171,7 @@ func ShowLoginStatus() {
 			os.Exit(1)
 		}
 
+		envtabLoginLine := getEnvtabLoginLine()
 		// Print enabled if the login script contains `envtabLoginLine`
 		if strings.Contains(string(content), envtabLoginLine) {
 			slog.Debug("login script contains envtab", "script", loginScript)
