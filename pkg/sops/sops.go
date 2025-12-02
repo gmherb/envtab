@@ -15,6 +15,29 @@ import (
 )
 
 const sopsInstallURL = "https://github.com/getsops/sops"
+const sopsFilenameOverride = "envtab-stdin-override"
+
+var envtabSOPSPathRegex = os.Getenv("ENVTAB_SOPS_PATH_REGEX")
+
+// sopsVerbose controls whether --verbose flag is added to sops commands
+var sopsVerbose = os.Getenv("SOPS_VERBOSE") == "true"
+
+// buildSOPSArgs builds command arguments for sops, adding --verbose if enabled
+func buildSOPSArgs(args ...string) []string {
+	if sopsVerbose {
+		return append([]string{"--verbose"}, args...)
+	}
+	return args
+}
+
+// getFilenameOverride returns the filename override to use for stdin operations
+// Defaults to "stdin" if ENVTAB_SOPS_PATH_REGEX is not set
+func getFilenameOverride() string {
+	if envtabSOPSPathRegex != "" {
+		return envtabSOPSPathRegex
+	}
+	return sopsFilenameOverride
+}
 
 // checkSOPSAvailable checks if the sops command is available
 func checkSOPSAvailable() error {
@@ -36,7 +59,7 @@ func SOPSEncryptFile(filePath string) ([]byte, error) {
 		return nil, err
 	}
 
-	cmd := exec.Command("sops", "-e", filePath)
+	cmd := exec.Command("sops", buildSOPSArgs("-e", filePath)...)
 	var stderr bytes.Buffer
 	cmd.Stderr = &stderr
 
@@ -63,7 +86,7 @@ func SOPSDecryptFile(filePath string) ([]byte, error) {
 		return nil, err
 	}
 
-	cmd := exec.Command("sops", "-d", filePath)
+	cmd := exec.Command("sops", buildSOPSArgs("-d", filePath)...)
 	var stderr bytes.Buffer
 	cmd.Stderr = &stderr
 
@@ -118,7 +141,7 @@ func SOPSReencryptFile(filePath string) error {
 	}
 
 	// Use sops to re-encrypt in place with current keys
-	cmd := exec.Command("sops", "-r", filePath)
+	cmd := exec.Command("sops", buildSOPSArgs("-r", "-i", filePath)...)
 	var stderr bytes.Buffer
 	cmd.Stderr = &stderr
 
@@ -167,70 +190,92 @@ func IsSOPSEncrypted(filePath string) bool {
 }
 
 // SOPSEncryptValue encrypts a single value using sops
-// Creates a temporary file, encrypts it, and returns the encrypted value with "SOPS:" prefix
+// Passes the value via stdin to avoid creating temporary files
 func SOPSEncryptValue(value string) (string, error) {
 	slog.Debug("encrypting value with SOPS")
-	tmpFile, err := os.CreateTemp("", "envtab-sops-*.yaml")
-	if err != nil {
-		return "", fmt.Errorf("failed to create temp file: %w", err)
+	if err := checkSOPSAvailable(); err != nil {
+		return "", err
 	}
-	defer os.Remove(tmpFile.Name())
-	slog.Debug("created temporary file for value encryption", "file", tmpFile.Name())
 
 	// Use YAML marshaling to properly handle special characters
 	data := map[string]string{"value": value}
 	yamlData, err := yaml.Marshal(data)
 	if err != nil {
-		tmpFile.Close()
 		return "", fmt.Errorf("failed to marshal value to YAML: %w", err)
 	}
 
-	if _, err := tmpFile.Write(yamlData); err != nil {
-		tmpFile.Close()
-		return "", fmt.Errorf("failed to write temp file: %w", err)
-	}
-	tmpFile.Close()
+	// Use stdin to pass data to sops
+	// --filename-override is required when reading from stdin to specify the file format
+	args := buildSOPSArgs("encrypt", "--filename-override", getFilenameOverride())
+	cmd := exec.Command("sops", args...)
+	cmd.Stdin = bytes.NewReader(yamlData)
+	var stderr bytes.Buffer
+	cmd.Stderr = &stderr
 
-	encrypted, err := SOPSEncryptFile(tmpFile.Name())
+	encrypted, err := cmd.Output()
 	if err != nil {
-		return "", err
+		stderrStr := stderr.String()
+		slog.Debug("SOPS encryption failed", "stderr", stderrStr, "error", err)
+		if stderrStr != "" {
+			return "", fmt.Errorf("sops encryption failed: %s: %w", strings.TrimSpace(stderrStr), err)
+		}
+		return "", fmt.Errorf("sops encryption failed: %w", err)
 	}
 
 	slog.Debug("value encrypted successfully")
 	return "SOPS:" + string(encrypted), nil
 }
 
-// SOPSDecryptValue decrypts a SOPS-encrypted value
-// The encrypted value contains the full SOPS-encrypted YAML structure including metadata
-// This preserves all SOPS metadata needed for decryption
+// SOPSDecryptValue decrypts a value using sops
 func SOPSDecryptValue(encryptedValue string) (string, error) {
 	slog.Debug("decrypting value with SOPS")
+	if err := checkSOPSAvailable(); err != nil {
+		return "", err
+	}
+
 	// Remove "SOPS:" prefix if present
 	encrypted := strings.TrimPrefix(encryptedValue, "SOPS:")
 	if encrypted == "" {
-		return "", fmt.Errorf("encrypted value is empty after removing prefix")
+		return "", fmt.Errorf("value is empty after removing prefix")
 	}
 
-	tmpFile, err := os.CreateTemp("", "envtab-sops-decrypt-*.yaml")
+	// Use stdin to pass data to sops
+	// --filename-override is required when reading from stdin to specify the file format
+	args := buildSOPSArgs("decrypt", "--filename-override", getFilenameOverride())
+	cmd := exec.Command("sops", args...)
+	cmd.Stdin = strings.NewReader(encrypted)
+	var stderr bytes.Buffer
+	cmd.Stderr = &stderr
+
+	decrypted, err := cmd.Output()
 	if err != nil {
-		return "", fmt.Errorf("failed to create temp file: %w", err)
-	}
-	defer os.Remove(tmpFile.Name())
-	slog.Debug("created temporary file for value decryption", "file", tmpFile.Name())
+		stderrStr := stderr.String()
+		slog.Debug("SOPS decryption failed", "stderr", stderrStr, "error", err)
 
-	if _, err := tmpFile.WriteString(encrypted); err != nil {
-		tmpFile.Close()
-		return "", fmt.Errorf("failed to write temp file: %w", err)
-	}
-	tmpFile.Close()
-
-	decrypted, err := SOPSDecryptFile(tmpFile.Name())
-	if err != nil {
-		if utils.Contains(err.Error(), "keys may have been rotated") {
-			slog.Warn("cannot decrypt value - keys may have been rotated")
-			return "", fmt.Errorf("cannot decrypt: encryption keys may have been rotated. The value was encrypted with different keys. %w", err)
+		if exitError, ok := err.(*exec.ExitError); ok {
+			// Check for key rotation or access errors
+			if utils.Contains(stderrStr, "no decryption key") ||
+				utils.Contains(stderrStr, "key not found") ||
+				utils.Contains(stderrStr, "access denied") ||
+				utils.Contains(stderrStr, "InvalidKeyException") ||
+				utils.Contains(stderrStr, "no decryption key found") {
+				slog.Warn("SOPS decryption failed - keys may have been rotated")
+				return "", fmt.Errorf("decryption failed: keys may have been rotated or access denied. Try re-encrypting the loadout file with current keys: %w", err)
+			}
+			// Check if value might not be SOPS-encrypted
+			if utils.Contains(stderrStr, "no sops metadata found") ||
+				utils.Contains(stderrStr, "not a valid sops file") ||
+				utils.Contains(stderrStr, "Error decrypting") {
+				slog.Debug("value may not be SOPS-encrypted", "stderr", stderrStr)
+				return "", fmt.Errorf("value may not be SOPS-encrypted or is corrupted. SOPS error: %s", stderrStr)
+			}
+			// Include stderr for debugging
+			if stderrStr != "" {
+				slog.Debug("SOPS decryption failed", "stderr", stderrStr, "exit_code", exitError.ExitCode())
+				return "", fmt.Errorf("sops decryption failed: %s (exit status %d)", strings.TrimSpace(stderrStr), exitError.ExitCode())
+			}
 		}
-		return "", err
+		return "", fmt.Errorf("sops decryption failed: %w", err)
 	}
 
 	// Parse YAML to extract value (more robust than line-by-line parsing)

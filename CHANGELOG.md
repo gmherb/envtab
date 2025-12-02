@@ -7,6 +7,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.5-alpha] - 2025-12-02
+
+### Added
+
+- SOPS stdin support for value encryption/decryption:
+  - `SOPSEncryptValue` and `SOPSDecryptValue` now use stdin instead of temporary files
+  - Added `--filename-override` flag support for stdin operations
+  - Added `ENVTAB_SOPS_PATH_REGEX` environment variable to customize filename override (defaults to `envtab-stdin-override`)
+- SOPS verbose mode support:
+  - Added `SOPS_VERBOSE` environment variable to enable `--verbose` flag for all sops commands
+- Updated SOPS configuration documentation:
+  - Added path_regex patterns for `envtab-stdin-override` and catchall in configuration examples
+  - Documented stdin filename override requirements
+
+### Changed
+
+- Improved SOPS value encryption/decryption efficiency by eliminating temporary file creation
+- Updated SOPS integration to use stdin for all value-level operations
+
+### Fixed
+
+- Fixed syntax error in `buildSOPSArgs` function
+- Removed sensitive value logging from debug statements
+
 ## [0.1.4-alpha] - 2025-12-02
 
 ### Fixed

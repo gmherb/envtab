@@ -177,8 +177,12 @@ Configure SOPS by creating a `.sops.yaml` file in your project root or home dire
 
 ```yaml
 creation_rules:
-  - path_regex: .*\.yaml$
+  - path_regex: envtab-stdin-override
     kms: 'arn:aws:kms:us-east-1:123456789012:key/12345678-1234-1234-1234-123456789012'
+    pgp: >-
+      FBC7B9E2A4F9289AC0C1D4843D16CEE4A27381B4
+
+  - kms: 'arn:aws:kms:us-east-1:123456789012:key/12345678-1234-1234-1234-123456789012'
     pgp: >-
       FBC7B9E2A4F9289AC0C1D4843D16CEE4A27381B4
 ```
@@ -309,7 +313,8 @@ This project includes a small tool that uses Cobra's `doc` package to generate M
 This runs `go run ./tools/gen-docs.go` and produces per-command Markdown files and a top-level `docs/envtab.md` that reflect the current CLI.
 
 # TODO
-
+- SOPS:exec-env - execute a command with decrypted values inserted into the environment
+  - Add support or re-implement. Reimplementation would be best as can support all envtab loadouts
 - Add --raw to loginCmd. This will place actual export entries inside of a shell script to be sourced from profile script instead of calling envtab.
   - Safer, faster, but lacks encryption at rest.
   - Also supports all environment values in entries as they will be evaluated on source.

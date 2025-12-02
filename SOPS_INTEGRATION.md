@@ -70,8 +70,13 @@ Create a `.sops.yaml` in your project root or home directory:
 
 ```yaml
 creation_rules:
-  - path_regex: .*\.yaml$
+  - path_regex: envtab-stdin-override
     kms: 'arn:aws:kms:us-east-1:123456789012:key/12345678-1234-1234-1234-123456789012'
+    pgp: >-
+      FBC7B9E2A4F9289AC0C1D4843D16CEE4A27381B4,
+      85D77543B3D624B63CEA9E06DCCB5A08F57A8DA3
+
+  - kms: 'arn:aws:kms:us-east-1:123456789012:key/12345678-1234-1234-1234-123456789012'
     pgp: >-
       FBC7B9E2A4F9289AC0C1D4843D16CEE4A27381B4,
       85D77543B3D624B63CEA9E06DCCB5A08F57A8DA3
@@ -120,8 +125,10 @@ age-keygen -o ~/.config/sops/age/keys.txt
 # Configure .sops.yaml
 cat > .sops.yaml <<EOF
 creation_rules:
-  - path_regex: .*\.yaml$
+  - path_regex: envtab-stdin-override
     age: >-
+      age1example1q2w3e4r5t6y7u8i9o0p1a2s3d4f5g6h7j8k9l0
+  - age: >-
       age1example1q2w3e4r5t6y7u8i9o0p1a2s3d4f5g6h7j8k9l0
 EOF
 
