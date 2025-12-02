@@ -325,6 +325,7 @@ This runs `go run ./tools/gen-docs.go` and produces per-command Markdown files a
   - However, syncing login requires checking for diffs after every edit, add, and import (make should have empty values from a template unless we are supporting values in templates)
     - sync can be manual for first implementation. `envtab login status --sync`
       - but end goal is `--sync` flag on edit, add, import, and make which triggers sync process.
+      - or make it automatic for simplicity
   - --raw should be utilized with either --enable or --disable. Ignored if --status or enable/disable are omitted.
   - --status should now include mode (raw|command substitution)
 - Support environment variables in show; exported with eval $(envtab export loadout)
