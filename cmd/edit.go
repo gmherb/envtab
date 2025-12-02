@@ -29,8 +29,8 @@ If no options are provided, enter editor to manually edit a envtab loadout.`,
 	Example: `  envtab edit myloadout                                  # edit loadout in editor
   envtab edit myloadout --name newname                   # rename loadout
   envtab edit myloadout --description "new description"  # update description
-  envtab edit myloadout --add-tags "tag1, tag2, tag3"    # add tags
-  envtab edit myloadout --remove-tags "tag1,tag2 tag3"   # remove tags
+  envtab edit myloadout --add-tags "tag1,tag2,tag3"      # add tags
+  envtab edit myloadout --remove-tags "tag1,tag2,tag3"   # remove tags
   envtab edit myloadout --remove-entry KEY               # remove entry
   envtab edit myloadout --login                          # enable login
   envtab edit myloadout --no-login                       # disable login
@@ -213,6 +213,7 @@ func editLoadout(loadoutName string) error {
 	if err != nil {
 		return err
 	}
+	defer os.Remove(tempFilePath)
 
 	editor := os.Getenv("EDITOR")
 	if editor == "" {
@@ -293,7 +294,5 @@ func editLoadout(loadoutName string) error {
 		return backends.WriteLoadout(loadoutName, editedLoadout)
 	}
 
-	// Remove the temp file
-	os.Remove(tempFilePath)
 	return nil
 }
