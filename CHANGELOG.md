@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.4-alpha] - 2025-12-02
+
+### Fixed
+
+- Fixed bug where temporary files were left behind after using `envtab edit` command
+- Fixed `--remove-tags` flag to properly parse and remove tags from loadouts
+
+### Changed
+
+- Refactored export logic to evaluate PATH expansion for encrypted values (decrypts SOPS-encrypted PATH values before processing PATH expansion)
+- Updated documentation examples for `--add-tags` and `--remove-tags` flags to use consistent comma-separated format
+
 ## [0.1.3-alpha] - 2025-12-02
 
 ### Added
