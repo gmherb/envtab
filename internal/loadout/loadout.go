@@ -180,6 +180,13 @@ func (l *Loadout) UpdateEntry(key string, value string) error {
 	return nil
 }
 
+func (l *Loadout) RemoveEntry(key string) error {
+	slog.Debug("RemoveEntry called", "key", key)
+	delete(l.Entries, key)
+	l.UpdateUpdatedAt()
+	return nil
+}
+
 func (l *Loadout) UpdateTags(newTags []string) error {
 	slog.Debug("UpdateTags called", "tags", newTags)
 	l.Metadata.Tags = tags.MergeTags(l.Metadata.Tags, newTags)
