@@ -4,8 +4,7 @@ Edit envtab loadout
 
 ### Synopsis
 
-Edit envtab loadout name, description, tags, and whether its enabled
-on login.
+Edit envtab loadout name, description, tags, and login status.
 
 If no options are provided, enter editor to manually edit a envtab loadout.
 
@@ -19,21 +18,23 @@ envtab edit LOADOUT_NAME [flags]
   envtab edit myloadout                                  # edit loadout in editor
   envtab edit myloadout --name newname                   # rename loadout
   envtab edit myloadout --description "new description"  # update description
-  envtab edit myloadout --tags "tag1, tag2, tag3"        # update tags
-  envtab edit myloadout --login                          # enable login on loadout
-  envtab edit myloadout --no-login                       # disable login on loadout
+  envtab edit myloadout --add-tags "tag1, tag2, tag3"    # add tags
+  envtab edit myloadout --remove-tags "tag1,tag2 tag3"   # remove tags
+  envtab edit myloadout --login                          # enable login
+  envtab edit myloadout --no-login                       # disable login
   envtab edit myloadout -n newloadout -d "blah bla" -l   # update multiple fields
 ```
 
 ### Options
 
 ```
+      --add-tags string      add tags to loadout (separated by comma or space)
   -d, --description string   set loadout description
   -h, --help                 help for edit
   -l, --login                enable loadout on login (mutually exclusive with --no-login)
   -n, --name string          set loadout name
   -L, --no-login             disable loadout on login (mutually exclusive with --login)
-  -t, --tags string          set loadout tags (separated by comma or space)
+      --remove-tags string   remove tags from loadout (separated by comma or space)
 ```
 
 ### Options inherited from parent commands

@@ -256,6 +256,46 @@ func TestReplaceTags(t *testing.T) {
 	}
 }
 
+func TestRemoveTags(t *testing.T) {
+	loadout := InitLoadout()
+	loadout.Metadata.Tags = []string{"tag1", "tag2", "tag3", "tag4"}
+
+	err := loadout.RemoveTags([]string{"tag2", "tag4"})
+	if err != nil {
+		t.Errorf("RemoveTags() error = %v", err)
+	}
+
+	if len(loadout.Metadata.Tags) != 2 {
+		t.Errorf("RemoveTags() should have 2 tags, got %d", len(loadout.Metadata.Tags))
+	}
+
+	// Check that removed tags are not present
+	for _, tag := range loadout.Metadata.Tags {
+		if tag == "tag2" || tag == "tag4" {
+			t.Errorf("RemoveTags() should have removed tag %s", tag)
+		}
+	}
+
+	// Check that remaining tags are present
+	expectedTags := []string{"tag1", "tag3"}
+	for _, expectedTag := range expectedTags {
+		found := false
+		for _, tag := range loadout.Metadata.Tags {
+			if tag == expectedTag {
+				found = true
+				break
+			}
+		}
+		if !found {
+			t.Errorf("RemoveTags() missing expected tag: %s", expectedTag)
+		}
+	}
+
+	if loadout.Metadata.UpdatedAt == "" {
+		t.Error("RemoveTags() should update UpdatedAt")
+	}
+}
+
 func TestUpdateDescription(t *testing.T) {
 	loadout := InitLoadout()
 
