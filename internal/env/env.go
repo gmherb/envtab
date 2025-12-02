@@ -4,12 +4,9 @@ import (
 	"log/slog"
 	"os"
 	"strings"
-)
 
-// DecryptFunc is a function type for decrypting values
-// This allows the env package to work with encrypted values without
-// directly depending on crypto implementations
-type DecryptFunc func(string) (string, error)
+	"github.com/gmherb/envtab/pkg/sops"
+)
 
 type Env struct {
 	Env map[string]string
@@ -40,35 +37,23 @@ func (e *Env) Get(key string) string {
 	return e.Env[key]
 }
 
-func (e *Env) Compare(key string, value string) bool {
-	return e.CompareWithDecrypt(key, value, nil)
+func (e *Env) CompareRawValue(key string, value string) bool {
+	return sops.SOPSDisplayValue(e.Get(key), false) == value
 }
 
-// CompareWithDecrypt compares a key-value pair, optionally decrypting the value first
-// If decryptFunc is provided and value is encrypted (starts with "SOPS:"), it will decrypt first
-func (e *Env) CompareWithDecrypt(key string, value string, decryptFunc DecryptFunc) bool {
+func (e *Env) CompareSOPSEncryptedValue(key string, value string) bool {
 	match := false
 
-	// Decrypt if needed and decryptFunc is provided
-	if decryptFunc != nil {
-		if strings.HasPrefix(value, "SOPS:") {
-			decrypted, err := decryptFunc(value)
-			if err != nil {
-				// If decryption fails, can't match - return false
-				return false
-			}
-			value = decrypted
-		}
-	}
+	displayValue := sops.SOPSDisplayValue(value, true)
 
-	if strings.Contains(value, "$PATH") {
+	if strings.Contains(displayValue, "$PATH") {
 		slog.Debug("entry contains $PATH", "key", key, "value", value, "env", e.Env)
-		value = strings.Replace(value, "$PATH", "", 1)
-		value = strings.Trim(value, ":")
+		displayValue = strings.Replace(value, "$PATH", "", 1)
+		displayValue = strings.Trim(displayValue, ":")
 	}
 
 	for k, v := range e.Env {
-		if k == key && v == value {
+		if k == key && v == displayValue {
 			match = true
 			break
 		} else if key == "PATH" && strings.Contains(v, value) {

@@ -14,7 +14,6 @@ import (
 
 	"github.com/gmherb/envtab/internal/backends"
 	"github.com/gmherb/envtab/internal/env"
-	"github.com/gmherb/envtab/pkg/sops"
 
 	"github.com/spf13/cobra"
 )
@@ -159,16 +158,9 @@ func ListEnvtabLoadouts(patterns []string) {
 		}
 
 		var activeEntries = []string{}
-		// Create decrypt function for comparing encrypted values
-		decryptFunc := func(encryptedValue string) (string, error) {
-			if strings.HasPrefix(encryptedValue, "SOPS:") {
-				return sops.SOPSDecryptValue(encryptedValue)
-			}
-			return encryptedValue, nil
-		}
 
 		for key, value := range lo.Entries {
-			if environment.CompareWithDecrypt(key, value, decryptFunc) {
+			if environment.CompareSOPSEncryptedValue(key, value) {
 				activeEntries = append(activeEntries, key+"="+value)
 			}
 		}

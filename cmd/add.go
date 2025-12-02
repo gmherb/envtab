@@ -114,4 +114,5 @@ func init() {
 	rootCmd.AddCommand(addCmd)
 	addCmd.Flags().BoolP("encrypt-value", "e", false, "Encrypt individual value with SOPS")
 	addCmd.Flags().BoolP("encrypt-file", "f", false, "Encrypt entire loadout file with SOPS")
+	addCmd.MarkFlagsMutuallyExclusive("encrypt-file", "encrypt-value")
 }

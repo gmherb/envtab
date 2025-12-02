@@ -327,3 +327,18 @@ func GetSOPSConfigPath() string {
 	slog.Debug("SOPS config file not found")
 	return ""
 }
+
+// SOPSDisplayValue returns display value for an entry
+// optionally decrypting it if decrypt is true if the value is encrypted (SOPS: prefix)
+func SOPSDisplayValue(value string, decrypt bool) string {
+	if strings.HasPrefix(value, "SOPS:") && decrypt {
+		decrypted, err := SOPSDecryptValue(value)
+		if err != nil {
+			slog.Error("failed to decrypt value", "value", value, "error", err)
+			return value
+		}
+		return decrypted
+	} else {
+		return value
+	}
+}

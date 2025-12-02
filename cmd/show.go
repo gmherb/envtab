@@ -34,25 +34,36 @@ If multiple patterns are provided, loadouts matching any pattern will be shown.`
 	Run: func(cmd *cobra.Command, args []string) {
 		slog.Debug("show called with args", "args", args)
 		decrypt, _ := cmd.Flags().GetBool("decrypt")
-		showActiveLoadouts(decrypt, args)
+		all, _ := cmd.Flags().GetBool("all")
+		key, _ := cmd.Flags().GetString("key")
+		value, _ := cmd.Flags().GetString("value")
+		showActiveLoadouts(decrypt, all, key, value, args)
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(showCmd)
 	showCmd.Flags().BoolP("decrypt", "d", false, "Show sensitive values (decrypt SOPS encrypted values)")
+	showCmd.Flags().BoolP("all", "a", false, "Show all envtab entries")
+	showCmd.Flags().StringP("key", "k", "", "Show env var matching key")
+	showCmd.Flags().StringP("value", "v", "", "Show env var matching value")
+	showCmd.MarkFlagsMutuallyExclusive("all", "key", "value")
 }
 
-func showActiveLoadouts(decrypt bool, patterns []string) {
+func showActiveLoadouts(decrypt bool, all bool, keyFilter string, valueFilter string, patterns []string) {
+	slog.Debug("showActiveLoadouts called with args", "decrypt", decrypt, "all", all, "keyFilter", keyFilter, "valueFilter", valueFilter, "patterns", patterns)
 	envtabSlice, err := backends.ListLoadouts()
 	if err != nil {
 		slog.Error("failure listing loadouts", "error", err)
 		os.Exit(1)
 	}
+
 	environment := env.NewEnv()
 	environment.Populate()
 
 	for _, loadout := range envtabSlice {
+		// Create a slice to store entries we want to show for this loadout
+		var entries = []string{}
 
 		// Filter by patterns if provided
 		if len(patterns) > 0 {
@@ -82,35 +93,21 @@ func showActiveLoadouts(decrypt bool, patterns []string) {
 			os.Exit(1)
 		}
 
-		var activeEntries = []string{}
-		// Create decrypt function for comparing encrypted values
-		decryptFunc := func(encryptedValue string) (string, error) {
-			if strings.HasPrefix(encryptedValue, "SOPS:") {
-				return sops.SOPSDecryptValue(encryptedValue)
-			}
-			return encryptedValue, nil
-		}
+		for entryKey, entryValue := range lo.Entries {
+			appendEntry := false
 
-		// Create display function that conditionally shows decrypted values
-		displayValue := func(value string) string {
-			if strings.HasPrefix(value, "SOPS:") {
-				if decrypt {
-					decrypted, err := sops.SOPSDecryptValue(value)
-					if err != nil {
-						return "***encrypted***"
-					}
-					return decrypted
-				}
-				return "***encrypted***"
+			if keyFilter != "" && entryKey == keyFilter {
+				appendEntry = true
+			} else if valueFilter != "" && environment.CompareRawValue(entryKey, valueFilter) {
+				appendEntry = true
+			} else if valueFilter != "" && environment.CompareSOPSEncryptedValue(entryKey, valueFilter) {
+				appendEntry = true
+			} else if all {
+				appendEntry = true
 			}
-			return value
-		}
 
-		for key, value := range lo.Entries {
-			if environment.CompareWithDecrypt(key, value, decryptFunc) {
-				// Display value (decrypted if decrypt is true)
-				displayVal := displayValue(value)
-				activeEntries = append(activeEntries, key+"="+displayVal)
+			if appendEntry {
+				entries = append(entries, entryKey+"="+sops.SOPSDisplayValue(entryValue, decrypt))
 			}
 		}
 
@@ -119,18 +116,18 @@ func showActiveLoadouts(decrypt bool, patterns []string) {
 		dashColor := color.New(color.FgHiBlack).SprintFunc()
 		loColor := color.New(color.FgGreen).SprintFunc()
 
-		activeEntryCount := len(activeEntries)
-		totalEntryCount := len(lo.Entries)
-
 		// If a loadout has fewer active entries than total entries, colorize the count red
 		var countColor func(a ...interface{}) string
-		if len(activeEntries) < len(lo.Entries) {
+		if len(entries) < len(lo.Entries) {
 			countColor = color.New(color.FgRed).SprintFunc()
 		} else {
 			countColor = color.New(color.FgBlue).SprintFunc()
 		}
 
-		if len(activeEntries) > 0 {
+		totalEntryCount := len(lo.Entries)
+		activeEntryCount := len(entries)
+
+		if activeEntryCount > 0 {
 
 			dashCount := 80 - // term width
 				len(loadout) -
@@ -141,10 +138,10 @@ func showActiveLoadouts(decrypt bool, patterns []string) {
 			fmt.Println(
 				loColor(loadout),
 				strings.Repeat(dashColor("-"), dashCount),
-				"[", countColor(len(activeEntries)), "/", countColor(totalEntryCount), "]",
+				"[", countColor(activeEntryCount), "/", countColor(totalEntryCount), "]",
 			)
 			padding := "   "
-			for _, entry := range activeEntries {
+			for _, entry := range entries {
 				fmt.Println(padding, entryColor(entry))
 			}
 		}
