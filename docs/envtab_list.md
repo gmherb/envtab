@@ -20,8 +20,8 @@ envtab list [LOADOUT_PATTERN...] [flags]
   envtab list -l
   envtab list --long
   envtab list dev*
-  envtab list -l *staging*
-  envtab list aws-* gcp-*
+  envtab list -l \*staging*
+  envtab list aws* \*prod*
 ```
 
 ### Options

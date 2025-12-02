@@ -30,8 +30,8 @@ listing format which includes the loadout name, tags, and other metadata.`,
   envtab list -l
   envtab list --long
   envtab list dev*
-  envtab list -l *staging*
-  envtab list aws-* gcp-*`,
+  envtab list -l \*staging*
+  envtab list aws* \*prod*`,
 	Args:    cobra.ArbitraryArgs,
 	Aliases: []string{"l", "ls", "lis"},
 	Run: func(cmd *cobra.Command, args []string) {
