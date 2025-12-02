@@ -313,7 +313,7 @@ This project includes a small tool that uses Cobra's `doc` package to generate M
 This runs `go run ./tools/gen-docs.go` and produces per-command Markdown files and a top-level `docs/envtab.md` that reflect the current CLI.
 
 # TODO
-- Support --key and --value in showCmd to locate specific vars without using $(echo $KEY) or $(env|grep $VAL):
+- Support --key and --value in showCmd to locate specific vars without using `$(echo $KEY)` or `$(env|grep $VAL)`:
   - Show env var matching --key
   - Show env var matching --value
 - SOPS:exec-env - execute a command with decrypted values inserted into the environment
