@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/gmherb/envtab/internal/utils"
+	"github.com/gmherb/envtab/pkg/sops"
 )
 
 func TestValidateLoadout(t *testing.T) {
@@ -559,6 +560,51 @@ func TestExport(t *testing.T) {
 	loadout2 := InitLoadout()
 	loadout2.Entries["EMPTY_VAR"] = ""
 	loadout2.Export() // Should not panic
+
+	// Verify LoadedAt was updated
+	if loadout.Metadata.LoadedAt == "" {
+		t.Error("Export() should update LoadedAt")
+	}
+}
+
+func TestExportWithSOPSEncryptedPATH(t *testing.T) {
+	// This test verifies the fix from 0.1.4-alpha:
+	// SOPS-encrypted PATH values should be decrypted before PATH expansion
+	// Skip test if SOPS is not available
+
+	// Save original PATH
+	originalPath := os.Getenv("PATH")
+	defer os.Setenv("PATH", originalPath)
+
+	// Set a test PATH
+	testPath := "/test/path1:/test/path2"
+	os.Setenv("PATH", testPath)
+
+	// Create a SOPS-encrypted PATH value that contains $PATH
+	// First, encrypt the value "/new/path:$PATH"
+	plainValue := "/new/path:$PATH"
+	encrypted, err := sops.SOPSEncryptValue(plainValue)
+	if err != nil {
+		t.Skipf("Cannot encrypt value for test (SOPS may not be configured): %v", err)
+	}
+
+	loadout := InitLoadout()
+	loadout.Entries["PATH"] = encrypted
+
+	// Export should decrypt the value first, then expand $PATH
+	loadout.Export()
+
+	// Verify PATH was updated with both the new path and existing paths
+	currentPath := os.Getenv("PATH")
+	if !strings.Contains(currentPath, "/new/path") {
+		t.Error("Export() should add new path from SOPS-encrypted PATH value")
+	}
+	if !strings.Contains(currentPath, "/test/path1") {
+		t.Error("Export() should preserve existing paths when expanding $PATH in SOPS-encrypted value")
+	}
+	if !strings.Contains(currentPath, "/test/path2") {
+		t.Error("Export() should preserve existing paths when expanding $PATH in SOPS-encrypted value")
+	}
 
 	// Verify LoadedAt was updated
 	if loadout.Metadata.LoadedAt == "" {
