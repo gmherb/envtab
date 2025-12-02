@@ -612,6 +612,136 @@ func TestExportWithSOPSEncryptedPATH(t *testing.T) {
 	}
 }
 
+func TestExportWithEmptyValues(t *testing.T) {
+	// Save original PATH
+	originalPath := os.Getenv("PATH")
+	defer os.Setenv("PATH", originalPath)
+
+	// Set a test PATH
+	testPath := "/test/path1:/test/path2"
+	os.Setenv("PATH", testPath)
+
+	tests := []struct {
+		name           string
+		entries        map[string]string
+		expectedInPath []string
+		notInPath      []string
+		shouldExport   map[string]bool // key -> should be exported
+	}{
+		{
+			name: "empty PATH entry should be skipped",
+			entries: map[string]string{
+				"PATH": "",
+				"VAR1": "value1",
+			},
+			expectedInPath: []string{"/test/path1", "/test/path2"},
+			notInPath:      []string{},
+			shouldExport: map[string]bool{
+				"VAR1": true,
+				"PATH": false, // Empty PATH should not be exported
+			},
+		},
+		{
+			name: "PATH with empty segments should skip empty parts",
+			entries: map[string]string{
+				"PATH": "/new/path1::/new/path2",
+			},
+			expectedInPath: []string{"/test/path1", "/test/path2", "/new/path1", "/new/path2"},
+			notInPath:      []string{""},
+			shouldExport: map[string]bool{
+				"PATH": true,
+			},
+		},
+		{
+			name: "PATH with leading/trailing colons should be trimmed",
+			entries: map[string]string{
+				"PATH": ":/new/path1:/new/path2:",
+			},
+			expectedInPath: []string{"/test/path1", "/test/path2", "/new/path1", "/new/path2"},
+			notInPath:      []string{""},
+			shouldExport: map[string]bool{
+				"PATH": true,
+			},
+		},
+		{
+			name: "PATH with only empty segments should preserve existing PATH",
+			entries: map[string]string{
+				"PATH": "::",
+			},
+			expectedInPath: []string{"/test/path1", "/test/path2"},
+			notInPath:      []string{""},
+			shouldExport: map[string]bool{
+				"PATH": true,
+			},
+		},
+		{
+			name: "empty non-PATH entries should be skipped",
+			entries: map[string]string{
+				"EMPTY_VAR": "",
+				"VAR1":      "value1",
+				"VAR2":      "value2",
+			},
+			expectedInPath: []string{"/test/path1", "/test/path2"},
+			notInPath:      []string{},
+			shouldExport: map[string]bool{
+				"EMPTY_VAR": false,
+				"VAR1":      true,
+				"VAR2":      true,
+			},
+		},
+		{
+			name: "PATH with $PATH expansion and empty segments",
+			entries: map[string]string{
+				"PATH": "/new/path1::$PATH:/new/path2:",
+			},
+			expectedInPath: []string{"/test/path1", "/test/path2", "/new/path1", "/new/path2"},
+			notInPath:      []string{""},
+			shouldExport: map[string]bool{
+				"PATH": true,
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			// Reset PATH for each test
+			os.Setenv("PATH", testPath)
+
+			loadout := InitLoadout()
+			for k, v := range tt.entries {
+				loadout.Entries[k] = v
+			}
+
+			// Capture output
+			loadout.Export()
+
+			// Verify PATH contents
+			currentPath := os.Getenv("PATH")
+			for _, expected := range tt.expectedInPath {
+				if !strings.Contains(currentPath, expected) {
+					t.Errorf("Expected PATH to contain %q, got %q", expected, currentPath)
+				}
+			}
+
+			for _, notExpected := range tt.notInPath {
+				if notExpected != "" && strings.Contains(currentPath, notExpected) {
+					t.Errorf("Expected PATH not to contain empty segment, got %q", currentPath)
+				}
+			}
+
+			// Verify PATH doesn't have double colons
+			if strings.Contains(currentPath, "::") {
+				t.Errorf("PATH should not contain double colons, got %q", currentPath)
+			}
+
+			// Verify LoadedAt was updated
+			if loadout.Metadata.LoadedAt == "" {
+				t.Error("Export() should update LoadedAt")
+			}
+		})
+	}
+}
+
 func TestContains(t *testing.T) {
 	tests := []struct {
 		name string
