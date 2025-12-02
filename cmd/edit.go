@@ -23,21 +23,21 @@ import (
 var editCmd = &cobra.Command{
 	Use:   "edit LOADOUT_NAME",
 	Short: "Edit envtab loadout",
-	Long: `Edit envtab loadout name, description, tags, and whether its enabled
-on login.
+	Long: `Edit envtab loadout name, description, tags, and login status.
 
 If no options are provided, enter editor to manually edit a envtab loadout.`,
 	Example: `  envtab edit myloadout                                  # edit loadout in editor
   envtab edit myloadout --name newname                   # rename loadout
   envtab edit myloadout --description "new description"  # update description
-  envtab edit myloadout --tags "tag1, tag2, tag3"        # update tags
-  envtab edit myloadout --login                          # enable login on loadout
-  envtab edit myloadout --no-login                       # disable login on loadout
+  envtab edit myloadout --add-tags "tag1, tag2, tag3"    # add tags
+  envtab edit myloadout --remove-tags "tag1,tag2 tag3"   # remove tags
+  envtab edit myloadout --login                          # enable login
+  envtab edit myloadout --no-login                       # disable login
   envtab edit myloadout -n newloadout -d "blah bla" -l   # update multiple fields`,
 	Args:    cobra.ExactArgs(1),
 	Aliases: []string{"ed", "edi"},
 	Run: func(cmd *cobra.Command, args []string) {
-		slog.Debug("edit called")
+		slog.Debug("edit called with args", "args", args)
 
 		loadoutName := args[0]
 		slog.Debug("editing loadout", "loadout", loadoutName)
@@ -89,17 +89,31 @@ If no options are provided, enter editor to manually edit a envtab loadout.`,
 			loadoutModified = true
 		}
 
-		// If --tags is set, update the loadout tags
-		if tagsStr, _ := cmd.Flags().GetString("tags"); tagsStr != "" {
+		// If --add-tags is set, add tags to the loadout
+		if tagsStr, _ := cmd.Flags().GetString("add-tags"); tagsStr != "" {
 			newTags := []string{tagsStr}
 
 			newTags = tags.SplitTags(newTags)
 			newTags = tags.RemoveEmptyTags(newTags)
 			newTags = tags.RemoveDuplicateTags(newTags)
 
-			slog.Debug("updating loadout tags", "loadout", loadoutName, "tags", newTags)
+			slog.Debug("adding loadout tags", "loadout", loadoutName, "tags", newTags)
 
 			lo.UpdateTags(newTags)
+			loadoutModified = true
+		}
+
+		// If --remove-tags is set, remove tags from the loadout
+		if tagsStr, _ := cmd.Flags().GetString("remove-tags"); tagsStr != "" {
+			tagsToRemove := []string{tagsStr}
+
+			tagsToRemove = tags.SplitTags(tagsToRemove)
+			tagsToRemove = tags.RemoveEmptyTags(tagsToRemove)
+			tagsToRemove = tags.RemoveDuplicateTags(tagsToRemove)
+
+			slog.Debug("removing loadout tags", "loadout", loadoutName, "tags", tagsToRemove)
+
+			lo.RemoveTags(tagsToRemove)
 			loadoutModified = true
 		}
 
@@ -127,7 +141,8 @@ func init() {
 
 	editCmd.Flags().StringP("name", "n", "", "set loadout name")
 	editCmd.Flags().StringP("description", "d", "", "set loadout description")
-	editCmd.Flags().StringP("tags", "t", "", "set loadout tags (separated by comma or space)")
+	editCmd.Flags().String("add-tags", "", "add tags to loadout (separated by comma or space)")
+	editCmd.Flags().String("remove-tags", "", "remove tags from loadout (separated by comma or space)")
 
 	editCmd.Flags().BoolP("login", "l", false, "enable loadout on login (mutually exclusive with --no-login)")
 	editCmd.Flags().BoolP("no-login", "L", false, "disable loadout on login (mutually exclusive with --login)")

@@ -70,6 +70,19 @@ func RemoveDuplicateTags(tags []string) []string {
 	return uniqueTags
 }
 
+// RemoveTags removes specified tags from the existing tags list
+func RemoveTags(existingTags []string, tagsToRemove []string) []string {
+	var result []string
+
+	for _, tag := range existingTags {
+		if !ContainsTag(tagsToRemove, tag) {
+			result = append(result, tag)
+		}
+	}
+
+	return result
+}
+
 //func searchByTag(tag string) ([]string, error) {
 //
 //	envtabPath := InitEnvtab()

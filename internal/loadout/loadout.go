@@ -194,6 +194,13 @@ func (l *Loadout) ReplaceTags(tags []string) error {
 	return nil
 }
 
+func (l *Loadout) RemoveTags(tagsToRemove []string) error {
+	slog.Debug("RemoveTags called", "tags", tagsToRemove)
+	l.Metadata.Tags = tags.RemoveTags(l.Metadata.Tags, tagsToRemove)
+	l.UpdateUpdatedAt()
+	return nil
+}
+
 func (l *Loadout) UpdateDescription(description string) error {
 	slog.Debug("UpdateDescription called", "description", description)
 	l.Metadata.Description = description
