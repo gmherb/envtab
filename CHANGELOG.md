@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.7-alpha] - 2025-12-02
+
+### Added
+
+- Test coverage for PATH expansion with SOPS-encrypted values:
+  - Added `TestExportWithSOPSEncryptedPATH` to verify SOPS-encrypted PATH values are decrypted before PATH expansion (fixes from 0.1.4-alpha)
+- Test coverage for empty value handling:
+  - Added `TestExportWithEmptyValues` to verify proper handling of empty PATH entries, empty PATH segments, and empty non-PATH entries
+
 ## [0.1.6-alpha] - 2025-12-02
 
 ### Fixed
