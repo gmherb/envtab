@@ -1,6 +1,7 @@
 package env
 
 import (
+	"log/slog"
 	"os"
 	"strings"
 )
@@ -61,10 +62,9 @@ func (e *Env) CompareWithDecrypt(key string, value string, decryptFunc DecryptFu
 	}
 
 	if strings.Contains(value, "$PATH") {
-		//println("DEBUG: entry contains $PATH")
+		slog.Debug("entry contains $PATH", "key", key, "value", value, "env", e.Env)
 		value = strings.Replace(value, "$PATH", "", 1)
 		value = strings.Trim(value, ":")
-		//println("DEBUG: trying to match:", value)
 	}
 
 	for k, v := range e.Env {

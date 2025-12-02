@@ -36,8 +36,8 @@ func TestValidateLoadout(t *testing.T) {
 			loadout: &Loadout{
 				Metadata: LoadoutMetadata{},
 				Entries: map[string]string{
-					"":      "value1",
-					"KEY2":  "value2",
+					"":     "value1",
+					"KEY2": "value2",
 				},
 			},
 			wantErr: true,
@@ -589,4 +589,3 @@ func TestContains(t *testing.T) {
 		})
 	}
 }
-

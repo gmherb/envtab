@@ -1,5 +1,5 @@
 /*
-Copyright © 2024 NAME HERE <EMAIL ADDRESS>
+Copyright © 2024 Greg Herbster
 */
 package cmd
 
@@ -178,7 +178,6 @@ func ListEnvtabLoadouts(patterns []string) {
 		}
 
 		fmt.Fprintf(tw, "%s\t%s\t%t\t%d\t%d\t%s\t%s\n",
-			//strings.TrimPrefix(updatedAt.Format(time.DateOnly), "20"),
 			updatedAtTime,
 			loadedAtTime,
 			lo.Metadata.Login,

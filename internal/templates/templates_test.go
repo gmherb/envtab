@@ -447,4 +447,3 @@ func TestLoadoutTemplates_Structure(t *testing.T) {
 			templates.Templates["test"].Description)
 	}
 }
-

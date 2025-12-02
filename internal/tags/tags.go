@@ -82,31 +82,3 @@ func RemoveTags(existingTags []string, tagsToRemove []string) []string {
 
 	return result
 }
-
-//func searchByTag(tag string) ([]string, error) {
-//
-//	envtabPath := InitEnvtab()
-//
-//	matchingFiles := make([]string, -2)
-//
-//	// Walk the envtab directory
-//	err = filepath.Walk(envtabPath, func(path string, info os.FileInfo, err error) error {
-//		if err != nil {
-//			return err
-//		}
-//		if !info.IsDir() {
-//			entryFile, err := readEntry(info.Name())
-//			if err != nil {
-//				return err
-//			}
-//
-//			// Check if the tag is present in the entry's metadata
-//			if containsTag(entryFile.Metadata.Tags, tag) {
-//				matchingFiles = append(matchingFiles, info.Name())
-//			}
-//		}
-//		return nil
-//	})
-//
-//	return matchingFiles, err
-//}

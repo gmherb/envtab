@@ -36,22 +36,22 @@ var exportCmd = &cobra.Command{
 
 			slog.Debug("exporting loadout", "loadout", loadoutName, "path", loadoutPath)
 
-		if _, err := os.Stat(loadoutPath); os.IsNotExist(err) {
-			slog.Error("loadout does not exist", "loadout", loadoutName)
-			os.Exit(1)
-		}
-
-		loadout, err := backends.ReadLoadout(loadoutName)
-		if err != nil {
-			// Skip loadout if SOPS is not installed (for encrypted loadouts)
-			errStr := err.Error()
-			if strings.Contains(errStr, "SOPS_NOT_INSTALLED") {
-				slog.Warn("skipping loadout - SOPS not installed", "loadout", loadoutName)
-				continue
+			if _, err := os.Stat(loadoutPath); os.IsNotExist(err) {
+				slog.Error("loadout does not exist", "loadout", loadoutName)
+				os.Exit(1)
 			}
-			slog.Error("failure reading loadout", "loadout", loadoutName, "error", err)
-			os.Exit(1)
-		}
+
+			loadout, err := backends.ReadLoadout(loadoutName)
+			if err != nil {
+				// Skip loadout if SOPS is not installed (for encrypted loadouts)
+				errStr := err.Error()
+				if strings.Contains(errStr, "SOPS_NOT_INSTALLED") {
+					slog.Warn("skipping loadout - SOPS not installed", "loadout", loadoutName)
+					continue
+				}
+				slog.Error("failure reading loadout", "loadout", loadoutName, "error", err)
+				os.Exit(1)
+			}
 
 			loadout.Export()
 		}

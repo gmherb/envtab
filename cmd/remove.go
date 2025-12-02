@@ -31,4 +31,3 @@ var removeCmd = &cobra.Command{
 func init() {
 	rootCmd.AddCommand(removeCmd)
 }
-

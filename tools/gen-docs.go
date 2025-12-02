@@ -35,5 +35,3 @@ func main() {
 		log.Fatalf("failed to generate top-level envtab markdown: %v", err)
 	}
 }
-
-
