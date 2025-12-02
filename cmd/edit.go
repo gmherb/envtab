@@ -31,6 +31,7 @@ If no options are provided, enter editor to manually edit a envtab loadout.`,
   envtab edit myloadout --description "new description"  # update description
   envtab edit myloadout --add-tags "tag1, tag2, tag3"    # add tags
   envtab edit myloadout --remove-tags "tag1,tag2 tag3"   # remove tags
+  envtab edit myloadout --remove-entry KEY               # remove entry
   envtab edit myloadout --login                          # enable login
   envtab edit myloadout --no-login                       # disable login
   envtab edit myloadout -n newloadout -d "blah bla" -l   # update multiple fields`,
@@ -117,6 +118,24 @@ If no options are provided, enter editor to manually edit a envtab loadout.`,
 			loadoutModified = true
 		}
 
+		// If --remove-entry is set, remove entry from the loadout
+		if entryKey, _ := cmd.Flags().GetString("remove-entry"); entryKey != "" {
+			slog.Debug("removing loadout entry", "loadout", loadoutName, "key", entryKey)
+
+			// Check if the entry exists
+			if _, exists := lo.Entries[entryKey]; !exists {
+				slog.Error("entry does not exist", "loadout", loadoutName, "key", entryKey)
+				os.Exit(1)
+			}
+
+			err := lo.RemoveEntry(entryKey)
+			if err != nil {
+				slog.Error("failure removing entry", "loadout", loadoutName, "key", entryKey, "error", err)
+				os.Exit(1)
+			}
+			loadoutModified = true
+		}
+
 		if loadoutModified {
 			slog.Debug("writing loadout", "loadout", loadoutName)
 
@@ -143,6 +162,7 @@ func init() {
 	editCmd.Flags().StringP("description", "d", "", "set loadout description")
 	editCmd.Flags().String("add-tags", "", "add tags to loadout (separated by comma or space)")
 	editCmd.Flags().String("remove-tags", "", "remove tags from loadout (separated by comma or space)")
+	editCmd.Flags().String("remove-entry", "", "remove entry from loadout")
 
 	editCmd.Flags().BoolP("login", "l", false, "enable loadout on login (mutually exclusive with --no-login)")
 	editCmd.Flags().BoolP("no-login", "L", false, "disable loadout on login (mutually exclusive with --login)")
