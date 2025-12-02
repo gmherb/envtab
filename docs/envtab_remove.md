@@ -27,7 +27,7 @@ envtab remove LOADOUT_NAME [LOADOUT_NAME ...] [flags]
 
 ```
       --config string   config file (default is $HOME/.envtab/.envtab.yaml)
-  -v, --verbose         Show verbose output (enables debug/info/warn logs)
+      --verbose         Show verbose output (enables debug/info/warn logs)
 ```
 
 ### SEE ALSO

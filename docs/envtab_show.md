@@ -24,15 +24,18 @@ envtab show [LOADOUT_PATTERN...]
 ### Options
 
 ```
-  -d, --decrypt   Show sensitive values (decrypt SOPS encrypted values)
-  -h, --help      help for show
+  -a, --all            Show all envtab entries
+  -d, --decrypt        Show sensitive values (decrypt SOPS encrypted values)
+  -h, --help           help for show
+  -k, --key string     Show env var matching key
+  -v, --value string   Show env var matching value
 ```
 
 ### Options inherited from parent commands
 
 ```
       --config string   config file (default is $HOME/.envtab/.envtab.yaml)
-  -v, --verbose         Show verbose output (enables debug/info/warn logs)
+      --verbose         Show verbose output (enables debug/info/warn logs)
 ```
 
 ### SEE ALSO
