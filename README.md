@@ -313,9 +313,10 @@ This project includes a small tool that uses Cobra's `doc` package to generate M
 This runs `go run ./tools/gen-docs.go` and produces per-command Markdown files and a top-level `docs/envtab.md` that reflect the current CLI.
 
 # TODO
-- Support --key and --value in showCmd to locate specific vars without using `$(echo $KEY)` or `$(env|grep $VAL)`:
-  - Show env var matching --key
-  - Show env var matching --value
+- Support `--key` and `--value` in showCmd to locate specific vars without using `$(echo $KEY)` or `$(env|grep $VAL)`:
+  - Show env var matching `--key`
+  - Show env var matching `--value`
+- Support `--all` to show all envtab entries. Not just those that are active.
 - SOPS:exec-env - execute a command with decrypted values inserted into the environment
   - Add support or re-implement. Reimplementation would be best as can support all envtab loadouts
 - Add --raw to loginCmd. This will place actual export entries inside of a shell script to be sourced from profile script instead of calling envtab.
@@ -326,8 +327,8 @@ This runs `go run ./tools/gen-docs.go` and produces per-command Markdown files a
   - --raw should be utilized with either --enable or --disable. Ignored if --status or enable/disable are omitted.
   - --status should now include mode (raw|command substitution)
 - Support environment variables in show; exported with eval $(envtab export loadout)
-  - Can we resolve all environment variables like we do with PATH?
-  - Add loadout priority/number to support specific load order in case entries build upon environment variable expansion.
+  - Can we resolve all environment variables like we do with PATH? --raw is a workaround for using other environment variables
+  - Add loadout order/priority/number to support specific load order in case entries build upon environment variable expansion
 - Add additional backends in addition to default (file backend).
   - File (Default)
   - Vault
