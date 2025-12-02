@@ -18,8 +18,8 @@ envtab edit LOADOUT_NAME [flags]
   envtab edit myloadout                                  # edit loadout in editor
   envtab edit myloadout --name newname                   # rename loadout
   envtab edit myloadout --description "new description"  # update description
-  envtab edit myloadout --add-tags "tag1, tag2, tag3"    # add tags
-  envtab edit myloadout --remove-tags "tag1,tag2 tag3"   # remove tags
+  envtab edit myloadout --add-tags "tag1,tag2,tag3"      # add tags
+  envtab edit myloadout --remove-tags "tag1,tag2,tag3"   # remove tags
   envtab edit myloadout --remove-entry KEY               # remove entry
   envtab edit myloadout --login                          # enable login
   envtab edit myloadout --no-login                       # disable login

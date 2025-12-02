@@ -117,10 +117,28 @@ func (l Loadout) Export() {
 
 	for key, value := range l.Entries {
 		if value != "" {
-			match := re.MatchString(value)
 			sopsEncrypted := reSOPS.MatchString(value)
-			if key == "PATH" && match {
-
+			if sopsEncrypted {
+				decrypted, err := sops.SOPSDecryptValue(value)
+				if err != nil {
+					errStr := err.Error()
+					if strings.Contains(strings.ToLower(errStr), "sops command not found") {
+						slog.Debug("skipping encrypted entry - SOPS not available", "key", key)
+						continue
+					}
+					if utils.Contains(err.Error(), "keys may have been rotated") {
+						slog.Warn("cannot decrypt - encryption keys may have been rotated", "key", key, "error", err)
+					} else {
+						slog.Error("failure decrypting SOPS value", "key", key, "error", err)
+					}
+					continue
+				}
+				value = decrypted
+			} else if key == "PATH" {
+				match := re.MatchString(value)
+				if match {
+					slog.Debug("found potential new PATH(s)", "path", value)
+				}
 				newPath := re.ReplaceAllString(value, "")
 				newPath = strings.Trim(newPath, ":")
 				for strings.Contains(newPath, "::") {
@@ -143,31 +161,8 @@ func (l Loadout) Export() {
 
 				os.Setenv("PATH", strings.Join(paths, string(os.PathListSeparator)))
 				fmt.Printf("export PATH=%s\n", os.Getenv("PATH"))
-			} else if sopsEncrypted {
-				// Decrypt SOPS-encrypted value
-				// SOPS metadata is preserved in the encrypted value string
-				decrypted, err := sops.SOPSDecryptValue(value)
-				if err != nil {
-					// Check if SOPS is not available - skip silently in that case
-					// This allows shell scripts to continue working even without SOPS
-					errStr := err.Error()
-					if strings.Contains(strings.ToLower(errStr), "sops command not found") {
-						slog.Debug("skipping encrypted entry - SOPS not available", "key", key)
-						continue
-					}
-					// For other decryption failures, show error messages
-					if utils.Contains(err.Error(), "keys may have been rotated") {
-						slog.Warn("cannot decrypt - encryption keys may have been rotated", "key", key, "error", err)
-						slog.Debug("to fix: re-encrypt the loadout with current keys using 'envtab reencrypt'")
-					} else {
-						slog.Error("failure decrypting SOPS value", "key", key, "error", err)
-					}
-					continue
-				}
-				fmt.Printf("export %s=%s\n", key, decrypted)
-			} else {
-				fmt.Printf("export %s=%s\n", key, value)
 			}
+			fmt.Printf("export %s=%s\n", key, value)
 		}
 	}
 	l.UpdateLoadedAt()
@@ -203,7 +198,12 @@ func (l *Loadout) ReplaceTags(tags []string) error {
 
 func (l *Loadout) RemoveTags(tagsToRemove []string) error {
 	slog.Debug("RemoveTags called", "tags", tagsToRemove)
-	l.Metadata.Tags = tags.RemoveTags(l.Metadata.Tags, tagsToRemove)
+	currentTags := l.Metadata.Tags
+	tagsToRemove = tags.RemoveDuplicateTags(tags.RemoveEmptyTags(tags.SplitTags(tagsToRemove)))
+	if len(tagsToRemove) == 0 {
+		return nil
+	}
+	l.Metadata.Tags = tags.RemoveTags(currentTags, tagsToRemove)
 	l.UpdateUpdatedAt()
 	return nil
 }
