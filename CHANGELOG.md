@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.8-alpha] - 2025-12-02
+
+### Added
+
+- Enhanced `envtab show` command with filtering options:
+  - Added `--key` / `-k` flag to show entries matching a specific key
+  - Added `--value` / `-v` flag to show entries matching a specific value (supports both raw and SOPS-encrypted values)
+  - Added `--all` / `-a` flag to show all entries in loadouts regardless of active status
+  - Flags are mutually exclusive for clear behavior
+
+### Changed
+
+- Refactored SOPS and environment packages:
+  - Consolidated SOPS display value logic into `SOPSDisplayValue` function in `pkg/sops`
+  - Simplified environment comparison methods to use centralized SOPS display handling
+  - Removed `DecryptFunc` type in favor of direct SOPS package integration
+  - Improved code organization and maintainability
+
 ## [0.1.7-alpha] - 2025-12-02
 
 ### Added
