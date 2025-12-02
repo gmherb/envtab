@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.6-alpha] - 2025-12-02
+
+### Fixed
+
+- Fixed PATH resolving in `loadout.Export()`:
+  - `$PATH` variable expansion now correctly replaces `$PATH` with the actual current PATH value instead of an empty string
+  - Fixed duplicate PATH export statement (PATH was being exported twice)
+  - Fixed PATH handling to skip empty path entries when processing PATH values
+
 ## [0.1.5-alpha] - 2025-12-02
 
 ### Added
@@ -44,14 +53,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Updated documentation examples for `--add-tags` and `--remove-tags` flags to use consistent comma-separated format
 
 ## [0.1.3-alpha] - 2025-12-02
-
-### Added
-
-### Changed
-
-### Deprecated
-
-### Removed
 
 ### Fixed
 
