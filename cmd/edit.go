@@ -213,6 +213,7 @@ func editLoadout(loadoutName string) error {
 	if err != nil {
 		return err
 	}
+	defer os.Remove(tempFilePath)
 
 	editor := os.Getenv("EDITOR")
 	if editor == "" {
@@ -293,7 +294,5 @@ func editLoadout(loadoutName string) error {
 		return backends.WriteLoadout(loadoutName, editedLoadout)
 	}
 
-	// Remove the temp file
-	os.Remove(tempFilePath)
 	return nil
 }
