@@ -20,6 +20,7 @@ envtab edit LOADOUT_NAME [flags]
   envtab edit myloadout --description "new description"  # update description
   envtab edit myloadout --add-tags "tag1, tag2, tag3"    # add tags
   envtab edit myloadout --remove-tags "tag1,tag2 tag3"   # remove tags
+  envtab edit myloadout --remove-entry KEY               # remove entry
   envtab edit myloadout --login                          # enable login
   envtab edit myloadout --no-login                       # disable login
   envtab edit myloadout -n newloadout -d "blah bla" -l   # update multiple fields
@@ -28,13 +29,14 @@ envtab edit LOADOUT_NAME [flags]
 ### Options
 
 ```
-      --add-tags string      add tags to loadout (separated by comma or space)
-  -d, --description string   set loadout description
-  -h, --help                 help for edit
-  -l, --login                enable loadout on login (mutually exclusive with --no-login)
-  -n, --name string          set loadout name
-  -L, --no-login             disable loadout on login (mutually exclusive with --login)
-      --remove-tags string   remove tags from loadout (separated by comma or space)
+      --add-tags string       add tags to loadout (separated by comma or space)
+  -d, --description string    set loadout description
+  -h, --help                  help for edit
+  -l, --login                 enable loadout on login (mutually exclusive with --no-login)
+  -n, --name string           set loadout name
+  -L, --no-login              disable loadout on login (mutually exclusive with --login)
+      --remove-entry string   remove entry from loadout
+      --remove-tags string    remove tags from loadout (separated by comma or space)
 ```
 
 ### Options inherited from parent commands
