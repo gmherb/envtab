@@ -116,9 +116,11 @@ func (l Loadout) Export() {
 	reSOPS := regexp.MustCompile(`^SOPS:`)
 
 	for key, value := range l.Entries {
-		if value != "" {
-			sopsEncrypted := reSOPS.MatchString(value)
-			if sopsEncrypted {
+
+		if value == "" {
+			continue
+		} else {
+			if reSOPS.MatchString(value) {
 				decrypted, err := sops.SOPSDecryptValue(value)
 				if err != nil {
 					errStr := err.Error()
