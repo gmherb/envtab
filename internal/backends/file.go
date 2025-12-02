@@ -203,21 +203,12 @@ func WriteLoadoutWithEncryption(name string, lo *loadout.Loadout, useSOPS bool) 
 	}
 
 	if useSOPS {
-		// Write to temp file first, then encrypt
-		tmpFile := filePath + ".tmp"
-		err = os.WriteFile(tmpFile, data, 0600)
+		encrypted, err := sops.SOPSEncryptFile(filePath)
 		if err != nil {
-			return err
-		}
-
-		encrypted, err := sops.SOPSEncryptFile(tmpFile)
-		if err != nil {
-			os.Remove(tmpFile)
 			return err
 		}
 
 		err = os.WriteFile(filePath, encrypted, 0600)
-		os.Remove(tmpFile)
 		if err != nil {
 			return err
 		}
@@ -238,23 +229,18 @@ func EditLoadout(name string) error {
 	filePath := filepath.Join(config.InitEnvtab(""), name+".yaml")
 	tempFilePath := filePath + ".tmp"
 
-	// Check if file is SOPS-encrypted to preserve encryption on save
 	isSOPSEncrypted := sops.IsSOPSEncrypted(filePath)
 
-	// Read the loadout (handles SOPS decryption automatically)
 	lo, err := ReadLoadout(name)
 	if err != nil {
 		return err
 	}
 
-	// Decrypt all SOPS-encrypted values for editing
-	// Keep track of which keys were encrypted so we can re-encrypt them on save
 	encryptedKeys, err := lo.DecryptSOPSValues()
 	if err != nil {
 		slog.Warn("some SOPS values could not be decrypted", "error", err)
 	}
 
-	// Marshal to get YAML for editing (now with decrypted values)
 	data, err := yaml.Marshal(lo)
 	if err != nil {
 		return err
@@ -264,7 +250,6 @@ func EditLoadout(name string) error {
 	createdAt := lo.Metadata.CreatedAt
 	loadedAt := lo.Metadata.LoadedAt
 
-	// Write the Loadout struct to a temp file
 	err = os.WriteFile(tempFilePath, data, 0600)
 	if err != nil {
 		return err
@@ -293,6 +278,7 @@ func EditLoadout(name string) error {
 		if err != nil {
 			return err
 		}
+		defer os.Remove(tempFilePath)
 
 		// Validate YAML for duplicate keys before unmarshaling
 		err = loadout.ValidateLoadoutYAML(data)
@@ -348,9 +334,6 @@ func EditLoadout(name string) error {
 		}
 		return WriteLoadout(name, editedLoadout)
 	}
-
-	// Remove the temp file
-	os.Remove(tempFilePath)
 	return nil
 }
 
