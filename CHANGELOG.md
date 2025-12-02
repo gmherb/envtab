@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.2-alpha] - 2025-12-02
+
+### Added
+
+- `envtab edit` command now supports `--remove-entry` flag to remove entries from loadouts
+- Comprehensive test suite for `envtab edit` command covering all flag combinations
+
 ## [0.1.1-alpha] - 2025-12-01
 
 ### Changed
