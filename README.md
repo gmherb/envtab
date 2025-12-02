@@ -310,8 +310,13 @@ This runs `go run ./tools/gen-docs.go` and produces per-command Markdown files a
 
 # TODO
 
-- Add --raw to loginCmd. This will place actual export entries instead of calling envtab.
+- Add --raw to loginCmd. This will place actual export entries inside of a shell script to be sourced from profile script instead of calling envtab.
   - Safer, faster, but lacks encryption at rest.
+  - Also supports all environment values in entries as they will be evaluated on source.
+  - However, syncing login requires checking for diffs after every edit, add, and import (make should have empty values from a template unless we are supporting values in templates)
+    - sync can be manual for first implementation. `envtab login status --sync`
+  - --raw should be utilized with either --enable or --disable. Ignored if --status or enable/disable are omitted.
+  - --status should now include mode (raw|command substitution)
 - Support environment variables in show; exported with eval $(envtab export loadout)
   - Can we resolve all environment variables like we do with PATH?
   - Add loadout priority/number to support specific load order in case entries build upon environment variable expansion.
