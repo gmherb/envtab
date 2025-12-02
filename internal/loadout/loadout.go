@@ -134,20 +134,27 @@ func (l Loadout) Export() {
 					continue
 				}
 				value = decrypted
-			} else if key == "PATH" {
-				match := re.MatchString(value)
-				if match {
-					slog.Debug("found potential new PATH(s)", "path", value)
-				}
-				newPath := re.ReplaceAllString(value, "")
-				newPath = strings.Trim(newPath, ":")
-				for strings.Contains(newPath, "::") {
-					newPath = strings.ReplaceAll(newPath, "::", ":")
-				}
+			}
+		}
 
-				slog.Debug("found potential new PATH(s)", "path", newPath)
+		if key == "PATH" {
+			match := re.MatchString(value)
+			if match {
+				slog.Debug("found potential new PATH(s)", "path", value)
+				// Replace $PATH with the current PATH value
+				currentPath := strings.Join(order, string(os.PathListSeparator))
+				value = re.ReplaceAllString(value, currentPath)
+			}
+			newPath := value
+			newPath = strings.Trim(newPath, ":")
+			for strings.Contains(newPath, "::") {
+				newPath = strings.ReplaceAll(newPath, "::", ":")
+			}
 
-				for _, np := range strings.Split(newPath, string(os.PathListSeparator)) {
+			slog.Debug("found potential new PATH(s)", "path", newPath)
+
+			for _, np := range strings.Split(newPath, string(os.PathListSeparator)) {
+				if np != "" {
 					if _, exists := pathMap[np]; !exists {
 
 						slog.Debug("adding new path to PATH map", "path", np)
@@ -155,13 +162,14 @@ func (l Loadout) Export() {
 						pathMap[np] = true
 					}
 				}
-
-				paths := make([]string, 0, len(pathMap)) // preallocate for efficiency
-				paths = append(paths, order...)
-
-				os.Setenv("PATH", strings.Join(paths, string(os.PathListSeparator)))
-				fmt.Printf("export PATH=%s\n", os.Getenv("PATH"))
 			}
+
+			paths := make([]string, 0, len(pathMap)) // preallocate for efficiency
+			paths = append(paths, order...)
+
+			os.Setenv("PATH", strings.Join(paths, string(os.PathListSeparator)))
+			fmt.Printf("export PATH=%s\n", os.Getenv("PATH"))
+		} else {
 			fmt.Printf("export %s=%s\n", key, value)
 		}
 	}
