@@ -93,7 +93,7 @@ func ListEnvtabLoadouts(patterns []string) {
 	environment.Populate()
 
 	tw := tabwriter.NewWriter(os.Stdout, 0, 8, 2, ' ', 0)
-	fmt.Fprintf(tw, "UpdatedAt\tLoadedAt\tLogin\tTotal\tActive\tName\tTags\n")
+	headerPrinted := false
 
 	for _, loadout := range envtabSlice {
 
@@ -122,6 +122,12 @@ func ListEnvtabLoadouts(patterns []string) {
 			}
 			slog.Error("failure reading loadout", "loadout", loadout, "error", err)
 			os.Exit(1)
+		}
+
+		// Print header only when we have at least one matching loadout to display
+		if !headerPrinted {
+			fmt.Fprintf(tw, "UpdatedAt\tLoadedAt\tLogin\tTotal\tActive\tName\tTags\n")
+			headerPrinted = true
 		}
 
 		// Handle empty timestamps gracefully
