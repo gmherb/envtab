@@ -1,7 +1,10 @@
 package loadout
 
 import (
+	"bytes"
+	"io"
 	"os"
+	"regexp"
 	"strings"
 	"testing"
 	"time"
@@ -712,8 +715,64 @@ func TestExportWithEmptyValues(t *testing.T) {
 				loadout.Entries[k] = v
 			}
 
-			// Capture output
+			// Capture stdout output
+			oldStdout := os.Stdout
+			r, w, err := os.Pipe()
+			if err != nil {
+				t.Fatalf("Failed to create pipe: %v", err)
+			}
+			os.Stdout = w
+
+			// Capture output in a goroutine
+			var capturedOutput bytes.Buffer
+			done := make(chan error)
+			go func() {
+				_, err := io.Copy(&capturedOutput, r)
+				r.Close()
+				done <- err
+			}()
+
+			// Call Export() which will write to stdout
 			loadout.Export()
+
+			// Close write end and restore stdout
+			w.Close()
+			os.Stdout = oldStdout
+
+			// Wait for capture to complete
+			if err := <-done; err != nil {
+				t.Fatalf("Failed to capture output: %v", err)
+			}
+
+			// Parse captured output to extract exported variables
+			exportedVars := make(map[string]bool)
+			output := capturedOutput.String()
+			// Match lines like "export VAR=value" or "export PATH=..."
+			exportRegex := regexp.MustCompile(`^export (\w+)=`)
+			for _, line := range strings.Split(output, "\n") {
+				line = strings.TrimSpace(line)
+				if line == "" {
+					continue
+				}
+				matches := exportRegex.FindStringSubmatch(line)
+				if len(matches) > 1 {
+					varName := matches[1]
+					exportedVars[varName] = true
+				}
+			}
+
+			// Validate shouldExport expectations
+			if tt.shouldExport != nil {
+				for varName, shouldBeExported := range tt.shouldExport {
+					wasExported := exportedVars[varName]
+					if shouldBeExported && !wasExported {
+						t.Errorf("Expected %q to be exported, but it was not. Output:\n%s", varName, output)
+					}
+					if !shouldBeExported && wasExported {
+						t.Errorf("Expected %q NOT to be exported, but it was. Output:\n%s", varName, output)
+					}
+				}
+			}
 
 			// Verify PATH contents
 			currentPath := os.Getenv("PATH")
