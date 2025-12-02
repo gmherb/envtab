@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.3-alpha] - 2025-12-02
+
+### Added
+
+### Changed
+
+### Deprecated
+
+### Removed
+
+### Fixed
+
+- Fixed shell wildcard escaping in `envtab list` command examples in both code and documentation
+- Updated README documentation with planning notes regarding --raw flag
+
+### Security
+
 ## [0.1.2-alpha] - 2025-12-02
 
 ### Added
