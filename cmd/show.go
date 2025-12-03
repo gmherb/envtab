@@ -101,11 +101,6 @@ func showActiveLoadouts(decrypt bool, all bool, keyFilter string, valueFilter st
 
 			displayValue := sops.SOPSDisplayValue(entryValue, true)
 
-			if environment.IsEntryActive(entryKey, displayValue) {
-				active = true
-				activeCount++
-			}
-
 			if keyFilter != "" {
 				if entryKey == keyFilter {
 					keyMatch = true
@@ -114,9 +109,12 @@ func showActiveLoadouts(decrypt bool, all bool, keyFilter string, valueFilter st
 				if displayValue == valueFilter {
 					valueMatch = true
 				}
+			} else if environment.IsEntryActive(entryKey, displayValue) {
+				active = true
+				activeCount++
 			}
 
-			if keyMatch || valueMatch || all || active {
+			if keyMatch || valueMatch || active || all {
 				entries = append(entries, entryKey+"="+sops.SOPSDisplayValue(entryValue, decrypt))
 			}
 
