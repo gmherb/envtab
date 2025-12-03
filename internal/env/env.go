@@ -48,7 +48,7 @@ func (e *Env) CompareSOPSEncryptedValue(key string, value string) bool {
 
 	if strings.Contains(displayValue, "$PATH") {
 		slog.Debug("entry contains $PATH", "key", key, "value", value, "env", e.Env)
-		displayValue = strings.Replace(value, "$PATH", "", 1)
+		displayValue = strings.Replace(displayValue, "$PATH", "", 1)
 		displayValue = strings.Trim(displayValue, ":")
 	}
 
@@ -56,7 +56,33 @@ func (e *Env) CompareSOPSEncryptedValue(key string, value string) bool {
 		if k == key && v == displayValue {
 			match = true
 			break
-		} else if key == "PATH" && strings.Contains(v, value) {
+		} else if key == "PATH" && strings.Contains(v, displayValue) {
+			match = true
+			break
+		}
+	}
+	return match
+}
+
+// IsEntryActive checks if a loadout entry is currently active in the environment
+// It compares the entry's value (decrypted if encrypted) with what's in the environment
+func (e *Env) IsEntryActive(key string, value string) bool {
+	match := false
+
+	// Decrypt value if it's encrypted
+	displayValue := sops.SOPSDisplayValue(value, true)
+
+	if strings.Contains(displayValue, "$PATH") {
+		slog.Debug("entry contains $PATH", "key", key, "value", value, "env", e.Env)
+		displayValue = strings.Replace(displayValue, "$PATH", "", 1)
+		displayValue = strings.Trim(displayValue, ":")
+	}
+
+	for k, v := range e.Env {
+		if k == key && v == displayValue {
+			match = true
+			break
+		} else if key == "PATH" && strings.Contains(v, displayValue) {
 			match = true
 			break
 		}

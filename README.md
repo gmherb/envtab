@@ -314,6 +314,7 @@ This runs `go run ./tools/gen-docs.go` and produces per-command Markdown files a
 
 # TODO
 
+- Fix the color output with show --all
 - SOPS:exec-env - execute a command with decrypted values inserted into the environment
   - Add support or re-implement. Reimplementation would be best as can support all envtab loadouts
 - Add --raw to loginCmd. This will place actual export entries inside of a shell script to be sourced from profile script instead of calling envtab.

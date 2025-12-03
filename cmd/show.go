@@ -64,6 +64,7 @@ func showActiveLoadouts(decrypt bool, all bool, keyFilter string, valueFilter st
 	for _, loadout := range envtabSlice {
 		// Create a slice to store entries we want to show for this loadout
 		var entries = []string{}
+		entryMatchCount := 0
 
 		// Filter by patterns if provided
 		if len(patterns) > 0 {
@@ -95,18 +96,34 @@ func showActiveLoadouts(decrypt bool, all bool, keyFilter string, valueFilter st
 
 		for entryKey, entryValue := range lo.Entries {
 			appendEntry := false
+			matched := false
 
-			if keyFilter != "" && entryKey == keyFilter {
-				appendEntry = true
-			} else if valueFilter != "" && environment.CompareRawValue(entryKey, valueFilter) {
-				appendEntry = true
-			} else if valueFilter != "" && environment.CompareSOPSEncryptedValue(entryKey, valueFilter) {
-				appendEntry = true
+			if keyFilter != "" {
+				// Filter by key
+				if entryKey == keyFilter {
+					appendEntry = true
+				}
+			} else if valueFilter != "" {
+				// Filter by value - check if loadout entry value matches the filter
+				displayValue := sops.SOPSDisplayValue(entryValue, true)
+				if displayValue == valueFilter {
+					appendEntry = true
+				} else {
+					// Also check raw (non-decrypted) value for encrypted entries
+					rawDisplayValue := sops.SOPSDisplayValue(entryValue, false)
+					if rawDisplayValue == valueFilter {
+						appendEntry = true
+					}
+				}
 			} else if all {
+				// Show all entries
 				appendEntry = true
 			}
-
-			if appendEntry {
+			matched = environment.IsEntryActive(entryKey, entryValue)
+			if matched {
+				entryMatchCount++
+			}
+			if appendEntry || matched {
 				entries = append(entries, entryKey+"="+sops.SOPSDisplayValue(entryValue, decrypt))
 			}
 		}
@@ -118,27 +135,24 @@ func showActiveLoadouts(decrypt bool, all bool, keyFilter string, valueFilter st
 
 		// If a loadout has fewer active entries than total entries, colorize the count red
 		var countColor func(a ...interface{}) string
-		if len(entries) < len(lo.Entries) {
+		if len(lo.Entries) != entryMatchCount {
 			countColor = color.New(color.FgRed).SprintFunc()
 		} else {
 			countColor = color.New(color.FgBlue).SprintFunc()
 		}
 
-		totalEntryCount := len(lo.Entries)
-		activeEntryCount := len(entries)
-
-		if activeEntryCount > 0 {
+		if len(entries) > 0 {
 
 			dashCount := 80 - // term width
 				len(loadout) -
-				len(fmt.Sprint(activeEntryCount)) -
-				len(fmt.Sprint(totalEntryCount)) -
+				len(fmt.Sprint(len(lo.Entries))) -
+				len(fmt.Sprint(entryMatchCount)) -
 				10 // magic number
 
 			fmt.Println(
 				loColor(loadout),
 				strings.Repeat(dashColor("-"), dashCount),
-				"[", countColor(activeEntryCount), "/", countColor(totalEntryCount), "]",
+				"[", countColor(len(lo.Entries)), "/", countColor(entryMatchCount), "]",
 			)
 			padding := "   "
 			for _, entry := range entries {
