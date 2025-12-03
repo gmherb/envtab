@@ -66,7 +66,6 @@ func showActiveLoadouts(decrypt bool, all bool, keyFilter string, valueFilter st
 	for _, loadout := range envtabSlice {
 		// Create a slice to store entries we want to show for this loadout
 		var entries = []string{}
-		activeCount := 0
 
 		// Filter by patterns if provided
 		if len(patterns) > 0 {
@@ -95,27 +94,27 @@ func showActiveLoadouts(decrypt bool, all bool, keyFilter string, valueFilter st
 			os.Exit(1)
 		}
 
+		activeMap := make(map[string]bool)
+		keyMap := make(map[string]bool)
+		valueMap := make(map[string]bool)
+
 		for entryKey, entryValue := range lo.Entries {
-			active := false
-			keyMatch := false
-			valueMatch := false
 
 			displayValue := sops.SOPSDisplayValue(entryValue, true)
 
 			if keyFilter != "" {
 				if entryKey == keyFilter {
-					keyMatch = true
+					keyMap[entryKey] = true
 				}
 			} else if valueFilter != "" {
 				if displayValue == valueFilter {
-					valueMatch = true
+					valueMap[entryKey] = true
 				}
 			} else if environment.IsEntryActive(entryKey, displayValue) {
-				active = true
-				activeCount++
+				activeMap[entryKey] = true
 			}
 
-			if keyMatch || valueMatch || active || all {
+			if keyMap[entryKey] || valueMap[entryKey] || activeMap[entryKey] || all {
 				entries = append(entries, entryKey+"="+sops.SOPSDisplayValue(entryValue, decrypt))
 			}
 
@@ -147,22 +146,32 @@ func showActiveLoadouts(decrypt bool, all bool, keyFilter string, valueFilter st
 		}
 
 		// If a loadout has fewer active entries than total entries, colorize the count red
-		if len(lo.Entries) != activeCount {
+		if len(lo.Entries) != len(activeMap) {
 			countColor = color.New(color.FgRed).SprintFunc()
+		}
+
+		countLeftHandSide := len(lo.Entries)
+		var countRightHandSide int = 0
+		if len(keyMap) > 0 {
+			countRightHandSide = len(keyMap)
+		} else if len(valueMap) > 0 {
+			countRightHandSide = len(valueMap)
+		} else {
+			countRightHandSide = len(activeMap)
 		}
 
 		if len(entries) > 0 {
 
 			dashCount := termWidth -
 				len(loadout) -
-				len(fmt.Sprint(len(lo.Entries))) -
-				len(fmt.Sprint(len(entries))) -
+				len(fmt.Sprint(countLeftHandSide)) -
+				len(fmt.Sprint(countRightHandSide)) -
 				10 // magic number
 
 			fmt.Println(
 				loColor(loadout),
 				strings.Repeat(dashColor("-"), dashCount),
-				"[", countColor(len(lo.Entries)), "/", countColor(activeCount), "]",
+				"[", countColor(countLeftHandSide), "/", countColor(countRightHandSide), "]",
 			)
 			for _, entry := range entries {
 				fmt.Println(padding, entryColor(entry))
