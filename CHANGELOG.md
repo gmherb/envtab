@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.10-alpha] - 2025-12-02
+
+### Fixed
+
+- Fixed `envtab show --all` command logic:
+  - Corrected order of active entry checking to only occur when no key or value filter is applied
+  - Fixed condition evaluation order to properly handle `--all` flag with filtering options
+
 ## [0.1.9-alpha] - 2025-12-02
 
 ### Changed
