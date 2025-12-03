@@ -28,9 +28,9 @@ If multiple patterns are provided, loadouts matching any pattern will be shown.`
 	Aliases:               []string{"s", "sh", "sho"},
 	DisableFlagsInUseLine: true,
 	Example: `  envtab show
-  envtab show aws-*
+  envtab show aws\*
   envtab show production
-  envtab show aws-* gcp-*`,
+  envtab show aws\* \*gcp\*`,
 	Run: func(cmd *cobra.Command, args []string) {
 		slog.Debug("show called with args", "args", args)
 		decrypt, _ := cmd.Flags().GetBool("decrypt")
