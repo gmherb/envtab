@@ -162,7 +162,7 @@ func showActiveLoadouts(decrypt bool, all bool, keyFilter string, valueFilter st
 			fmt.Println(
 				loColor(loadout),
 				strings.Repeat(dashColor("-"), dashCount),
-				"[", countColor(len(lo.Entries)), "/", countColor(len(entries)), "]",
+				"[", countColor(len(lo.Entries)), "/", countColor(activeCount), "]",
 			)
 			for _, entry := range entries {
 				fmt.Println(padding, entryColor(entry))
