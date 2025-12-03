@@ -11,13 +11,12 @@ import (
 	"strings"
 
 	"github.com/gmherb/envtab/internal/utils"
+	"github.com/spf13/viper"
 	yaml "gopkg.in/yaml.v2"
 )
 
 const sopsInstallURL = "https://github.com/getsops/sops"
 const sopsFilenameOverride = "envtab-stdin-override"
-
-var envtabSOPSPathRegex = os.Getenv("ENVTAB_SOPS_PATH_REGEX")
 
 // sopsVerbose controls whether --verbose flag is added to sops commands
 var sopsVerbose = os.Getenv("SOPS_VERBOSE") == "true"
@@ -33,8 +32,13 @@ func buildSOPSArgs(args ...string) []string {
 // getFilenameOverride returns the filename override to use for stdin operations
 // Defaults to "stdin" if ENVTAB_SOPS_PATH_REGEX is not set
 func getFilenameOverride() string {
-	if envtabSOPSPathRegex != "" {
-		return envtabSOPSPathRegex
+	// Check viper first (supports ENVTAB_SOPS_PATH_REGEX env var and config file)
+	if viper.IsSet("sops.path_regex") {
+		return viper.GetString("sops.path_regex")
+	}
+	// Fallback to environment variable (for cases where viper isn't initialized yet)
+	if envPath := os.Getenv("ENVTAB_SOPS_PATH_REGEX"); envPath != "" {
+		return envPath
 	}
 	return sopsFilenameOverride
 }

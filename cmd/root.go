@@ -6,15 +6,20 @@ package cmd
 import (
 	"log/slog"
 	"os"
-	"path/filepath"
 	"strings"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
 
-// cfgFile is the path to the config file
+// cfgFile is the path to the config file (provided by flag)
 var cfgFile string
+
+const (
+	ENVTAB_DIR         = ".envtab"
+	ENVTAB_CONFIG      = ".envtab"
+	ENVTAB_CONFIG_TYPE = "yaml"
+)
 
 // Version information set at build time via ldflags
 var (
@@ -42,81 +47,56 @@ func parseLogLevelFromString(levelStr string) slog.Level {
 	}
 }
 
-// parseLogLevel parses the log level from config or environment variable
-// Supported values: DEBUG, INFO, WARN, ERROR (case-insensitive)
-// Defaults to ERROR if not set or invalid
-func parseLogLevel() slog.Level {
-	// Check config first, then environment variable
-	levelStr := viper.GetString("log.level")
-	if levelStr == "" {
-		levelStr = os.Getenv("ENVTAB_LOG_LEVEL")
-	}
-	return parseLogLevelFromString(levelStr)
-}
-
 func init() {
-	// Initialize default logger to write to stderr
-	// This ensures debug logs don't interfere with normal command output
-	// Log level can be configured via ENVTAB_LOG_LEVEL environment variable or config
-	// Defaults to ERROR if not set
-	levelStr := os.Getenv("ENVTAB_LOG_LEVEL")
-	level := parseLogLevelFromString(levelStr)
-
+	// Initialize default logger with ERROR level
+	// Log level will be updated in initConfig() after viper is configured
 	slog.SetDefault(slog.New(slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{
-		Level: level,
+		Level: slog.LevelError,
 	})))
 
-	// Initialize Viper
+	// Initialize Viper configuration (cobra will call this automatically)
 	cobra.OnInitialize(initConfig)
 }
 
-// initConfig reads in config file and ENV variables if set.
+// initConfig reads in config file and environment variables if set.
+// Priority order for config file:
+// 1. Command-line flag (--config)
+// 2. Environment variable (ENVTAB_CONFIG)
+// 3. Default paths (~/.envtab/.envtab.yaml or ~/.envtab.yaml)
 func initConfig() {
-	// Priority order:
-	// 1. Command-line flag (--config)
-	// 2. Environment variable (ENVTAB_CONFIG)
-	// 3. Default paths
-
 	if cfgFile != "" {
-		// Use config file from the flag (highest priority).
 		viper.SetConfigFile(cfgFile)
 	} else if envConfig := os.Getenv("ENVTAB_CONFIG"); envConfig != "" {
-		// Use config file from environment variable
 		viper.SetConfigFile(envConfig)
 	} else {
-		// Find home directory.
+		// Use default config paths
 		home, err := os.UserHomeDir()
 		if err != nil {
 			slog.Error("failure getting user's home directory", "error", err)
 			os.Exit(1)
 		}
 
-		// Search config in home directory with name ".envtab" (without extension).
-		viper.AddConfigPath(filepath.Join(home, ".envtab"))
 		viper.AddConfigPath(home)
-		viper.SetConfigType("yaml")
-		viper.SetConfigName(".envtab")
+		viper.SetConfigName(ENVTAB_CONFIG)
+		viper.SetConfigType(ENVTAB_CONFIG_TYPE)
 	}
 
-	// Set environment variable prefix
 	viper.SetEnvPrefix("ENVTAB")
-	viper.AutomaticEnv() // read in environment variables that match
-
-	// Set defaults
+	viper.AutomaticEnv()
 	viper.SetDefault("log.level", "ERROR")
+	viper.SetDefault("term.width", 80)
 
-	// If a config file is found, read it in.
+	// Read config file if found
 	if err := viper.ReadInConfig(); err == nil {
 		slog.Debug("Using config file", "file", viper.ConfigFileUsed())
-		// Update default logger with log level from config if it differs
-		configLevel := parseLogLevel()
-		slog.SetDefault(slog.New(slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{
-			Level: configLevel,
-		})))
-	} else {
-		// Config file not found; ignore if missing
-		slog.Debug("No config file found, using defaults", "error", err)
 	}
+
+	// Always set logger from viper (reads from env var, config file, or default)
+	logLevelStr := viper.GetString("log.level")
+	logLevel := parseLogLevelFromString(logLevelStr)
+	slog.SetDefault(slog.New(slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{
+		Level: logLevel,
+	})))
 }
 
 // rootCmd represents the base command when called without any subcommands
@@ -129,25 +109,13 @@ var rootCmd = &cobra.Command{
 	// has an action associated with it:
 	// Run: func(cmd *cobra.Command, args []string) { },
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
-		// Check if ENVTAB_LOG_LEVEL is explicitly set - if so, respect it (don't override)
-		if explicitLevel := os.Getenv("ENVTAB_LOG_LEVEL"); explicitLevel != "" {
-			// ENVTAB_LOG_LEVEL was explicitly set, keep the level from initConfig()
-			// (which already processed it)
-			return
-		}
-
-		// No explicit ENVTAB_LOG_LEVEL, so apply --verbose flag logic
-		// Access persistent flag from root command
-		verbose, _ := cmd.Root().PersistentFlags().GetBool("verbose")
-		if verbose {
+		// --verbose flag overrides config file setting
+		if verbose, _ := cmd.Root().PersistentFlags().GetBool("verbose"); verbose {
 			slog.SetDefault(slog.New(slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{
 				Level: slog.LevelDebug,
 			})))
-		} else {
-			slog.SetDefault(slog.New(slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{
-				Level: slog.LevelError,
-			})))
 		}
+		// Otherwise, keep the level set in initConfig() (from config file or env var)
 	},
 }
 
@@ -161,16 +129,9 @@ func Execute() {
 }
 
 func init() {
-	// Here you will define your flags and configuration settings.
-	// Cobra supports persistent flags, which, if defined here,
-	// will be global for your application.
-
+	// Define persistent flags (global for all commands)
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.envtab/.envtab.yaml)")
 	rootCmd.PersistentFlags().BoolP("verbose", "", false, "Show verbose output (enables debug/info/warn logs)")
-
-	// Cobra also supports local flags, which will only run
-	// when this action is called directly.
-	// rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }
 
 // GetRootCmd exposes the root command for tooling (e.g., docs generators).

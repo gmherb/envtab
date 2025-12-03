@@ -1,5 +1,5 @@
 /*
-Copyright © 2024 NAME HERE <EMAIL ADDRESS>
+Copyright © 2024 Greg Herbster
 */
 package cmd
 
@@ -15,6 +15,8 @@ import (
 	"github.com/gmherb/envtab/internal/env"
 	"github.com/gmherb/envtab/pkg/sops"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
+	"golang.org/x/term"
 )
 
 var showCmd = &cobra.Command{
@@ -123,18 +125,32 @@ func showActiveLoadouts(decrypt bool, all bool, keyFilter string, valueFilter st
 		entryColor := color.New(color.FgHiWhite).SprintFunc()
 		dashColor := color.New(color.FgHiBlack).SprintFunc()
 		loColor := color.New(color.FgGreen).SprintFunc()
+		countColor := color.New(color.FgBlue).SprintFunc()
+		padding := "   "
+		termWidth := 80
+
+		// Check viper first (supports ENVTAB_TERM_WIDTH env var and config file)
+		if viper.IsSet("term.width") {
+			termWidth = viper.GetInt("term.width")
+			if termWidth <= 0 {
+				slog.Warn("ENVTAB_TERM_WIDTH must be positive, using default of 80", "termWidth", termWidth)
+				termWidth = 80
+			}
+		} else {
+			termWidth, _, err = term.GetSize(int(os.Stdout.Fd()))
+			if err != nil {
+				slog.Warn("failure getting terminal width, using default of 80", "error", err, "termWidth", termWidth)
+			}
+		}
 
 		// If a loadout has fewer active entries than total entries, colorize the count red
-		var countColor func(a ...interface{}) string
 		if len(lo.Entries) != activeCount {
 			countColor = color.New(color.FgRed).SprintFunc()
-		} else {
-			countColor = color.New(color.FgBlue).SprintFunc()
 		}
 
 		if len(entries) > 0 {
 
-			dashCount := 80 - // term width
+			dashCount := termWidth -
 				len(loadout) -
 				len(fmt.Sprint(len(lo.Entries))) -
 				len(fmt.Sprint(len(entries))) -
@@ -145,7 +161,6 @@ func showActiveLoadouts(decrypt bool, all bool, keyFilter string, valueFilter st
 				strings.Repeat(dashColor("-"), dashCount),
 				"[", countColor(len(lo.Entries)), "/", countColor(len(entries)), "]",
 			)
-			padding := "   "
 			for _, entry := range entries {
 				fmt.Println(padding, entryColor(entry))
 			}

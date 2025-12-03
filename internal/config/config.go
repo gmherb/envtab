@@ -3,7 +3,6 @@ package config
 import (
 	"log/slog"
 	"os"
-	"os/user"
 	"path/filepath"
 
 	"github.com/spf13/viper"
@@ -13,54 +12,39 @@ const (
 	ENVTAB_DIR = ".envtab"
 )
 
-// Get the path to the envtab directory
-func getEnvtabPath() string {
-	// Try to get from Viper config first
-	if viper.IsSet("envtab_dir") {
-		return viper.GetString("envtab_dir")
+// GetEnvtabPath returns the path to the envtab directory
+// Checks viper config first (supports ENVTAB_DIR env var and config file), then defaults to ~/.envtab
+func GetEnvtabPath() string {
+	if viper.IsSet("dir") {
+		return viper.GetString("dir")
 	}
 
-	// Fall back to environment variable
-	if envPath := os.Getenv("ENVTAB_DIR"); envPath != "" {
-		return envPath
-	}
-
-	// Default to home directory
-	usr, err := user.Current()
+	home, err := os.UserHomeDir()
 	if err != nil {
 		slog.Error("failure getting user's home directory", "error", err)
 		os.Exit(1)
 	}
 
-	return filepath.Join(usr.HomeDir, ENVTAB_DIR)
+	return filepath.Join(home, ENVTAB_DIR)
 }
 
-// Create the envtab directory if it doesn't exist and return the path
+// InitEnvtab creates the envtab directory if it doesn't exist and returns the path.
+// If path is empty, uses the default envtab directory from config or ~/.envtab.
 func InitEnvtab(path string) string {
 	var envtabPath string
 
-	if path == "" {
-		envtabPath = getEnvtabPath()
-	} else {
+	if path != "" {
 		envtabPath = path
+	} else {
+		envtabPath = GetEnvtabPath()
 	}
 
 	if _, err := os.Stat(envtabPath); os.IsNotExist(err) {
-		os.Mkdir(envtabPath, 0700)
+		if err := os.Mkdir(envtabPath, 0700); err != nil {
+			slog.Error("failure creating envtab directory", "path", envtabPath, "error", err)
+			os.Exit(1)
+		}
 	}
+
 	return envtabPath
-}
-
-// GetConfigPath returns the path to the config file
-func GetConfigPath() string {
-	if viper.ConfigFileUsed() != "" {
-		return viper.ConfigFileUsed()
-	}
-
-	home, err := os.UserHomeDir()
-	if err != nil {
-		return ""
-	}
-
-	return filepath.Join(home, ENVTAB_DIR, ".envtab.yaml")
 }
