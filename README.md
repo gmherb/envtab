@@ -314,7 +314,6 @@ This runs `go run ./tools/gen-docs.go` and produces per-command Markdown files a
 
 # TODO
 
-- Fix the color output with show --all
 - SOPS:exec-env - execute a command with decrypted values inserted into the environment
   - Add support or re-implement. Reimplementation would be best as can support all envtab loadouts
 - Add --raw to loginCmd. This will place actual export entries inside of a shell script to be sourced from profile script instead of calling envtab.
@@ -337,6 +336,7 @@ This runs `go run ./tools/gen-docs.go` and produces per-command Markdown files a
 
 ## Done
 
+- Fix the color output with show --all
 - Support `--key` and `--value` in showCmd to locate specific vars without using `$(echo $KEY)` or `$(env|grep $VAL)`:
   - Show env var matching `--key`
   - Show env var matching `--value`

@@ -86,7 +86,6 @@ func showActiveLoadouts(decrypt bool, all bool, keyFilter string, valueFilter st
 			// Skip loadout if SOPS is not installed (for encrypted loadouts)
 			errStr := err.Error()
 			if strings.Contains(errStr, "SOPS_NOT_INSTALLED") {
-				slog.Debug("SOPS not installed, skipping loadout", "loadout", loadout)
 				slog.Warn("skipping loadout - SOPS not installed", "loadout", loadout)
 				continue
 			}
