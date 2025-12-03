@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.9-alpha] - 2025-12-02
+
+### Changed
+
+- Improved `envtab show --all` command display:
+  - Added properly colored entry counts for better visibility when using `--all` / `-a` flag
+  - Refactored color handling for improved consistency and maintainability
+
 ## [0.1.8-alpha] - 2025-12-02
 
 ### Added
