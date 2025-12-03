@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.11-alpha] - 2025-12-03
+
+### Changed
+
+- Refactored configuration handling:
+  - Consolidated Viper configuration logic into `cmd/root.go` and `internal/config/config.go`
+  - Simplified configuration initialization and path resolution
+  - Improved code organization and maintainability
+
+### Fixed
+
+- Removed debug logging statement from `envtab show` command
+
 ## [0.1.10-alpha] - 2025-12-02
 
 ### Fixed
