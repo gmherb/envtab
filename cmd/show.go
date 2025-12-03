@@ -142,6 +142,7 @@ func showActiveLoadouts(decrypt bool, all bool, keyFilter string, valueFilter st
 			slog.Debug("terminal width", "termWidth", termWidth)
 			if err != nil {
 				slog.Warn("failure getting terminal width, using default of 80", "error", err, "termWidth", termWidth)
+				termWidth = 80
 			}
 		}
 
