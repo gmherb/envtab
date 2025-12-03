@@ -127,17 +127,19 @@ func showActiveLoadouts(decrypt bool, all bool, keyFilter string, valueFilter st
 		loColor := color.New(color.FgGreen).SprintFunc()
 		countColor := color.New(color.FgBlue).SprintFunc()
 		padding := "   "
-		termWidth := 80
+		var termWidth int
 
 		// Check viper first (supports ENVTAB_TERM_WIDTH env var and config file)
 		if viper.IsSet("term.width") {
 			termWidth = viper.GetInt("term.width")
+			slog.Debug("ENVTAB_TERM_WIDTH set to", "termWidth", termWidth)
 			if termWidth <= 0 {
 				slog.Warn("ENVTAB_TERM_WIDTH must be positive, using default of 80", "termWidth", termWidth)
 				termWidth = 80
 			}
 		} else {
 			termWidth, _, err = term.GetSize(int(os.Stdout.Fd()))
+			slog.Debug("terminal width", "termWidth", termWidth)
 			if err != nil {
 				slog.Warn("failure getting terminal width, using default of 80", "error", err, "termWidth", termWidth)
 			}

@@ -84,7 +84,6 @@ func initConfig() {
 	viper.SetEnvPrefix("ENVTAB")
 	viper.AutomaticEnv()
 	viper.SetDefault("log.level", "ERROR")
-	viper.SetDefault("term.width", 80)
 
 	// Read config file if found
 	if err := viper.ReadInConfig(); err == nil {
