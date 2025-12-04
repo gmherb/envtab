@@ -184,7 +184,7 @@ func ShowLoadout(loadout string, environment *env.Env, decrypt bool, keyFilter s
 			10 // magic number
 
 		entryString = append(entryString,
-			loColor(loadout)+strings.Repeat(dashColor("-"), dashCount)+"[ "+countColor(countLeftHandSide)+" / "+countColor(countRightHandSide)+" ]",
+			loColor(loadout)+" "+strings.Repeat(dashColor("-"), dashCount)+" [ "+countColor(countLeftHandSide)+" / "+countColor(countRightHandSide)+" ]",
 		)
 		for _, entry := range entries {
 			entryString = append(entryString, fmt.Sprint(padding, entryColor(entry)))
