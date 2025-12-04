@@ -7,6 +7,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.12-alpha] - 2025-12-03
+
+### Added
+
+- Concurrency support for `envtab show` command:
+  - Loadout parsing now executes in goroutines for improved performance
+  - Parallel processing of multiple loadouts when displaying results
+
+### Changed
+
+- Refactored `envtab show` command implementation:
+  - Consolidated all loadout parsing logic into `ShowLoadout` function
+  - Simplified output generation using maps for better code organization
+  - Improved code maintainability and readability
+- Enhanced terminal width handling:
+  - Removed default terminal width to support dynamic width detection
+  - Added fallback handling when terminal width cannot be determined
+  - Better support for various terminal environments
+
+### Fixed
+
+- Fixed activeCount display issue in `envtab show` command
+- Fixed spacing in show command output
+
 ## [0.1.11-alpha] - 2025-12-03
 
 ### Changed
