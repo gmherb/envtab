@@ -5,7 +5,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/gmherb/envtab/pkg/sops"
+	"github.com/gmherb/envtab/internal/sops"
 )
 
 type Env struct {

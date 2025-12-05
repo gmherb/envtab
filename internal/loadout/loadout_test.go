@@ -9,8 +9,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/gmherb/envtab/internal/sops"
 	"github.com/gmherb/envtab/internal/utils"
-	"github.com/gmherb/envtab/pkg/sops"
 )
 
 func TestValidateLoadout(t *testing.T) {

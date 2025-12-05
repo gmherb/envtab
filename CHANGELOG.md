@@ -73,7 +73,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Refactored SOPS and environment packages:
-  - Consolidated SOPS display value logic into `SOPSDisplayValue` function in `pkg/sops`
+  - Consolidated SOPS display value logic into `SOPSDisplayValue` function in `internal/sops`
   - Simplified environment comparison methods to use centralized SOPS display handling
   - Removed `DecryptFunc` type in favor of direct SOPS package integration
   - Improved code organization and maintainability

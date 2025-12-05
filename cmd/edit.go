@@ -13,9 +13,9 @@ import (
 	"github.com/gmherb/envtab/internal/backends"
 	"github.com/gmherb/envtab/internal/config"
 	"github.com/gmherb/envtab/internal/loadout"
+	"github.com/gmherb/envtab/internal/sops"
 	"github.com/gmherb/envtab/internal/tags"
 	"github.com/gmherb/envtab/internal/utils"
-	"github.com/gmherb/envtab/pkg/sops"
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v2"
 )

@@ -14,7 +14,7 @@ import (
 	"github.com/fatih/color"
 	"github.com/gmherb/envtab/internal/backends"
 	"github.com/gmherb/envtab/internal/env"
-	"github.com/gmherb/envtab/pkg/sops"
+	"github.com/gmherb/envtab/internal/sops"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"golang.org/x/term"
