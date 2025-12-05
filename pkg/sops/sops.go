@@ -54,6 +54,32 @@ func checkSOPSAvailable() error {
 	return nil
 }
 
+// GetSOPSConfigPath returns the path to .sops.yaml config file
+// Checks current directory and home directory
+func GetSOPSConfigPath() string {
+	slog.Debug("searching for SOPS config file")
+	// Check current directory
+	if absPath, err := filepath.Abs(".sops.yaml"); err == nil {
+		if _, err := os.Stat(absPath); err == nil {
+			slog.Debug("found SOPS config file in current directory", "path", absPath)
+			return absPath
+		}
+	}
+
+	// Check home directory
+	homeDir, err := os.UserHomeDir()
+	if err == nil {
+		configPath := filepath.Join(homeDir, ".sops.yaml")
+		if _, err := os.Stat(configPath); err == nil {
+			slog.Debug("found SOPS config file in home directory", "path", configPath)
+			return configPath
+		}
+	}
+
+	slog.Debug("SOPS config file not found")
+	return ""
+}
+
 // SOPSEncryptFile encrypts a file using sops command-line tool
 // Returns the encrypted content as bytes
 // SOPS encrypts YAML files in-place, preserving structure and adding sops: metadata
@@ -304,32 +330,6 @@ func SOPSDecryptValue(encryptedValue string) (string, error) {
 
 	slog.Debug("value decrypted successfully")
 	return data.Value, nil
-}
-
-// GetSOPSConfigPath returns the path to .sops.yaml config file
-// Checks current directory and home directory
-func GetSOPSConfigPath() string {
-	slog.Debug("searching for SOPS config file")
-	// Check current directory
-	if absPath, err := filepath.Abs(".sops.yaml"); err == nil {
-		if _, err := os.Stat(absPath); err == nil {
-			slog.Debug("found SOPS config file in current directory", "path", absPath)
-			return absPath
-		}
-	}
-
-	// Check home directory
-	homeDir, err := os.UserHomeDir()
-	if err == nil {
-		configPath := filepath.Join(homeDir, ".sops.yaml")
-		if _, err := os.Stat(configPath); err == nil {
-			slog.Debug("found SOPS config file in home directory", "path", configPath)
-			return configPath
-		}
-	}
-
-	slog.Debug("SOPS config file not found")
-	return ""
 }
 
 // SOPSDisplayValue returns display value for an entry
