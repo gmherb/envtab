@@ -1,5 +1,5 @@
 ![banner](banner.png)
-`envtab` (typed `envt\t`) aims to be your goto tool for working with environment variables. Organize sets of environment variables into loadouts. A loadout is a collection of environment variables that can be exported into the shell. Loadouts are named, optionally tagged, and can include a description. `envtab` stores these loadouts in your data directory (defaults to `~/.envtab`, or `$XDG_DATA_HOME/envtab` if `XDG_DATA_HOME` is set). `envtab` loadouts can also be enabled on shell login.
+`envtab` (typed `envt\t`) aims to be your goto tool for working with environment variables. Organize sets of environment variables into loadouts. A loadout is a collection of environment variables that can be exported into the shell. Loadouts are named, optionally tagged, and can include a description. `envtab` stores these loadouts in your data directory (uses XDG paths if XDG env vars are set, otherwise falls back to `~/.envtab`, or `$ENVTAB_DIR` if set). `envtab` loadouts can also be enabled on shell login.
 
 ![diagram](diagram.png "Take control of your environment")
 
@@ -67,7 +67,7 @@ See also: [`envtab.md`](docs/envtab.md) for top-level usage and flags.
 
 - **Loadouts**: `ENVTAB_DIR/*.yaml` (no subdirectory)
 - **Templates**: `ENVTAB_DIR/templates/*.env`
-- **Temp files**: `ENVTAB_DIR/tmp/*.tmp`
+- **Temp files**: `$XDG_CACHE_HOME/envtab/tmp/*.tmp` (defaults to `$HOME/.cache/envtab/tmp/*.tmp`) or `~/.envtab/tmp/*.tmp` (POSIX fallback)
 
 # Configuration
 
@@ -78,23 +78,38 @@ See also: [`envtab.md`](docs/envtab.md) for top-level usage and flags.
 1. `--config` flag (explicit override)
 2. `ENVTAB_CONFIG` environment variable (explicit override)
 3. Project config: `.envtab.yaml` in current directory, walking up the directory tree
-4. User config: `~/.envtab.yaml` or `$XDG_CONFIG_HOME/envtab/.envtab.yaml` (if `XDG_CONFIG_HOME` is set)
+4. User config: `$XDG_CONFIG_HOME/envtab/envtab.yaml` (defaults to `$HOME/.config/envtab/envtab.yaml`) or `~/.envtab.yaml` (POSIX fallback)
 5. System config: `/etc/envtab.yaml`
 
 ## Data Directory (ENVTAB_DIR)
 
-The data directory (where loadouts, templates, and temp files are stored) is determined by:
+The data directory (where loadouts and templates are stored) is determined by:
 
-1. `ENVTAB_DIR` environment variable (if set)
-2. `$XDG_DATA_HOME/envtab` (if `XDG_DATA_HOME` is set)
-3. `~/.envtab` (default)
+1. `ENVTAB_DIR` environment variable (if set, overrides path selection)
+2. XDG path: `$XDG_DATA_HOME/envtab` (defaults to `$HOME/.local/share/envtab`)
+3. POSIX fallback: `~/.envtab` (only used if XDG directory creation fails)
+
+## Path Selection
+
+`envtab` automatically uses XDG Base Directory paths by default, falling back to POSIX paths only if XDG directory creation fails:
+
+- **XDG paths** (default, always tried first):
+  - Data: `$XDG_DATA_HOME/envtab` (defaults to `$HOME/.local/share/envtab`)
+  - Config: `$XDG_CONFIG_HOME/envtab/envtab.yaml` (defaults to `$HOME/.config/envtab/envtab.yaml`)
+  - Cache: `$XDG_CACHE_HOME/envtab/tmp/` (defaults to `$HOME/.cache/envtab/tmp/`)
+
+- **POSIX paths** (fallback if XDG directory creation fails):
+  - Data: `~/.envtab`
+  - Config: `~/.envtab.yaml`
+  - Cache: `~/.envtab/tmp/`
 
 ## Environment Variables
 
-- `ENVTAB_DIR`: Override the data directory location
+- `ENVTAB_DIR`: Override the data directory location (overrides mode selection)
 - `ENVTAB_CONFIG`: Override the config file location
-- `XDG_DATA_HOME`: Used for data directory if `ENVTAB_DIR` is not set (defaults to `~/.local/share`)
-- `XDG_CONFIG_HOME`: Used for config file location (defaults to `~/.config`)
+- `XDG_DATA_HOME`: Used for data directory in XDG mode (defaults to `$HOME/.local/share`)
+- `XDG_CONFIG_HOME`: Used for config file location in XDG mode (defaults to `$HOME/.config`)
+- `XDG_CACHE_HOME`: Used for temporary/cache files in XDG mode (defaults to `$HOME/.cache`)
 
 
 # Environment Variables in Values
@@ -264,7 +279,7 @@ $ envtab add secrets --encrypt-file API_KEY=mykey DB_PASSWORD=mypass
 This encrypts the entire file, including metadata. The file can be edited directly with `sops`:
 
 ```text
-$ sops ~/.envtab/secrets.yaml
+$ sops $ENVTAB_DIR/secrets.yaml  # or ~/.local/share/envtab/secrets.yaml by default
 ```
 
 NOTE: File encryption will be faster if multiple encrypted values exist in a single loadout.

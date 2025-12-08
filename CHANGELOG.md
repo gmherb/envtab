@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.14-alpha] - 2025-12-08
+
+### Changed
+
+- Path selection now always tries XDG Base Directory paths first (with defaults), falling back to POSIX paths only if XDG directory creation fails:
+  - XDG paths are used by default (even if XDG env vars are not explicitly set)
+  - Falls back to POSIX paths (`~/.envtab`, `~/.envtab.yaml`, `~/.envtab/tmp/`) only if XDG directory creation fails
+- `GetTmpPath()` no longer accepts `envtabPath` parameter
+
+### Fixed
+
+- Fixed race condition in `InitEnvtab()` POSIX fallback:
+  - Now checks if POSIX directory exists before attempting to create it
+  - Prevents "file exists" errors when falling back to POSIX paths in concurrent scenarios
+
 ## [0.1.13-alpha] - 2025-12-08
 
 ### Added

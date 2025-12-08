@@ -65,7 +65,7 @@ func init() {
 // 1. Command-line flag (--config)
 // 2. Environment variable (ENVTAB_CONFIG)
 // 3. Project config: CWD/.envtab.yaml and walk up the directory tree
-// 4. User config: ~/.envtab.yaml or $XDG_CONFIG_HOME/envtab/.envtab.yaml
+// 4. User config: $XDG_CONFIG_HOME/envtab/envtab.yaml (if XDG env vars set) or ~/.envtab.yaml (POSIX fallback)
 // 5. System config: /etc/envtab.yaml
 func initConfig() {
 	if cfgFile != "" {
@@ -87,7 +87,7 @@ func initConfig() {
 			slog.Debug("Found project config", "path", projectConfig)
 		}
 
-		// 4. User config: ~/.envtab.yaml or $XDG_CONFIG_HOME/envtab/.envtab.yaml
+		// 4. User config: $XDG_CONFIG_HOME/envtab/envtab.yaml (defaults to $HOME/.config/envtab/envtab.yaml) or ~/.envtab.yaml (POSIX fallback)
 		userConfigPath := config.GetUserConfigPath()
 		userConfigDir := filepath.Dir(userConfigPath)
 		viper.AddConfigPath(userConfigDir)

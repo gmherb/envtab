@@ -206,7 +206,7 @@ func editLoadout(loadoutName string) error {
 	createdAt := lo.Metadata.CreatedAt
 	updatedAt := lo.Metadata.LoadedAt
 
-	tmpDir := config.GetTmpPath(envtabPath)
+	tmpDir := config.GetTmpPath()
 	tempFilePath := filepath.Join(tmpDir, loadoutName+".tmp")
 
 	// Write the Loadout struct to a temp file

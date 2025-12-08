@@ -231,8 +231,7 @@ func WriteLoadoutWithEncryption(name string, lo *loadout.Loadout, useSOPS bool) 
 func EditLoadout(name string) error {
 
 	filePath := GetLoadoutFilePath(name)
-	envtabPath := filepath.Dir(filePath)
-	tmpDir := config.GetTmpPath(envtabPath)
+	tmpDir := config.GetTmpPath()
 	tempFilePath := filepath.Join(tmpDir, name+".tmp")
 
 	isSOPSEncrypted := sops.IsSOPSEncrypted(filePath)

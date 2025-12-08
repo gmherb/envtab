@@ -33,7 +33,7 @@ VCS:          git, github, gitlab
 Network:      proxy, wireguard
 Utils:        sops, yq, jq, jo, etcd, k6
 
-You can also create custom templates in ~/.envtab/templates/.`,
+You can also create custom templates in ENVTAB_DIR/templates/ (defaults to $XDG_DATA_HOME/envtab/templates/).`,
 	Example:    `  envtab make myloadout aws`,
 	Args:       cobra.ExactArgs(2),
 	SuggestFor: []string{"create", "new"},

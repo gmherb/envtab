@@ -97,7 +97,7 @@ envtab add production --encrypt-file \
   API_KEY=key456
 
 # File is encrypted, can be viewed with sops
-sops ~/.envtab/production.yaml
+sops $ENVTAB_DIR/production.yaml  # or ~/.local/share/envtab/production.yaml by default
 
 # Export automatically decrypts
 envtab export production
@@ -201,7 +201,7 @@ When encryption keys are rotated (e.g., AWS KMS key rotation, age key changes):
 **For file-level encrypted loadouts:**
 ```bash
 # Re-encrypt with current keys
-sops -i -e ~/.envtab/myloadout.yaml
+sops -i -e $ENVTAB_DIR/myloadout.yaml  # or ~/.local/share/envtab/myloadout.yaml by default
 
 # Or use the helper function (if implemented as command)
 envtab reencrypt myloadout
@@ -241,7 +241,7 @@ Install SOPS: `brew install sops` or download from https://github.com/getsops/so
 ### "keys may have been rotated"
 - This means the encryption keys used to encrypt the data are no longer available
 - Re-encrypt the loadout with current keys (see Key Rotation section above)
-- For file-level encryption: `sops -i -e ~/.envtab/myloadout.yaml`
+- For file-level encryption: `sops -i -e $ENVTAB_DIR/myloadout.yaml` (or `~/.local/share/envtab/myloadout.yaml` by default)
 - For value-level encryption: Re-add the values with `--encrypt-value` (or `-e`) flag
 
 ## Security Considerations
