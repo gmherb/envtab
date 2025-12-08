@@ -6,8 +6,10 @@ package cmd
 import (
 	"log/slog"
 	"os"
+	"path/filepath"
 	"strings"
 
+	"github.com/gmherb/envtab/internal/config"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -62,23 +64,36 @@ func init() {
 // Priority order for config file:
 // 1. Command-line flag (--config)
 // 2. Environment variable (ENVTAB_CONFIG)
-// 3. Default paths (~/.envtab/.envtab.yaml or ~/.envtab.yaml)
+// 3. Project config: CWD/.envtab.yaml and walk up the directory tree
+// 4. User config: ~/.envtab.yaml or $XDG_CONFIG_HOME/envtab/.envtab.yaml
+// 5. System config: /etc/envtab.yaml
 func initConfig() {
 	if cfgFile != "" {
+		// 1. Command-line flag (--config)
 		viper.SetConfigFile(cfgFile)
 	} else if envConfig := os.Getenv("ENVTAB_CONFIG"); envConfig != "" {
+		// 2. Environment variable (ENVTAB_CONFIG)
 		viper.SetConfigFile(envConfig)
 	} else {
-		// Use default config paths
-		home, err := os.UserHomeDir()
-		if err != nil {
-			slog.Error("failure getting user's home directory", "error", err)
-			os.Exit(1)
-		}
-
-		viper.AddConfigPath(home)
+		// Use hierarchical config paths
 		viper.SetConfigName(ENVTAB_CONFIG)
 		viper.SetConfigType(ENVTAB_CONFIG_TYPE)
+
+		// 3. Project config: walk up from CWD to find .envtab.yaml
+		projectConfig := config.FindProjectConfig()
+		if projectConfig != "" {
+			projectDir := filepath.Dir(projectConfig)
+			viper.AddConfigPath(projectDir)
+			slog.Debug("Found project config", "path", projectConfig)
+		}
+
+		// 4. User config: ~/.envtab.yaml or $XDG_CONFIG_HOME/envtab/.envtab.yaml
+		userConfigPath := config.GetUserConfigPath()
+		userConfigDir := filepath.Dir(userConfigPath)
+		viper.AddConfigPath(userConfigDir)
+
+		// 5. System config: /etc/envtab.yaml
+		viper.AddConfigPath("/etc")
 	}
 
 	viper.SetEnvPrefix("ENVTAB")
@@ -129,7 +144,7 @@ func Execute() {
 
 func init() {
 	// Define persistent flags (global for all commands)
-	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.envtab/.envtab.yaml)")
+	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (overrides project/user/system config precedence)")
 	rootCmd.PersistentFlags().BoolP("verbose", "", false, "Show verbose output (enables debug/info/warn logs)")
 }
 
