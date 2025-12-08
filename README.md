@@ -1,5 +1,5 @@
 ![banner](banner.png)
-`envtab` (typed `envt\t`) aims to be your goto tool for working with environment variables. Organize sets of environment variables into loadouts. A loadout is a collection of environment variables that can be exported into the shell. Loadouts are named, optionally tagged, and can include a description. `envtab` stores these loadouts in your data directory (uses XDG paths if XDG env vars are set, otherwise falls back to `~/.envtab`, or `$ENVTAB_DIR` if set). `envtab` loadouts can also be enabled on shell login.
+`envtab` (typed `envt\t`) aims to be your goto tool for working with environment variables. Organize sets of environment variables into loadouts. A loadout is a collection of environment variables that can be exported into the shell. Loadouts are named, optionally tagged, and can include a description. `envtab` stores these loadouts in your data directory. `envtab` loadouts can also be enabled on shell login.
 
 ![diagram](diagram.png "Take control of your environment")
 
@@ -60,15 +60,6 @@ Complete documentation for all `envtab` commands:
 
 See also: [`envtab.md`](docs/envtab.md) for top-level usage and flags.
 
-
-# Directory Structure
-
-`envtab` uses the following directory structure:
-
-- **Loadouts**: `ENVTAB_DIR/*.yaml` (no subdirectory)
-- **Templates**: `ENVTAB_DIR/templates/*.env`
-- **Temp files**: `$XDG_CACHE_HOME/envtab/tmp/*.tmp` (defaults to `$HOME/.cache/envtab/tmp/*.tmp`)
-
 # Configuration
 
 ## Configuration File Precedence
@@ -103,7 +94,6 @@ The data directory (where loadouts and templates are stored) is determined by:
 - `XDG_DATA_HOME`: Used for data directory (defaults to `$HOME/.local/share`)
 - `XDG_CONFIG_HOME`: Used for config file location (defaults to `$HOME/.config`)
 - `XDG_CACHE_HOME`: Used for temporary/cache files (defaults to `$HOME/.cache`)
-
 
 # Environment Variables in Values
 
