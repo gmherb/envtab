@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 )
 
+<<<<<<< Updated upstream
 const (
 	envtabDir = "envtab"
 )
@@ -31,6 +32,19 @@ func getXDGDir(envVar, defaultSubdir string) string {
 // getXDGDataHome returns the XDG data home directory, using defaults if not set.
 func getXDGDataHome() string {
 	return getXDGDir("XDG_DATA_HOME", ".local/share")
+=======
+// getXDGDataHome returns the XDG data home directory, using defaults if not set.
+func getXDGDataHome() (string, error) {
+	xdgDataHome := os.Getenv("XDG_DATA_HOME")
+	if xdgDataHome == "" {
+		home, err := os.UserHomeDir()
+		if err != nil {
+			return "", err
+		}
+		xdgDataHome = filepath.Join(home, ".local", "share")
+	}
+	return xdgDataHome, nil
+>>>>>>> Stashed changes
 }
 
 // GetEnvtabPath returns the path to the envtab data directory
@@ -79,11 +93,29 @@ func FindProjectConfig() string {
 	return ""
 }
 
+<<<<<<< Updated upstream
 // createDir creates a directory if it doesn't exist, returning the path.
 func createDir(path string) string {
 	if _, err := os.Stat(path); os.IsNotExist(err) {
 		if err := os.Mkdir(path, 0700); err != nil {
 			slog.Error("failure creating directory", "path", path, "error", err)
+=======
+// InitEnvtab creates the envtab directory if it doesn't exist and returns the path.
+// If path is empty, uses the default envtab directory from GetEnvtabPath().
+func InitEnvtab(path string) string {
+	var envtabPath string
+
+	if path != "" {
+		envtabPath = path
+	} else {
+		envtabPath = GetEnvtabPath()
+	}
+
+	// Try to create/ensure the directory exists
+	if _, err := os.Stat(envtabPath); os.IsNotExist(err) {
+		if err := os.MkdirAll(envtabPath, 0700); err != nil {
+			slog.Error("failure creating envtab directory", "path", envtabPath, "error", err)
+>>>>>>> Stashed changes
 			os.Exit(1)
 		}
 	}
@@ -106,6 +138,10 @@ func GetTmpPath() string {
 	xdgCacheHome := getXDGDir("XDG_CACHE_HOME", ".cache")
 	tmpPath := filepath.Join(xdgCacheHome, envtabDir, "tmp")
 
+<<<<<<< Updated upstream
+=======
+	// Create tmp directory
+>>>>>>> Stashed changes
 	if err := os.MkdirAll(tmpPath, 0700); err != nil {
 		slog.Error("failure creating tmp directory", "path", tmpPath, "error", err)
 		os.Exit(1)
