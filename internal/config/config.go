@@ -4,21 +4,26 @@ import (
 	"log/slog"
 	"os"
 	"path/filepath"
-
-	"github.com/spf13/viper"
 )
 
 const (
 	ENVTAB_DIR = ".envtab"
 )
 
-// GetEnvtabPath returns the path to the envtab directory
-// Checks viper config first (supports ENVTAB_DIR env var and config file), then defaults to ~/.envtab
+// GetEnvtabPath returns the path to the envtab data directory
+// Priority: 1. ENVTAB_DIR env var, 2. XDG_DATA_HOME/envtab, 3. ~/.envtab
 func GetEnvtabPath() string {
-	if viper.IsSet("dir") {
-		return viper.GetString("dir")
+	// Check ENVTAB_DIR environment variable first
+	if envDir := os.Getenv("ENVTAB_DIR"); envDir != "" {
+		return envDir
 	}
 
+	// Check XDG_DATA_HOME
+	if xdgDataHome := os.Getenv("XDG_DATA_HOME"); xdgDataHome != "" {
+		return filepath.Join(xdgDataHome, "envtab")
+	}
+
+	// Default to ~/.envtab
 	home, err := os.UserHomeDir()
 	if err != nil {
 		slog.Error("failure getting user's home directory", "error", err)
@@ -26,6 +31,51 @@ func GetEnvtabPath() string {
 	}
 
 	return filepath.Join(home, ENVTAB_DIR)
+}
+
+// GetUserConfigPath returns the path to the user config file
+// Returns ~/.envtab.yaml or $XDG_CONFIG_HOME/envtab/.envtab.yaml if XDG_CONFIG_HOME is set
+func GetUserConfigPath() string {
+	// Check XDG_CONFIG_HOME
+	if xdgConfigHome := os.Getenv("XDG_CONFIG_HOME"); xdgConfigHome != "" {
+		return filepath.Join(xdgConfigHome, "envtab", ".envtab.yaml")
+	}
+
+	// Default to ~/.envtab.yaml
+	home, err := os.UserHomeDir()
+	if err != nil {
+		slog.Error("failure getting user's home directory", "error", err)
+		os.Exit(1)
+	}
+
+	return filepath.Join(home, ".envtab.yaml")
+}
+
+// FindProjectConfig walks up the directory tree from the current working directory
+// to find .envtab.yaml. Returns the path if found, empty string otherwise.
+func FindProjectConfig() string {
+	cwd, err := os.Getwd()
+	if err != nil {
+		slog.Debug("failure getting current working directory", "error", err)
+		return ""
+	}
+
+	dir := cwd
+	for {
+		configPath := filepath.Join(dir, ".envtab.yaml")
+		if _, err := os.Stat(configPath); err == nil {
+			return configPath
+		}
+
+		parent := filepath.Dir(dir)
+		if parent == dir {
+			// Reached root directory
+			break
+		}
+		dir = parent
+	}
+
+	return ""
 }
 
 // InitEnvtab creates the envtab directory if it doesn't exist and returns the path.
@@ -47,4 +97,27 @@ func InitEnvtab(path string) string {
 	}
 
 	return envtabPath
+}
+
+// GetTmpPath returns the path to the tmp directory and ensures it exists.
+// If envtabPath is provided (non-empty), uses it; otherwise determines it.
+// Returns ENVTAB_DIR/tmp/
+func GetTmpPath(envtabPath ...string) string {
+	var path string
+	if len(envtabPath) > 0 && envtabPath[0] != "" {
+		path = envtabPath[0]
+	} else {
+		path = InitEnvtab("")
+	}
+
+	tmpPath := filepath.Join(path, "tmp")
+
+	if _, err := os.Stat(tmpPath); os.IsNotExist(err) {
+		if err := os.Mkdir(tmpPath, 0700); err != nil {
+			slog.Error("failure creating tmp directory", "path", tmpPath, "error", err)
+			os.Exit(1)
+		}
+	}
+
+	return tmpPath
 }

@@ -11,10 +11,14 @@ import (
 
 	"github.com/gmherb/envtab/internal/config"
 	"github.com/gmherb/envtab/internal/loadout"
+	"github.com/gmherb/envtab/internal/sops"
 	"github.com/gmherb/envtab/internal/utils"
-	"github.com/gmherb/envtab/pkg/sops"
 	yaml "gopkg.in/yaml.v2"
 )
+
+func GetLoadoutFilePath(name string) string {
+	return filepath.Join(config.InitEnvtab(""), name+".yaml")
+}
 
 // Write a key-value pair to a loadout (and optionally any tags)
 func AddEntryToLoadout(name string, key string, value string, tags []string) error {
@@ -31,8 +35,9 @@ func AddEntryToLoadout(name string, key string, value string, tags []string) err
 	lo.UpdateEntry(key, value)
 	lo.UpdateTags(tags)
 
-	// Check if file is SOPS-encrypted to preserve encryption
 	filePath := filepath.Join(config.InitEnvtab(""), name+".yaml")
+
+	// Check if file is SOPS-encrypted to preserve encryption
 	isSOPSEncrypted := false
 	if _, err := os.Stat(filePath); err == nil {
 		isSOPSEncrypted = sops.IsSOPSEncrypted(filePath)
@@ -173,9 +178,8 @@ func ReadLoadout(name string) (*loadout.Loadout, error) {
 // Rename a loadout file
 func RenameLoadout(oldName, newName string) error {
 
-	envtabPath := config.InitEnvtab("")
-	oldFilePath := filepath.Join(envtabPath, oldName+".yaml")
-	newFilePath := filepath.Join(envtabPath, newName+".yaml")
+	oldFilePath := GetLoadoutFilePath(oldName)
+	newFilePath := GetLoadoutFilePath(newName)
 
 	err := os.Rename(oldFilePath, newFilePath)
 	if err != nil {
@@ -195,7 +199,7 @@ func WriteLoadout(name string, lo *loadout.Loadout) error {
 // If useSOPS is true, encrypts the entire file with SOPS
 func WriteLoadoutWithEncryption(name string, lo *loadout.Loadout, useSOPS bool) error {
 
-	filePath := filepath.Join(config.InitEnvtab(""), name+".yaml")
+	filePath := GetLoadoutFilePath(name)
 
 	data, err := yaml.Marshal(lo)
 	if err != nil {
@@ -226,8 +230,10 @@ func WriteLoadoutWithEncryption(name string, lo *loadout.Loadout, useSOPS bool) 
 // Automatically handles SOPS-encrypted files and preserves encryption on save
 func EditLoadout(name string) error {
 
-	filePath := filepath.Join(config.InitEnvtab(""), name+".yaml")
-	tempFilePath := filePath + ".tmp"
+	filePath := GetLoadoutFilePath(name)
+	envtabPath := filepath.Dir(filePath)
+	tmpDir := config.GetTmpPath(envtabPath)
+	tempFilePath := filepath.Join(tmpDir, name+".tmp")
 
 	isSOPSEncrypted := sops.IsSOPSEncrypted(filePath)
 
@@ -361,11 +367,7 @@ func ListLoadouts() ([]string, error) {
 
 // IsLoadoutFileEncrypted checks if a loadout file is encrypted at the file level
 func IsLoadoutFileEncrypted(name string) bool {
-	filePath := filepath.Join(config.InitEnvtab(""), name+".yaml")
-	if _, err := os.Stat(filePath); os.IsNotExist(err) {
-		return false
-	}
-	return sops.IsSOPSEncrypted(filePath)
+	return sops.IsSOPSEncrypted(GetLoadoutFilePath(name))
 }
 
 // HasValueEncryptedEntries checks if a loadout has any value-encrypted entries (SOPS: prefix)
@@ -379,59 +381,4 @@ func HasValueEncryptedEntries(lo *loadout.Loadout) bool {
 		}
 	}
 	return false
-}
-
-// ParseDotenvContent parses .env file content and returns a map of key-value pairs
-// It skips comments (lines starting with #) and empty lines
-// Returns an error if the content cannot be parsed
-func ParseDotenvContent(content []byte) (map[string]string, error) {
-	entries := make(map[string]string)
-	lines := strings.Split(string(content), "\n")
-
-	for _, line := range lines {
-		// Trim whitespace from the line
-		line = strings.TrimSpace(line)
-
-		// Skip empty lines and comments
-		if line == "" || strings.HasPrefix(line, "#") {
-			continue
-		}
-
-		// Split on first = only (values may contain =)
-		parts := strings.SplitN(line, "=", 2)
-		if len(parts) != 2 {
-			continue
-		}
-
-		key := strings.TrimSpace(parts[0])
-		value := strings.TrimSpace(parts[1])
-
-		// Skip if key is empty
-		if key == "" {
-			continue
-		}
-
-		entries[key] = value
-	}
-
-	return entries, nil
-}
-
-// ImportFromDotenv reads a .env file and imports its entries into a loadout
-func ImportFromDotenv(loadout *loadout.Loadout, dotenvFile string) error {
-	dotenv, err := os.ReadFile(dotenvFile)
-	if err != nil {
-		return err
-	}
-
-	entries, err := ParseDotenvContent(dotenv)
-	if err != nil {
-		return err
-	}
-
-	for key, value := range entries {
-		loadout.UpdateEntry(key, value)
-	}
-
-	return nil
 }

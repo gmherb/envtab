@@ -1,5 +1,5 @@
 ![banner](banner.png)
-`envtab` (typed `envt\t`) aims to be your goto tool for working with environment variables. Organize sets of environment variables into loadouts. A loadout is a collection of environment variables that can be exported into the shell. Loadouts are named, optionally tagged, and can include a description. `envtab` stores these loadouts in your `$HOME` directory (`~/.envtab`), by default. `envtab` loadouts can also be enabled on shell login.
+`envtab` (typed `envt\t`) aims to be your goto tool for working with environment variables. Organize sets of environment variables into loadouts. A loadout is a collection of environment variables that can be exported into the shell. Loadouts are named, optionally tagged, and can include a description. `envtab` stores these loadouts in your data directory (defaults to `~/.envtab`, or `$XDG_DATA_HOME/envtab` if `XDG_DATA_HOME` is set). `envtab` loadouts can also be enabled on shell login.
 
 ![diagram](diagram.png "Take control of your environment")
 
@@ -59,6 +59,43 @@ Complete documentation for all `envtab` commands:
 - [`envtab show`](docs/envtab_show.md) - Show active loadouts
 
 See also: [`envtab.md`](docs/envtab.md) for top-level usage and flags.
+
+
+# Directory Structure
+
+`envtab` uses the following directory structure:
+
+- **Loadouts**: `ENVTAB_DIR/*.yaml` (no subdirectory)
+- **Templates**: `ENVTAB_DIR/templates/*.env`
+- **Temp files**: `ENVTAB_DIR/tmp/*.tmp`
+
+# Configuration
+
+## Configuration File Precedence
+
+`envtab` searches for configuration files in the following order (first found is used):
+
+1. `--config` flag (explicit override)
+2. `ENVTAB_CONFIG` environment variable (explicit override)
+3. Project config: `.envtab.yaml` in current directory, walking up the directory tree
+4. User config: `~/.envtab.yaml` or `$XDG_CONFIG_HOME/envtab/.envtab.yaml` (if `XDG_CONFIG_HOME` is set)
+5. System config: `/etc/envtab.yaml`
+
+## Data Directory (ENVTAB_DIR)
+
+The data directory (where loadouts, templates, and temp files are stored) is determined by:
+
+1. `ENVTAB_DIR` environment variable (if set)
+2. `$XDG_DATA_HOME/envtab` (if `XDG_DATA_HOME` is set)
+3. `~/.envtab` (default)
+
+## Environment Variables
+
+- `ENVTAB_DIR`: Override the data directory location
+- `ENVTAB_CONFIG`: Override the config file location
+- `XDG_DATA_HOME`: Used for data directory if `ENVTAB_DIR` is not set (defaults to `~/.local/share`)
+- `XDG_CONFIG_HOME`: Used for config file location (defaults to `~/.config`)
+
 
 # Environment Variables in Values
 

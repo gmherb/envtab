@@ -13,9 +13,9 @@ import (
 	"github.com/gmherb/envtab/internal/backends"
 	"github.com/gmherb/envtab/internal/config"
 	"github.com/gmherb/envtab/internal/loadout"
+	"github.com/gmherb/envtab/internal/sops"
 	"github.com/gmherb/envtab/internal/tags"
 	"github.com/gmherb/envtab/internal/utils"
-	"github.com/gmherb/envtab/pkg/sops"
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v2"
 )
@@ -206,7 +206,8 @@ func editLoadout(loadoutName string) error {
 	createdAt := lo.Metadata.CreatedAt
 	updatedAt := lo.Metadata.LoadedAt
 
-	tempFilePath := loadoutPath + ".tmp"
+	tmpDir := config.GetTmpPath(envtabPath)
+	tempFilePath := filepath.Join(tmpDir, loadoutName+".tmp")
 
 	// Write the Loadout struct to a temp file
 	err = os.WriteFile(tempFilePath, data, 0600)

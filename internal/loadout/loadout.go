@@ -7,9 +7,9 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/gmherb/envtab/internal/sops"
 	"github.com/gmherb/envtab/internal/tags"
 	"github.com/gmherb/envtab/internal/utils"
-	"github.com/gmherb/envtab/pkg/sops"
 	yaml "gopkg.in/yaml.v2"
 )
 

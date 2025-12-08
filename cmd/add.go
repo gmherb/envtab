@@ -9,8 +9,8 @@ import (
 	"strings"
 
 	"github.com/gmherb/envtab/internal/backends"
+	"github.com/gmherb/envtab/internal/sops"
 	"github.com/gmherb/envtab/internal/tags"
-	"github.com/gmherb/envtab/pkg/sops"
 	"github.com/spf13/cobra"
 )
 
