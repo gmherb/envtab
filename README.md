@@ -67,7 +67,7 @@ See also: [`envtab.md`](docs/envtab.md) for top-level usage and flags.
 
 - **Loadouts**: `ENVTAB_DIR/*.yaml` (no subdirectory)
 - **Templates**: `ENVTAB_DIR/templates/*.env`
-- **Temp files**: `$XDG_CACHE_HOME/envtab/tmp/*.tmp` (defaults to `$HOME/.cache/envtab/tmp/*.tmp`) or `~/.envtab/tmp/*.tmp` (POSIX fallback)
+- **Temp files**: `$XDG_CACHE_HOME/envtab/tmp/*.tmp` (defaults to `$HOME/.cache/envtab/tmp/*.tmp`)
 
 # Configuration
 
@@ -78,7 +78,7 @@ See also: [`envtab.md`](docs/envtab.md) for top-level usage and flags.
 1. `--config` flag (explicit override)
 2. `ENVTAB_CONFIG` environment variable (explicit override)
 3. Project config: `.envtab.yaml` in current directory, walking up the directory tree
-4. User config: `$XDG_CONFIG_HOME/envtab/envtab.yaml` (defaults to `$HOME/.config/envtab/envtab.yaml`) or `~/.envtab.yaml` (POSIX fallback)
+4. User config: `$XDG_CONFIG_HOME/envtab/envtab.yaml` (defaults to `$HOME/.config/envtab/envtab.yaml`)
 5. System config: `/etc/envtab.yaml`
 
 ## Data Directory (ENVTAB_DIR)
@@ -87,29 +87,22 @@ The data directory (where loadouts and templates are stored) is determined by:
 
 1. `ENVTAB_DIR` environment variable (if set, overrides path selection)
 2. XDG path: `$XDG_DATA_HOME/envtab` (defaults to `$HOME/.local/share/envtab`)
-3. POSIX fallback: `~/.envtab` (only used if XDG directory creation fails)
 
 ## Path Selection
 
-`envtab` automatically uses XDG Base Directory paths by default, falling back to POSIX paths only if XDG directory creation fails:
+`envtab` uses XDG Base Directory paths:
 
-- **XDG paths** (default, always tried first):
-  - Data: `$XDG_DATA_HOME/envtab` (defaults to `$HOME/.local/share/envtab`)
-  - Config: `$XDG_CONFIG_HOME/envtab/envtab.yaml` (defaults to `$HOME/.config/envtab/envtab.yaml`)
-  - Cache: `$XDG_CACHE_HOME/envtab/tmp/` (defaults to `$HOME/.cache/envtab/tmp/`)
-
-- **POSIX paths** (fallback if XDG directory creation fails):
-  - Data: `~/.envtab`
-  - Config: `~/.envtab.yaml`
-  - Cache: `~/.envtab/tmp/`
+- **Data**: `$XDG_DATA_HOME/envtab` (defaults to `$HOME/.local/share/envtab`)
+- **Config**: `$XDG_CONFIG_HOME/envtab/envtab.yaml` (defaults to `$HOME/.config/envtab/envtab.yaml`)
+- **Cache**: `$XDG_CACHE_HOME/envtab/tmp/` (defaults to `$HOME/.cache/envtab/tmp/`)
 
 ## Environment Variables
 
-- `ENVTAB_DIR`: Override the data directory location (overrides mode selection)
+- `ENVTAB_DIR`: Override the data directory location
 - `ENVTAB_CONFIG`: Override the config file location
-- `XDG_DATA_HOME`: Used for data directory in XDG mode (defaults to `$HOME/.local/share`)
-- `XDG_CONFIG_HOME`: Used for config file location in XDG mode (defaults to `$HOME/.config`)
-- `XDG_CACHE_HOME`: Used for temporary/cache files in XDG mode (defaults to `$HOME/.cache`)
+- `XDG_DATA_HOME`: Used for data directory (defaults to `$HOME/.local/share`)
+- `XDG_CONFIG_HOME`: Used for config file location (defaults to `$HOME/.config`)
+- `XDG_CACHE_HOME`: Used for temporary/cache files (defaults to `$HOME/.cache`)
 
 
 # Environment Variables in Values
