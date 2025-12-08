@@ -19,7 +19,7 @@ var cfgFile string
 
 const (
 	ENVTAB_DIR         = ".envtab"
-	ENVTAB_CONFIG      = ".envtab"
+	ENVTAB_CONFIG      = "envtab"
 	ENVTAB_CONFIG_TYPE = "yaml"
 )
 
@@ -75,25 +75,26 @@ func initConfig() {
 		// 2. Environment variable (ENVTAB_CONFIG)
 		viper.SetConfigFile(envConfig)
 	} else {
-		// Use hierarchical config paths
-		viper.SetConfigName(ENVTAB_CONFIG)
-		viper.SetConfigType(ENVTAB_CONFIG_TYPE)
-
 		// 3. Project config: walk up from CWD to find .envtab.yaml
 		projectConfig := config.FindProjectConfig()
 		if projectConfig != "" {
-			projectDir := filepath.Dir(projectConfig)
-			viper.AddConfigPath(projectDir)
+			// Project config uses .envtab.yaml (with dot), so set it explicitly
+			viper.SetConfigFile(projectConfig)
 			slog.Debug("Found project config", "path", projectConfig)
+		} else {
+			// Use hierarchical config paths for user/system configs
+			// These use envtab.yaml (without dot)
+			viper.SetConfigName(ENVTAB_CONFIG)
+			viper.SetConfigType(ENVTAB_CONFIG_TYPE)
+
+			// 4. User config: $XDG_CONFIG_HOME/envtab/envtab.yaml (defaults to $HOME/.config/envtab/envtab.yaml) or ~/.envtab.yaml (POSIX fallback)
+			userConfigPath := config.GetUserConfigPath()
+			userConfigDir := filepath.Dir(userConfigPath)
+			viper.AddConfigPath(userConfigDir)
+
+			// 5. System config: /etc/envtab.yaml
+			viper.AddConfigPath("/etc")
 		}
-
-		// 4. User config: $XDG_CONFIG_HOME/envtab/envtab.yaml (defaults to $HOME/.config/envtab/envtab.yaml) or ~/.envtab.yaml (POSIX fallback)
-		userConfigPath := config.GetUserConfigPath()
-		userConfigDir := filepath.Dir(userConfigPath)
-		viper.AddConfigPath(userConfigDir)
-
-		// 5. System config: /etc/envtab.yaml
-		viper.AddConfigPath("/etc")
 	}
 
 	viper.SetEnvPrefix("ENVTAB")
