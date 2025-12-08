@@ -112,11 +112,11 @@ func GetTmpPath(envtabPath ...string) string {
 
 	tmpPath := filepath.Join(path, "tmp")
 
-	if _, err := os.Stat(tmpPath); os.IsNotExist(err) {
-		if err := os.Mkdir(tmpPath, 0700); err != nil {
-			slog.Error("failure creating tmp directory", "path", tmpPath, "error", err)
-			os.Exit(1)
-		}
+	// Use MkdirAll which is idempotent - creates directory if it doesn't exist,
+	// or does nothing if it already exists. This avoids race conditions.
+	if err := os.MkdirAll(tmpPath, 0700); err != nil {
+		slog.Error("failure creating tmp directory", "path", tmpPath, "error", err)
+		os.Exit(1)
 	}
 
 	return tmpPath
