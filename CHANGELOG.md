@@ -7,6 +7,41 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.13-alpha] - 2025-12-08
+
+### Added
+
+- Multi-path configuration file support with hierarchical precedence:
+  - `--config` flag (explicit override)
+  - `ENVTAB_CONFIG` environment variable (explicit override)
+  - Project config: `.envtab.yaml` discovered by walking up directory tree from CWD
+  - User config: `~/.envtab.yaml` or `$XDG_CONFIG_HOME/envtab/.envtab.yaml` (if XDG_CONFIG_HOME is set)
+  - System config: `/etc/envtab.yaml`
+- XDG Base Directory support:
+  - `XDG_CONFIG_HOME` for configuration file location (defaults to `~/.config`)
+  - `XDG_DATA_HOME` for data directory location (defaults to `~/.local/share`)
+  - `ENVTAB_DIR` environment variable to override data directory
+- Project configuration discovery:
+  - Automatically finds `.envtab.yaml` by walking up directory tree from current working directory
+  - Enables project-specific configuration files
+
+### Changed
+
+- Data directory determination:
+  - Priority: `ENVTAB_DIR` env var → `$XDG_DATA_HOME/envtab` → `~/.envtab`
+- Temp file management:
+  - Moved temporary files from `ENVTAB_DIR/*.tmp` to `ENVTAB_DIR/tmp/*.tmp`
+  - Prevents temp files from cluttering the loadout directory
+- Configuration initialization:
+  - Removed dependency on viper for path determination in config package
+  - Simplified config path resolution logic
+
+### Fixed
+
+- Fixed race condition in `GetTmpPath()`:
+  - Replaced `os.Stat` + `os.Mkdir` pattern with `os.MkdirAll` for thread-safe directory creation
+  - Prevents errors when multiple processes create tmp directory concurrently
+
 ## [0.1.12-alpha] - 2025-12-03
 
 ### Added
