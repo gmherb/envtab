@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+<<<<<<< HEAD
 ### Fixed
 
 - Fixed configuration file name mismatch:
@@ -14,6 +15,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Project config (`.envtab.yaml`) is now handled explicitly with full path
   - User and system configs (`envtab.yaml`) now correctly use the constant for Viper's config name resolution
   - Ensures Viper can properly locate `envtab.yaml` in user config (`$XDG_CONFIG_HOME/envtab/`) and system config (`/etc/`) paths
+=======
+## [0.1.15-alpha] - 2025-12-08
+
+### Fixed
+
+- Fixed configuration file name mismatch preventing user and system config discovery:
+  - Changed `ENVTAB_CONFIG` constant from `.envtab` to `envtab` (removed dot prefix)
+  - Project config (`.envtab.yaml`) is now handled explicitly with full path via `viper.SetConfigFile()`
+  - User and system configs (`envtab.yaml`) now correctly use `SetConfigName("envtab")` for Viper's config name resolution
+  - Previously, Viper was looking for `.envtab.yaml` in all config paths, which only matched project configs
+  - Now correctly locates:
+    - Project config: `.envtab.yaml` (explicit path, with dot prefix)
+    - User config: `envtab.yaml` in `$XDG_CONFIG_HOME/envtab/` (without dot prefix)
+    - System config: `envtab.yaml` in `/etc/` (without dot prefix)
+>>>>>>> 0b16054 (changelog)
 
 ## [0.1.14-alpha] - 2025-12-08
 
