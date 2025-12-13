@@ -179,7 +179,11 @@ func (l Loadout) Export() {
 				value = strings.ReplaceAll(value, "$"+varName[1], varValue)
 				slog.Debug("replaced variable", "variable", varName[1], "value", value)
 			}
-			fmt.Printf("export %s=%s\n", key, value)
+			if value != "" {
+				fmt.Printf("export %s=%s\n", key, value)
+			} else {
+				slog.Debug("skipping empty value after variable expansion", "key", key, "value", value)
+			}
 		}
 	}
 	l.UpdateLoadedAt()
