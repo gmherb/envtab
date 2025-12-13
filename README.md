@@ -87,7 +87,7 @@ The data directory (where loadouts and templates are stored) is determined by:
 - **Config**: `$XDG_CONFIG_HOME/envtab/envtab.yaml` (defaults to `$HOME/.config/envtab/envtab.yaml`)
 - **Cache**: `$XDG_CACHE_HOME/envtab/tmp/` (defaults to `$HOME/.cache/envtab/tmp/`)
 
-## Environment Variables
+## `envtab` Environment Variables
 
 - `ENVTAB_DIR`: Override the data directory location
 - `ENVTAB_CONFIG`: Override the config file location
@@ -95,11 +95,15 @@ The data directory (where loadouts and templates are stored) is determined by:
 - `XDG_CONFIG_HOME`: Used for config file location (defaults to `$HOME/.config`)
 - `XDG_CACHE_HOME`: Used for temporary/cache files (defaults to `$HOME/.cache`)
 
-# Environment Variables in Values
+# Environment Variables
 
-Sometimes you may need to utilize environment variables in the value of a loadout entry. For example, the PATH environment variable.
+Sometimes you may need to utilize environment variables in the value of a loadout entry or even as the key. For example, the PATH environment variable.
 
-## PATH
+### Environment Variables in Value
+
+Variables within a load entry value will be expanded before exported.
+
+### Environment Variables as Key
 
 The PATH environment variable has first class support and will work without utilizing eval (shown below).
 
@@ -115,7 +119,7 @@ $ envtab cat testld | grep PATH
   PATH: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/go/bin:/other/bin
 ```
 
-Use must escape to bypass expansion.
+You must escape to bypass expansion.
 
 ```text
 $ envtab add testld PATH=\$PATH:/other/bin
@@ -153,9 +157,11 @@ testld -------------------------------------------------------------- [ 1 / 1 ]
 
 ## Environment variables other than PATH
 
-Currently, PATH is the only officially support environment variable. You can use other environment variables using eval however, do not expect `envtab show` to work properly.
+`envtab` now supports variable expansion for all environment variables, not just PATH. You can reference any environment variable using `$VARNAME` syntax, and it will be automatically expanded during export.
 
-### Eval
+### Variable Expansion
+
+Any environment variable can reference other environment variables using `$VARNAME` syntax:
 
 ```text
 $ envtab cat example
@@ -168,27 +174,44 @@ metadata:
   description: ""
 entries:
   CONFIG_DIR: $HOME/conf
+  PROJECT_ROOT: $HOME/projects/$PROJECT_NAME
+  LOG_DIR: $CONFIG_DIR/logs
 ```
 
 ```text
-# Export shows the actual variable
+# Export automatically expands all variables
 $ envtab export example
-export CONFIG_DIR=$HOME/conf
+export CONFIG_DIR=/home/gmherb/conf
+export PROJECT_ROOT=/home/gmherb/projects/myproject
+export LOG_DIR=/home/gmherb/conf/logs
 
-# But when sourced it is not expanded
+# Source the export to set variables
 $ $(envtab export example)
 
-# See variable hardcoded
-$ env|grep CONFIG_DIR
-CONFIG_DIR=$HOME/conf
-
-# Use eval to expand
-$ eval $(envtab export example)
-
-# Variable expanded
+# Variables are expanded
 $ env|grep CONFIG_DIR
 CONFIG_DIR=/home/gmherb/conf
+$ env|grep PROJECT_ROOT
+PROJECT_ROOT=/home/gmherb/projects/myproject
+$ env|grep LOG_DIR
+LOG_DIR=/home/gmherb/conf/logs
+```
 
+### Using add
+
+When using `add`, you can escape the `$` to prevent shell expansion and preserve the variable reference:
+
+```text
+$ envtab add example CONFIG_DIR=\$HOME/conf
+$ envtab cat example | grep CONFIG_DIR
+  CONFIG_DIR: $HOME/conf
+```
+
+### Empty Variable Handling
+
+If a referenced environment variable is unset or empty, the entry will be skipped during export to prevent setting empty values:
+
+```text
 # Unfortunately, no match in `show` or `list` at this time.
 $ envtab show
 $ envtab list -l example
@@ -309,13 +332,13 @@ envtab imports entire loadouts from .yaml files. It also can import variables fr
 
 ## Import from local files (by extension)
 
-  ```text
-  # Merge a .env into an existing/new loadout
-  envtab import myloadout ./config.env
+```text
+# Merge a .env into an existing/new loadout
+envtab import myloadout ./config.env
 
-  # Replace/create a loadout from YAML
-  envtab import myloadout ./prod.yaml
-  ```
+# Replace/create a loadout from YAML
+envtab import myloadout ./prod.yaml
+```
 
 ## Import from remote URLs (e.g., GitHub raw)
 
@@ -349,6 +372,7 @@ This runs `go run ./tools/gen-docs.go` and produces per-command Markdown files a
 
 # TODO
 
+- Should we modify the prefix (SOPS:) to something less likely to occur in values?
 - SOPS:exec-env - execute a command with decrypted values inserted into the environment
   - Add support or re-implement. Reimplementation would be best as can support all envtab loadouts
 - Add --raw to loginCmd. This will place actual export entries inside of a shell script to be sourced from profile script instead of calling envtab.
@@ -360,8 +384,6 @@ This runs `go run ./tools/gen-docs.go` and produces per-command Markdown files a
       - or make it automatic for simplicity
   - --raw should be utilized with either --enable or --disable. Ignored if --status or enable/disable are omitted.
   - --status should now include mode (raw|command substitution)
-- Support environment variables in show; exported with eval $(envtab export loadout)
-  - Can we resolve all environment variables like we do with PATH? --raw is a workaround for using other environment variables
   - Add loadout order/priority/number to support specific load order in case entries build upon environment variable expansion
 - Add additional backends in addition to default (file backend).
   - File (Default)
@@ -389,3 +411,5 @@ This runs `go run ./tools/gen-docs.go` and produces per-command Markdown files a
   - templates can be .env files.
   - include templates for common things: AWS|GCP|Azure, Vault, GIT|GITHUB|GITLAB, PGSQL, etc.
 - Support importing templates (.env)
+- Support environment variables in show; exported with eval $(envtab export loadout)
+  - Can we resolve all environment variables like we do with PATH? --raw is a workaround for using other environment variables

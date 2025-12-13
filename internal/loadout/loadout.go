@@ -100,6 +100,22 @@ func ValidateLoadoutYAML(yamlContent []byte) error {
 	return nil
 }
 
+// ExpandVariables expands environment variable references in a value string
+// It replaces $VARNAME patterns with the actual environment variable values
+// Returns the expanded value string
+func ExpandVariables(value string) string {
+	reVariable := regexp.MustCompile(`\$(\w+)`)
+
+	// Find all variable references and replace them
+	for _, varName := range reVariable.FindAllStringSubmatch(value, -1) {
+		varValue := os.Getenv(varName[1])
+		value = strings.ReplaceAll(value, "$"+varName[1], varValue)
+		slog.Debug("expanded variable", "variable", varName[1], "expandedValue", varValue, "result", value)
+	}
+
+	return value
+}
+
 func (l Loadout) Export() {
 
 	pathMap := make(map[string]bool)
@@ -113,6 +129,7 @@ func (l Loadout) Export() {
 	}
 
 	re := regexp.MustCompile(`\$PATH`)
+	reVariable := regexp.MustCompile(`\$(\w+)`)
 	reSOPS := regexp.MustCompile(`^SOPS:`)
 
 	for key, value := range l.Entries {
@@ -172,7 +189,17 @@ func (l Loadout) Export() {
 			os.Setenv("PATH", strings.Join(paths, string(os.PathListSeparator)))
 			fmt.Printf("export PATH=%s\n", os.Getenv("PATH"))
 		} else {
-			fmt.Printf("export %s=%s\n", key, value)
+			// loop through all variables in the value
+			for _, varName := range reVariable.FindAllStringSubmatch(value, -1) {
+				varValue := os.Getenv(varName[1])
+				value = strings.ReplaceAll(value, "$"+varName[1], varValue)
+				slog.Debug("replaced variable", "variable", varName[1], "value", value)
+			}
+			if value != "" {
+				fmt.Printf("export %s=%s\n", key, value)
+			} else {
+				slog.Debug("skipping empty value after variable expansion", "key", key, "value", value)
+			}
 		}
 	}
 	l.UpdateLoadedAt()

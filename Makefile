@@ -44,5 +44,5 @@ test:
 	@go mod verify
 	@rm -f profile.cov
 	@go clean -testcache
-	@PATH="$$HOME/go/bin:$$PATH" go test -v -p 1 -timeout 30s -coverpkg ./... -coverprofile=profile.cov ./...
+	@export PATH="$$HOME/go/bin:$$PATH" && go test -v -p 1 -timeout 30s -coverpkg ./... -coverprofile=profile.cov ./...
 	@test -f profile.cov && go tool cover -func profile.cov

@@ -1,10 +1,10 @@
 package env
 
 import (
-	"log/slog"
 	"os"
 	"strings"
 
+	"github.com/gmherb/envtab/internal/loadout"
 	"github.com/gmherb/envtab/internal/sops"
 )
 
@@ -46,19 +46,36 @@ func (e *Env) CompareSOPSEncryptedValue(key string, value string) bool {
 
 	displayValue := sops.SOPSDisplayValue(value, true)
 
-	if strings.Contains(displayValue, "$PATH") {
-		slog.Debug("entry contains $PATH", "key", key, "value", value, "env", e.Env)
-		displayValue = strings.Replace(displayValue, "$PATH", "", 1)
-		displayValue = strings.Trim(displayValue, ":")
+	// Expand environment variables in the value
+	// Only expand if not encrypted (encrypted values will have "SOPS:" prefix)
+	if !strings.HasPrefix(displayValue, "SOPS:") {
+		displayValue = loadout.ExpandVariables(displayValue)
 	}
 
-	for k, v := range e.Env {
-		if k == key && v == displayValue {
-			match = true
-			break
-		} else if key == "PATH" && strings.Contains(v, displayValue) {
-			match = true
-			break
+	// Handle PATH specially - check if the expanded value is contained in current PATH
+	if key == "PATH" {
+		currentPath := e.Get("PATH")
+		if currentPath != "" {
+			// For PATH, check if all segments in displayValue are in currentPath
+			pathSegments := strings.Split(displayValue, ":")
+			allInPath := true
+			for _, segment := range pathSegments {
+				if segment != "" && !strings.Contains(currentPath, segment) {
+					allInPath = false
+					break
+				}
+			}
+			if allInPath && len(pathSegments) > 0 {
+				match = true
+			}
+		}
+	} else {
+		// For non-PATH variables, do exact match
+		for k, v := range e.Env {
+			if k == key && v == displayValue {
+				match = true
+				break
+			}
 		}
 	}
 	return match
@@ -72,19 +89,36 @@ func (e *Env) IsEntryActive(key string, value string) bool {
 	// Decrypt value if it's encrypted
 	displayValue := sops.SOPSDisplayValue(value, true)
 
-	if strings.Contains(displayValue, "$PATH") {
-		slog.Debug("entry contains $PATH", "key", key, "value", value, "env", e.Env)
-		displayValue = strings.Replace(displayValue, "$PATH", "", 1)
-		displayValue = strings.Trim(displayValue, ":")
+	// Expand environment variables in the value
+	// Only expand if not encrypted (encrypted values will have "SOPS:" prefix)
+	if !strings.HasPrefix(displayValue, "SOPS:") {
+		displayValue = loadout.ExpandVariables(displayValue)
 	}
 
-	for k, v := range e.Env {
-		if k == key && v == displayValue {
-			match = true
-			break
-		} else if key == "PATH" && strings.Contains(v, displayValue) {
-			match = true
-			break
+	// Handle PATH specially - check if the expanded value is contained in current PATH
+	if key == "PATH" {
+		currentPath := e.Get("PATH")
+		if currentPath != "" {
+			// For PATH, check if all segments in displayValue are in currentPath
+			pathSegments := strings.Split(displayValue, ":")
+			allInPath := true
+			for _, segment := range pathSegments {
+				if segment != "" && !strings.Contains(currentPath, segment) {
+					allInPath = false
+					break
+				}
+			}
+			if allInPath && len(pathSegments) > 0 {
+				match = true
+			}
+		}
+	} else {
+		// For non-PATH variables, do exact match
+		for k, v := range e.Env {
+			if k == key && v == displayValue {
+				match = true
+				break
+			}
 		}
 	}
 	return match
