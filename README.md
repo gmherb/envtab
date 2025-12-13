@@ -148,17 +148,9 @@ LOG_DIR=/home/gmherb/conf/logs
 
 If a referenced environment variable is unset or empty, the entry will be skipped during export to prevent setting empty values:
 
-```text
-# Unfortunately, no match in `show` or `list` at this time.
-$ envtab show
-$ envtab list -l example
-UpdatedAt  LoadedAt  Login  Active  Total  Name     Tags
-23:08:32   22:59:13  false  0       1      example  []
-```
-
 ## PATH as a Key
 
-The PATH environment variable is the only supported key. PATH has first class support and will work without utilizing eval.
+The PATH environment variable is treated specially to track entries added in different loadouts. All other keys (!PATH) will be treated as normal. Values are not injected into environment for consecutive loadout exports.
 
 NOTE: To utilize multiple entries of the same KEY such as PATH, you must utilize multiple loadouts. A single loadout cannot have duplicate keys.
 
