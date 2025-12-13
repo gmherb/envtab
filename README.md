@@ -383,8 +383,6 @@ This runs `go run ./tools/gen-docs.go` and produces per-command Markdown files a
       - or make it automatic for simplicity
   - --raw should be utilized with either --enable or --disable. Ignored if --status or enable/disable are omitted.
   - --status should now include mode (raw|command substitution)
-- Support environment variables in show; exported with eval $(envtab export loadout)
-  - ~~Can we resolve all environment variables like we do with PATH?~~ ✅ Done - All environment variables now support expansion
   - Add loadout order/priority/number to support specific load order in case entries build upon environment variable expansion
 - Add additional backends in addition to default (file backend).
   - File (Default)
@@ -412,3 +410,5 @@ This runs `go run ./tools/gen-docs.go` and produces per-command Markdown files a
   - templates can be .env files.
   - include templates for common things: AWS|GCP|Azure, Vault, GIT|GITHUB|GITLAB, PGSQL, etc.
 - Support importing templates (.env)
+- Support environment variables in show; exported with eval $(envtab export loadout)
+  - Can we resolve all environment variables like we do with PATH? --raw is a workaround for using other environment variables
