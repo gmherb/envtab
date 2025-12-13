@@ -4,7 +4,8 @@ This document explains how to use SOPS (Secrets OPerationS) encryption with envt
 
 ## Overview
 
-envtab now supports SOPS encryption in two ways:
+envtab supports SOPS encryption in two ways:
+
 1. **File-level encryption**: Encrypt entire loadout YAML files with SOPS
 2. **Value-level encryption**: Encrypt individual environment variable values with SOPS
 
@@ -18,24 +19,29 @@ envtab now supports SOPS encryption in two ways:
 
 ### File-Level Encryption
 
-Encrypt an entire loadout file with SOPS:
+Encrypt an entire loadout file with SOPS.
 
 ```bash
 # Create a new loadout with file-level SOPS encryption
 envtab add myloadout --encrypt-file MY_VAR=value
+# Or use the short form
+envtab add myloadout -f MY_VAR=value
 
-# Use the --encrypt-file flag to encrypt the entire file
+# Using the --encrypt-file (or -f) flag will always encrypt the entire file
+# Even when value-level encryption (or no encryption) was used prior
 envtab add myloadout --encrypt-file MY_VAR=value
 ```
 
 **Benefits:**
+
 - Entire file is encrypted, including metadata
 - Can be edited with `sops myloadout.yaml` directly
 - Works seamlessly with existing SOPS workflows
+- Faster than value-based encryption if multiple secrets stored on single loadout.
 
 ### Value-Level Encryption
 
-Encrypt individual values with SOPS:
+Encrypt individual values with SOPS.
 
 ```bash
 # Encrypt a single value
@@ -46,13 +52,14 @@ envtab add myloadout --encrypt-value API_KEY=apikey123
 ```
 
 **Benefits:**
+
 - Granular control over which values are encrypted
 - Mix encrypted and plaintext values in the same file
-- Values are decrypted automatically on export
+- Keep loadouts organized even if you have secrets
 
 ### Automatic Decryption
 
-When exporting loadouts, SOPS-encrypted values are automatically decrypted:
+When exporting loadouts, SOPS-encrypted data is automatically decrypted.
 
 ```bash
 # Export will automatically decrypt SOPS values
@@ -66,25 +73,37 @@ envtab cat myloadout -d
 
 ### SOPS Configuration File
 
-Create a `.sops.yaml` in your project root or home directory:
+Create a `.sops.yaml` in your project root or home directory.
+
+You must have creation rule(s) that match:
+
+1. `path_regex: envtab-stdin-override`
+
+*`envtab-stdin-override` is used for internal envtab processes that read from stdin (`sops --filename-override`). This prevents writing sensitive data to disk*
+
+2. A creation rule for loadouts stored in your `ENVTAB_DIR` directory.
+
+- Loadouts always end with `.yaml` and are stored directly in `ENVTAB_DIR` (no sub-directories).
+- Replace `ENVTAB_DIR` in the path_regex with your actual directory path (e.g., `~/.local/share/envtab` or the value of your `ENVTAB_DIR` environment variable).
+- The pattern should match loadout filenames (letters, numbers, dashes, and underscores are common).
+
+*Dash (-), underscore (_), and numbers are included here in the example, but naming is up to you.*
 
 ```yaml
 creation_rules:
   - path_regex: envtab-stdin-override
     kms: 'arn:aws:kms:us-east-1:123456789012:key/12345678-1234-1234-1234-123456789012'
-    pgp: >-
-      FBC7B9E2A4F9289AC0C1D4843D16CEE4A27381B4,
-      85D77543B3D624B63CEA9E06DCCB5A08F57A8DA3
 
-  - kms: 'arn:aws:kms:us-east-1:123456789012:key/12345678-1234-1234-1234-123456789012'
-    pgp: >-
-      FBC7B9E2A4F9289AC0C1D4843D16CEE4A27381B4,
-      85D77543B3D624B63CEA9E06DCCB5A08F57A8DA3
+  - path_regex: ^~/\.local/share/envtab/[a-zA-Z0-9_-]+\.yaml$
+    kms: 'arn:aws:kms:us-east-1:123456789012:key/12345678-1234-1234-1234-123456789012'
 ```
 
-### Environment Variables
+If no other SOPS creation rules exist you can use a single rule to catch all (omit `path_regex`).
 
-None currently required. Use the `--encrypt-file` flag to enable file-level encryption.
+```yaml
+creation_rules:
+  - kms: 'arn:aws:kms:us-east-1:123456789012:key/12345678-1234-1234-1234-123456789012'
+```
 
 ## Examples
 
@@ -92,9 +111,7 @@ None currently required. Use the `--encrypt-file` flag to enable file-level encr
 
 ```bash
 # Create encrypted loadout
-envtab add production --encrypt-file \
-  DB_PASSWORD=secret123 \
-  API_KEY=key456
+envtab add production --encrypt-file DB_PASSWORD=secret123
 
 # File is encrypted, can be viewed with sops
 sops $ENVTAB_DIR/production.yaml  # or ~/.local/share/envtab/production.yaml by default
@@ -107,10 +124,8 @@ envtab export production
 
 ```bash
 # Mix encrypted and plaintext values
-envtab add staging \
-  DB_HOST=localhost \
-  -e DB_PASSWORD=secret123 \
-  DEBUG=true
+envtab add staging DB_HOST=localhost
+envtab add staging -e DB_PASSWORD=secret123
 
 # Only DB_PASSWORD is encrypted
 envtab cat staging
@@ -125,15 +140,14 @@ age-keygen -o ~/.config/sops/age/keys.txt
 # Configure .sops.yaml
 cat > .sops.yaml <<EOF
 creation_rules:
-  - path_regex: envtab-stdin-override
-    age: >-
-      age1example1q2w3e4r5t6y7u8i9o0p1a2s3d4f5g6h7j8k9l0
   - age: >-
       age1example1q2w3e4r5t6y7u8i9o0p1a2s3d4f5g6h7j8k9l0
 EOF
 
-# Use SOPS encryption
+# Use SOPS file encryption
 envtab add secrets --encrypt-file API_KEY=mykey
+# All consecutive entries added to file encrypted loadouts are encrypted
+envtab add secrets PASSWORD=secret
 ```
 
 ## Implementation Details
@@ -201,17 +215,14 @@ When encryption keys are rotated (e.g., AWS KMS key rotation, age key changes):
 **For file-level encrypted loadouts:**
 ```bash
 # Re-encrypt with current keys
-sops -i -e $ENVTAB_DIR/myloadout.yaml  # or ~/.local/share/envtab/myloadout.yaml by default
-
-# Or use the helper function (if implemented as command)
-envtab reencrypt myloadout
+sops -r -i $ENVTAB_DIR/myloadout.yaml  # or ~/.local/share/envtab/myloadout.yaml by default
 ```
 
 **For value-level encrypted entries:**
 You'll need to re-add the values with current keys:
 ```bash
-# Remove old encrypted value
-envtab remove myloadout  # or edit manually
+# Remove old encrypted value entry
+envtab edit myloadout --remove-entry SECRET  # or edit manually
 
 # Re-add with current keys
 envtab add myloadout -e SECRET=newvalue
@@ -241,7 +252,7 @@ Install SOPS: `brew install sops` or download from https://github.com/getsops/so
 ### "keys may have been rotated"
 - This means the encryption keys used to encrypt the data are no longer available
 - Re-encrypt the loadout with current keys (see Key Rotation section above)
-- For file-level encryption: `sops -i -e $ENVTAB_DIR/myloadout.yaml` (or `~/.local/share/envtab/myloadout.yaml` by default)
+- For file-level encryption: `sops -r -i $ENVTAB_DIR/myloadout.yaml` (or `~/.local/share/envtab/myloadout.yaml` by default)
 - For value-level encryption: Re-add the values with `--encrypt-value` (or `-e`) flag
 
 ## Security Considerations
