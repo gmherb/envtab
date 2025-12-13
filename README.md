@@ -339,7 +339,7 @@ envtab import myloadout ./prod.yaml
   envtab import myloadout --url https://raw.githubusercontent.com/org/repo/branch/loadouts/prod.yaml
   ```
 
-## Write a loadout YAML to a file for versioning in Git
+## Write a loadout YAML to file with `cat`
 
   ```text
   envtab cat myloadout --output ./envtab-loadout-repo/myloadout.yaml
