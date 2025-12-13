@@ -342,19 +342,19 @@ envtab import myloadout ./prod.yaml
 
 ## Import from remote URLs (e.g., GitHub raw)
 
-```text
-# Merge .env from URL into an existing/new loadout
-envtab import myloadout --url https://raw.githubusercontent.com/org/repo/branch/config.env
+  ```text
+  # Merge .env from URL into an existing/new loadout
+  envtab import myloadout --url https://raw.githubusercontent.com/org/repo/branch/config.env
 
-# Replace/create a loadout from YAML at a URL
-envtab import myloadout --url https://raw.githubusercontent.com/org/repo/branch/loadouts/prod.yaml
-```
+  # Replace/create a loadout from YAML at a URL
+  envtab import myloadout --url https://raw.githubusercontent.com/org/repo/branch/loadouts/prod.yaml
+  ```
 
 ## Write a loadout YAML to a file for versioning in Git
 
-```text
-envtab cat myloadout --output ./envtab-loadout-repo/myloadout.yaml
-```
+  ```text
+  envtab cat myloadout --output ./envtab-loadout-repo/myloadout.yaml
+  ```
 
 You can then commit and push these YAML files to GitHub or another Git host and share them with your team.
 
@@ -364,9 +364,9 @@ This project includes a small tool that uses Cobra's `doc` package to generate M
 
 - **Generate docs into the `docs/` directory**:
 
-```text
-make docs
-```
+  ```text
+  make docs
+  ```
 
 This runs `go run ./tools/gen-docs.go` and produces per-command Markdown files and a top-level `docs/envtab.md` that reflect the current CLI.
 
