@@ -113,6 +113,7 @@ func (l Loadout) Export() {
 	}
 
 	re := regexp.MustCompile(`\$PATH`)
+	reVariable := regexp.MustCompile(`\$(\w+)`)
 	reSOPS := regexp.MustCompile(`^SOPS:`)
 
 	for key, value := range l.Entries {
@@ -172,6 +173,12 @@ func (l Loadout) Export() {
 			os.Setenv("PATH", strings.Join(paths, string(os.PathListSeparator)))
 			fmt.Printf("export PATH=%s\n", os.Getenv("PATH"))
 		} else {
+			// loop through all variables in the value
+			for _, varName := range reVariable.FindAllStringSubmatch(value, -1) {
+				varValue := os.Getenv(varName[1])
+				value = strings.ReplaceAll(value, "$"+varName[1], varValue)
+				slog.Debug("replaced variable", "variable", varName[1], "value", value)
+			}
 			fmt.Printf("export %s=%s\n", key, value)
 		}
 	}
