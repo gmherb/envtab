@@ -113,6 +113,9 @@ creation_rules:
 # Create encrypted loadout
 envtab add production --encrypt-file DB_PASSWORD=secret123
 
+# All consecutive entries added to file encrypted loadouts are encrypted
+envtab add secrets PASSWORD=secret
+
 # File is encrypted, can be viewed with sops
 sops $ENVTAB_DIR/production.yaml  # or ~/.local/share/envtab/production.yaml by default
 
@@ -131,38 +134,17 @@ envtab add staging -e DB_PASSWORD=secret123
 envtab cat staging
 ```
 
-### Example 3: Using with Age (SOPS backend)
-
-```bash
-# Generate age key
-age-keygen -o ~/.config/sops/age/keys.txt
-
-# Configure .sops.yaml
-cat > .sops.yaml <<EOF
-creation_rules:
-  - age: >-
-      age1example1q2w3e4r5t6y7u8i9o0p1a2s3d4f5g6h7j8k9l0
-EOF
-
-# Use SOPS file encryption
-envtab add secrets --encrypt-file API_KEY=mykey
-# All consecutive entries added to file encrypted loadouts are encrypted
-envtab add secrets PASSWORD=secret
-```
-
 ## Implementation Details
 
 ### SOPS Metadata Preservation
 
 **Important**: SOPS requires metadata (encryption keys used, MAC, etc.) to decrypt files. Our implementation preserves this:
 
-1. **File-level encryption**: The entire file is encrypted with SOPS, preserving all metadata in the file itself. This is the recommended approach.
+1. **File-level encryption**: The entire file is encrypted with SOPS, preserving all metadata in the file itself.
 
 2. **Value-level encryption**: When encrypting individual values:
-   - We create a temporary YAML file: `value: <secret>`
    - Encrypt it with SOPS (which adds metadata)
    - Store the **entire SOPS-encrypted YAML structure** (including metadata) as the value
-   - On decryption, we write the full encrypted structure to a temp file and decrypt it
    - This ensures all SOPS metadata is preserved
 
 ### Key Rotation Handling
