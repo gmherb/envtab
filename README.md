@@ -5,9 +5,10 @@
 
 - [Installation](#installation)
 - [Usage](#usage)
-- [Environment Variables in Values](#environment-variables-in-values)
-  - [PATH](#path)
-  - [Environment variables other than PATH](#environment-variables-other-than-path)
+- [Environment Variables](#environment-variables)
+  - [Environment Variables in Values](#environment-variables-in-values)
+  - [PATH as a Key](#path-as-a-key)
+  - [Shell Expansion](#shell-expansion)
 - [Encrypting Sensitive Values](#encrypting-sensitive-values)
   - [Prerequisites](#prerequisites)
     - [Sops Configuration](#sops-configuration)
@@ -97,71 +98,15 @@ The data directory (where loadouts and templates are stored) is determined by:
 
 # Environment Variables
 
-Sometimes you may need to utilize environment variables in the value of a loadout entry or even as the key. For example, the PATH environment variable.
+`envtab` supports environment variables in values and PATH as a key.
 
-### Environment Variables in Value
+## Environment Variables in Values
 
-Variables within a load entry value will be expanded before exported.
-
-### Environment Variables as Key
-
-The PATH environment variable has first class support and will work without utilizing eval (shown below).
-
-NOTE: To utilize multiple entries of the same KEY such as PATH, you must utilize multiple loadouts. A single loadout cannot have duplicate keys.
-
-### Using add
-
-If you utilize add, the environment variable will be subjected to shell variable/parameter expansion.
-
-```text
-$ envtab add testld PATH=$PATH:/other/bin
-$ envtab cat testld | grep PATH
-  PATH: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/go/bin:/other/bin
-```
-
-You must escape to bypass expansion.
-
-```text
-$ envtab add testld PATH=\$PATH:/other/bin
-$ envtab cat testld | grep PATH
-  PATH: $PATH:/other/bin
-```
-
-### Using edit
-
-Or by editing the loadout configuration directly.
-
-```text
-$ envtab edit testld
-----
-metadata:
-  createdAt: "2025-11-21T19:21:06-05:00"
-  loadedAt: "2025-11-21T19:21:06-05:00"
-  updatedAt: "2025-11-21T19:25:07-05:00"
-  login: false
-  tags: []
-  description: ""
-entries:
-  PATH: $PATH:/other/bin
-```
-
-```text
-$ envtab export testld
-export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/go/bin:/other/bin
-
-$ $(envtab export testld)
-$ envtab show
-testld -------------------------------------------------------------- [ 1 / 1 ]
-   PATH=$PATH:/other/bin
-```
-
-## Environment variables other than PATH
-
-`envtab` now supports variable expansion for all environment variables, not just PATH. You can reference any environment variable using `$VARNAME` syntax, and it will be automatically expanded during export.
+Environment variables are fully supported in values. Any environment variable can be referenced using `$VARNAME` syntax, and it will be automatically expanded during export.
 
 ### Variable Expansion
 
-Any environment variable can reference other environment variables using `$VARNAME` syntax:
+Variables within a loadout entry value will be expanded before export:
 
 ```text
 $ envtab cat example
@@ -176,6 +121,7 @@ entries:
   CONFIG_DIR: $HOME/conf
   PROJECT_ROOT: $HOME/projects/$PROJECT_NAME
   LOG_DIR: $CONFIG_DIR/logs
+  PATH: $PATH:/other/bin
 ```
 
 ```text
@@ -184,6 +130,7 @@ $ envtab export example
 export CONFIG_DIR=/home/gmherb/conf
 export PROJECT_ROOT=/home/gmherb/projects/myproject
 export LOG_DIR=/home/gmherb/conf/logs
+export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/go/bin:/other/bin
 
 # Source the export to set variables
 $ $(envtab export example)
@@ -197,16 +144,6 @@ $ env|grep LOG_DIR
 LOG_DIR=/home/gmherb/conf/logs
 ```
 
-### Using add
-
-When using `add`, you can escape the `$` to prevent shell expansion and preserve the variable reference:
-
-```text
-$ envtab add example CONFIG_DIR=\$HOME/conf
-$ envtab cat example | grep CONFIG_DIR
-  CONFIG_DIR: $HOME/conf
-```
-
 ### Empty Variable Handling
 
 If a referenced environment variable is unset or empty, the entry will be skipped during export to prevent setting empty values:
@@ -217,6 +154,66 @@ $ envtab show
 $ envtab list -l example
 UpdatedAt  LoadedAt  Login  Active  Total  Name     Tags
 23:08:32   22:59:13  false  0       1      example  []
+```
+
+## PATH as a Key
+
+The PATH environment variable is the only supported key. PATH has first class support and will work without utilizing eval.
+
+NOTE: To utilize multiple entries of the same KEY such as PATH, you must utilize multiple loadouts. A single loadout cannot have duplicate keys.
+
+## Shell Expansion
+
+When using `add`, environment variables will be subjected to shell variable/parameter expansion. You must escape the `$` to prevent shell expansion and preserve the variable reference:
+
+### Using add
+
+```text
+# Without escaping - shell expands $PATH before envtab sees it
+$ envtab add testld PATH=$PATH:/other/bin
+$ envtab cat testld | grep PATH
+  PATH: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/go/bin:/other/bin
+
+# With escaping - preserves $PATH for expansion during export
+$ envtab add testld PATH=\$PATH:/other/bin
+$ envtab cat testld | grep PATH
+  PATH: $PATH:/other/bin
+
+# Same applies to other environment variables in values
+$ envtab add example CONFIG_DIR=\$HOME/conf
+$ envtab cat example | grep CONFIG_DIR
+  CONFIG_DIR: $HOME/conf
+```
+
+### Using edit
+
+When editing the loadout configuration directly, you can use `$VARNAME` syntax without escaping:
+
+```text
+$ envtab edit testld
+----
+metadata:
+  createdAt: "2025-11-21T19:21:06-05:00"
+  loadedAt: "2025-11-21T19:21:06-05:00"
+  updatedAt: "2025-11-21T19:25:07-05:00"
+  login: false
+  tags: []
+  description: ""
+entries:
+  PATH: $PATH:/other/bin
+  CONFIG_DIR: $HOME/conf
+```
+
+```text
+$ envtab export testld
+export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/go/bin:/other/bin
+export CONFIG_DIR=/home/gmherb/conf
+
+$ $(envtab export testld)
+$ envtab show
+testld -------------------------------------------------------------- [ 2 / 2 ]
+   PATH=$PATH:/other/bin
+   CONFIG_DIR=$HOME/conf
 ```
 
 # Encrypting Sensitive Values
