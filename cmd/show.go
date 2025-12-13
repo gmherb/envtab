@@ -14,6 +14,7 @@ import (
 	"github.com/fatih/color"
 	"github.com/gmherb/envtab/internal/backends"
 	"github.com/gmherb/envtab/internal/env"
+	"github.com/gmherb/envtab/internal/loadout"
 	"github.com/gmherb/envtab/internal/sops"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -79,7 +80,7 @@ func init() {
 	showCmd.MarkFlagsMutuallyExclusive("all", "key", "value")
 }
 
-func ShowLoadout(loadout string, environment *env.Env, decrypt bool, keyFilter string, valueFilter string, all bool, patterns []string, waitGroup *sync.WaitGroup, ch chan []string) {
+func ShowLoadout(lo string, environment *env.Env, decrypt bool, keyFilter string, valueFilter string, all bool, patterns []string, waitGroup *sync.WaitGroup, ch chan []string) {
 	defer waitGroup.Done()
 
 	var entries = []string{}
@@ -87,7 +88,7 @@ func ShowLoadout(loadout string, environment *env.Env, decrypt bool, keyFilter s
 	if len(patterns) > 0 {
 		matched := false
 		for _, pattern := range patterns {
-			m, _ := filepath.Match(pattern, loadout)
+			m, _ := filepath.Match(pattern, lo)
 			if m {
 				matched = true
 				break
@@ -98,15 +99,15 @@ func ShowLoadout(loadout string, environment *env.Env, decrypt bool, keyFilter s
 		}
 	}
 
-	lo, err := backends.ReadLoadout(loadout)
+	loStruct, err := backends.ReadLoadout(lo)
 	if err != nil {
 		// Skip loadout if SOPS is not installed (for encrypted loadouts)
 		errStr := err.Error()
 		if strings.Contains(errStr, "SOPS_NOT_INSTALLED") {
-			slog.Warn("skipping loadout - SOPS not installed", "loadout", loadout)
+			slog.Warn("skipping loadout - SOPS not installed", "loadout", lo)
 			return
 		}
-		slog.Error("failure reading loadout", "loadout", loadout, "error", err)
+		slog.Error("failure reading loadout", "loadout", lo, "error", err)
 		return
 	}
 
@@ -114,24 +115,32 @@ func ShowLoadout(loadout string, environment *env.Env, decrypt bool, keyFilter s
 	keyMap := make(map[string]bool)
 	valueMap := make(map[string]bool)
 
-	for entryKey, entryValue := range lo.Entries {
+	for entryKey, entryValue := range loStruct.Entries {
 
-		displayValue := sops.SOPSDisplayValue(entryValue, true)
+		// Get decrypted value for filtering/comparison
+		decryptedValue := sops.SOPSDisplayValue(entryValue, true)
+		// Expand variables for filtering/comparison (if not encrypted)
+		if !strings.HasPrefix(decryptedValue, "SOPS:") {
+			decryptedValue = loadout.ExpandVariables(decryptedValue)
+		}
 
 		if keyFilter != "" {
 			if entryKey == keyFilter {
 				keyMap[entryKey] = true
 			}
 		} else if valueFilter != "" {
-			if displayValue == valueFilter {
+			if decryptedValue == valueFilter {
 				valueMap[entryKey] = true
 			}
-		} else if environment.IsEntryActive(entryKey, displayValue) {
+		} else if environment.IsEntryActive(entryKey, entryValue) {
 			activeMap[entryKey] = true
 		}
 
 		if keyMap[entryKey] || valueMap[entryKey] || activeMap[entryKey] || all {
-			entries = append(entries, entryKey+"="+sops.SOPSDisplayValue(entryValue, decrypt))
+			// Display the original value with variable references (e.g., $HOME, $PATH)
+			// Don't expand variables in the display - show them as stored
+			displayValue := sops.SOPSDisplayValue(entryValue, decrypt)
+			entries = append(entries, entryKey+"="+displayValue)
 		}
 
 	}
@@ -162,11 +171,11 @@ func ShowLoadout(loadout string, environment *env.Env, decrypt bool, keyFilter s
 	}
 
 	// If a loadout has fewer active entries than total entries, colorize the count red
-	if len(lo.Entries) != len(activeMap) {
+	if len(loStruct.Entries) != len(activeMap) {
 		countColor = color.New(color.FgRed).SprintFunc()
 	}
 
-	countLeftHandSide := len(lo.Entries)
+	countLeftHandSide := len(loStruct.Entries)
 	var countRightHandSide int = 0
 	if len(keyMap) > 0 {
 		countRightHandSide = len(keyMap)
@@ -178,13 +187,13 @@ func ShowLoadout(loadout string, environment *env.Env, decrypt bool, keyFilter s
 
 	entryString := []string{}
 	if len(entries) > 0 {
-		dashCount := termWidth - len(loadout) -
+		dashCount := termWidth - len(lo) -
 			len(fmt.Sprint(countLeftHandSide)) -
 			len(fmt.Sprint(countRightHandSide)) -
 			10 // magic number
 
 		entryString = append(entryString,
-			loColor(loadout)+" "+strings.Repeat(dashColor("-"), dashCount)+" [ "+countColor(countLeftHandSide)+" / "+countColor(countRightHandSide)+" ]",
+			loColor(lo)+" "+strings.Repeat(dashColor("-"), dashCount)+" [ "+countColor(countLeftHandSide)+" / "+countColor(countRightHandSide)+" ]",
 		)
 		for _, entry := range entries {
 			entryString = append(entryString, fmt.Sprint(padding, entryColor(entry)))

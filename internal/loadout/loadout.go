@@ -100,6 +100,22 @@ func ValidateLoadoutYAML(yamlContent []byte) error {
 	return nil
 }
 
+// ExpandVariables expands environment variable references in a value string
+// It replaces $VARNAME patterns with the actual environment variable values
+// Returns the expanded value string
+func ExpandVariables(value string) string {
+	reVariable := regexp.MustCompile(`\$(\w+)`)
+
+	// Find all variable references and replace them
+	for _, varName := range reVariable.FindAllStringSubmatch(value, -1) {
+		varValue := os.Getenv(varName[1])
+		value = strings.ReplaceAll(value, "$"+varName[1], varValue)
+		slog.Debug("expanded variable", "variable", varName[1], "expandedValue", varValue, "result", value)
+	}
+
+	return value
+}
+
 func (l Loadout) Export() {
 
 	pathMap := make(map[string]bool)
