@@ -146,7 +146,7 @@ LOG_DIR=/home/gmherb/conf/logs
 
 ### Empty Variable Handling
 
-If a referenced environment variable is unset or empty, the entry will be skipped during export to prevent setting empty values:
+If a referenced environment variable is unset or empty, the entry will be skipped during export to prevent setting empty values.
 
 ## PATH as a Key
 
@@ -268,7 +268,7 @@ entries:
 You can also encrypt entire loadout files with SOPS using the `--encrypt-file` flag (or `-f`):
 
 ```text
-$ envtab add secrets --encrypt-file API_KEY=mykey DB_PASSWORD=mypass
+$ envtab add secrets --encrypt-file API_KEY=mykey
 ```
 
 This encrypts the entire file, including metadata. The file can be edited directly with `sops`:
@@ -361,6 +361,7 @@ This runs `go run ./tools/gen-docs.go` and produces per-command Markdown files a
 
 # TODO
 
+- Add config option to show raw sops data vs `***encrypted***` string in showCmd
 - Should we modify the prefix (SOPS:) to something less likely to occur in values?
 - SOPS:exec-env - execute a command with decrypted values inserted into the environment
   - Add support or re-implement. Reimplementation would be best as can support all envtab loadouts
