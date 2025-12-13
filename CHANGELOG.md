@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.16-alpha] - 2025-12-12
+
+### Added
+
+- Variable expansion support for all environment variables:
+  - Added support for variable expansion in any environment variable value (not just PATH)
+  - Variables can now reference other environment variables using `$VARNAME` syntax
+  - Automatic expansion of all `$VARNAME` patterns in loadout entry values during export
+
+### Fixed
+
+- Fixed handling of empty values after variable expansion:
+  - Skip exporting entries with empty values after variable expansion
+  - Prevents exporting empty environment variables when referenced variables are unset or empty
+  - Resolves issues when variables are empty or do not exist
+
 ## [0.1.15-alpha] - 2025-12-08
 
 ### Fixed
