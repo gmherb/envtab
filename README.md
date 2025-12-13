@@ -28,7 +28,7 @@
 ### Prerequisites
 
 - Go 1.25 or later
-- Git (for version information)
+- Git
 
 ### Build and Install
 
