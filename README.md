@@ -1,7 +1,7 @@
 ![banner](banner.png)
 `envtab` (typed `envt\t`) aims to be your goto tool for working with environment variables. Organize sets of environment variables into loadouts. A loadout is a collection of environment variables that can be exported into the shell. Loadouts are named, optionally tagged, and can include a description. `envtab` stores these loadouts in your data directory. `envtab` loadouts can also be enabled on shell login.
 
-![diagram](diagram.png "Take control of your environment")
+![diagram](diagram.png "Keep tabs on your environment")
 
 - [Installation](#installation)
 - [Usage](#usage)

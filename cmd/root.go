@@ -1,6 +1,3 @@
-/*
-Copyright © 2024 Greg Herbster
-*/
 package cmd
 
 import (
@@ -117,8 +114,8 @@ func initConfig() {
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:     "envtab",
-	Short:   "Take control of your environment.",
-	Long:    `Take control of your environment.`,
+	Short:   "Keep tabs on your environment.",
+	Long:    `Keep tabs on your environment.`,
 	Version: getVersion(),
 	// Uncomment the following line if your bare application
 	// has an action associated with it:
