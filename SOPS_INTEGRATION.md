@@ -113,8 +113,8 @@ creation_rules:
 # Create encrypted loadout
 envtab add production --encrypt-file DB_PASSWORD=secret123
 
-# All consecutive entries added to file encrypted loadouts are encrypted
-envtab add secrets PASSWORD=secret
+# Consecutive entries added to file encrypted loadouts are always encrypted
+envtab add production PASSWORD=secret
 
 # File is encrypted, can be viewed with sops
 sops $ENVTAB_DIR/production.yaml  # or ~/.local/share/envtab/production.yaml by default
