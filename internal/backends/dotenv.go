@@ -4,6 +4,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/gmherb/envtab/internal/env"
 	"github.com/gmherb/envtab/internal/loadout"
 )
 
@@ -23,16 +24,8 @@ func ParseDotenvContent(content []byte) (map[string]string, error) {
 			continue
 		}
 
-		// Split on first = only (values may contain =)
-		parts := strings.SplitN(line, "=", 2)
-		if len(parts) != 2 {
-			continue
-		}
-
-		key := strings.TrimSpace(parts[0])
-		value := strings.TrimSpace(parts[1])
-
-		// Skip if key is empty
+		// Parse key-value pair (handles values with = and trims whitespace)
+		key, value := env.ParseKeyValue(line)
 		if key == "" {
 			continue
 		}

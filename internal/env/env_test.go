@@ -5,11 +5,54 @@ import (
 	"testing"
 )
 
+func TestParseKeyValue(t *testing.T) {
+	tests := []struct {
+		name     string
+		input    string
+		expectedKey   string
+		expectedValue string
+	}{
+		{"simple key-value", "KEY=value", "KEY", "value"},
+		{"value with equals", "KEY=value=with=equals", "KEY", "value=with=equals"},
+		{"empty value", "KEY=", "KEY", ""},
+		{"no equals sign", "KEY", "", ""},
+		{"multiple equals", "KEY=val1=val2=val3", "KEY", "val1=val2=val3"},
+		{"key with leading whitespace", "  KEY=value", "KEY", "value"},
+		{"key with trailing whitespace", "KEY  =value", "KEY", "value"},
+		{"key with both whitespace", "  KEY  =value", "KEY", "value"},
+		{"value with leading whitespace", "KEY=  value", "KEY", "value"},
+		{"value with trailing whitespace", "KEY=value  ", "KEY", "value"},
+		{"value with both whitespace", "KEY=  value  ", "KEY", "value"},
+		{"both key and value with whitespace", "  KEY  =  value  ", "KEY", "value"},
+		{"value with internal whitespace", "KEY=value with spaces", "KEY", "value with spaces"},
+		{"empty value with whitespace", "KEY=  ", "KEY", ""},
+		{"key with whitespace, empty value", "  KEY  =", "KEY", ""},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			key, value := ParseKeyValue(tt.input)
+			if key != tt.expectedKey {
+				t.Errorf("ParseKeyValue() key = %v, want %v", key, tt.expectedKey)
+			}
+			if value != tt.expectedValue {
+				t.Errorf("ParseKeyValue() value = %v, want %v", value, tt.expectedValue)
+			}
+		})
+	}
+}
+
 func TestSet(t *testing.T) {
 	e := NewEnv()
 	e.Set("TEST=TEST")
 	if e.Env["TEST"] != "TEST" {
 		t.Errorf("Expected %s, got %s", "TEST", e.Env["TEST"])
+	}
+
+	// Test value with equals sign
+	e.Set("TEST2=value=with=equals")
+	if e.Env["TEST2"] != "value=with=equals" {
+		t.Errorf("Expected %s, got %s", "value=with=equals", e.Env["TEST2"])
 	}
 }
 

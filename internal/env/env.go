@@ -16,9 +16,25 @@ func NewEnv() *Env {
 	return &Env{Env: make(map[string]string)}
 }
 
+// ParseKeyValue parses a key-value pair from a string in the format "KEY=VALUE"
+// It splits only on the first '=' to handle values that may contain '=' characters
+// Trims whitespace from both key and value for consistency
+// Returns the key and value, or empty strings if the format is invalid
+func ParseKeyValue(ev string) (key, value string) {
+	parts := strings.SplitN(ev, "=", 2)
+	if len(parts) != 2 {
+		return "", ""
+	}
+	key = strings.TrimSpace(parts[0])
+	value = strings.TrimSpace(parts[1])
+	return key, value
+}
+
 func (e *Env) Set(ev string) {
-	pair := strings.Split(ev, "=")
-	e.Env[pair[0]] = pair[1]
+	key, value := ParseKeyValue(ev)
+	if key != "" {
+		e.Env[key] = value
+	}
 }
 
 func (e *Env) Populate() {

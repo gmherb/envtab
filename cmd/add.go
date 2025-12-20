@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/gmherb/envtab/internal/backends"
+	"github.com/gmherb/envtab/internal/env"
 	"github.com/gmherb/envtab/internal/sops"
 	"github.com/gmherb/envtab/internal/tags"
 	"github.com/spf13/cobra"
@@ -47,8 +48,12 @@ Multiple tags can be provided using space or comma as a separator.`,
 
 		if strings.Contains(args[1], "=") {
 			slog.Debug("Equal sign detected in second argument. Splitting into key and value.")
-			parts := strings.SplitN(args[1], "=", 2)
-			key, value = parts[0], parts[1]
+			key, value = env.ParseKeyValue(args[1])
+			if key == "" {
+				slog.Error("Invalid key-value format", "input", args[1])
+				cmd.Usage()
+				os.Exit(1)
+			}
 			newTags = args[2:]
 		} else {
 			slog.Debug("No equal sign detected in second argument. Assigning second argument as key.")
