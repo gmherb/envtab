@@ -1,6 +1,7 @@
 package sops
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
@@ -9,6 +10,62 @@ import (
 	"github.com/gmherb/envtab/internal/utils"
 	yaml "gopkg.in/yaml.v2"
 )
+
+// checkSOPSConfigForTesting verifies that sops is configured correctly for testing
+// and provides helpful error messages if configuration is missing
+func checkSOPSConfigForTesting(t *testing.T) error {
+	if err := checkSOPSAvailable(); err != nil {
+		return err
+	}
+
+	// Check if sops config exists and has the required rule
+	configPath := GetSOPSConfigPath()
+	if configPath == "" {
+		return fmt.Errorf(`sops is installed but no .sops.yaml configuration found.
+
+For testing, you need a .sops.yaml file with a creation rule matching the filename override.
+Required rule: path_regex: %s
+
+Example .sops.yaml:
+creation_rules:
+  - path_regex: %s
+    # Add your encryption backend here (e.g., age, kms, etc.)
+    # For testing, you can use age with a test key
+
+See SOPS_INTEGRATION.md for more details.`, SOPSFilenameOverride, SOPSFilenameOverride)
+	}
+
+	// Test that we can actually use sops with the filename override
+	// by attempting a simple encrypt/decrypt operation
+	testValue := "test-config-check"
+	encrypted, err := SOPSEncryptValue(testValue)
+	if err != nil {
+		return fmt.Errorf(`sops configuration test failed: %v
+
+This usually means your .sops.yaml is missing a creation rule for the filename override.
+Required rule: path_regex: %s
+
+Example .sops.yaml:
+creation_rules:
+  - path_regex: %s
+    # Add your encryption backend here (e.g., age, kms, etc.)
+
+See SOPS_INTEGRATION.md for more details.`, err, SOPSFilenameOverride, SOPSFilenameOverride)
+	}
+
+	// Try to decrypt to ensure it works both ways
+	_, err = SOPSDecryptValue(encrypted)
+	if err != nil {
+		return fmt.Errorf(`sops decryption test failed: %v
+
+This usually means your .sops.yaml configuration is incorrect or keys are not accessible.
+Required rule: path_regex: %s
+
+See SOPS_INTEGRATION.md for more details.`, err, SOPSFilenameOverride)
+	}
+
+	return nil
+}
 
 func TestContains(t *testing.T) {
 	tests := []struct {
@@ -160,9 +217,9 @@ func TestCheckSOPSAvailable(t *testing.T) {
 }
 
 func TestSOPSEncryptValue(t *testing.T) {
-	// Skip if sops is not available
-	if err := checkSOPSAvailable(); err != nil {
-		t.Skipf("Skipping test: sops not available: %v", err)
+	// Skip if sops is not available or not configured correctly
+	if err := checkSOPSConfigForTesting(t); err != nil {
+		t.Fatalf("%v", err)
 	}
 
 	tests := []struct {
@@ -205,9 +262,9 @@ func TestSOPSEncryptValue(t *testing.T) {
 }
 
 func TestSOPSDecryptValue(t *testing.T) {
-	// Skip if sops is not available
-	if err := checkSOPSAvailable(); err != nil {
-		t.Skipf("Skipping test: sops not available: %v", err)
+	// Skip if sops is not available or not configured correctly
+	if err := checkSOPSConfigForTesting(t); err != nil {
+		t.Fatalf("%v", err)
 	}
 
 	// Test decrypting a value we encrypt
@@ -502,9 +559,9 @@ entries:
 }
 
 func TestSOPSEncryptDecryptRoundTrip(t *testing.T) {
-	// Skip if sops is not available
-	if err := checkSOPSAvailable(); err != nil {
-		t.Skipf("Skipping test: sops not available: %v", err)
+	// Skip if sops is not available or not configured correctly
+	if err := checkSOPSConfigForTesting(t); err != nil {
+		t.Fatalf("%v", err)
 	}
 
 	originalValue := "round_trip_test_value_123"
@@ -528,9 +585,9 @@ func TestSOPSEncryptDecryptRoundTrip(t *testing.T) {
 }
 
 func TestSOPSDecryptValueWithFallbackParsing(t *testing.T) {
-	// Skip if sops is not available
-	if err := checkSOPSAvailable(); err != nil {
-		t.Skipf("Skipping test: sops not available: %v", err)
+	// Skip if sops is not available or not configured correctly
+	if err := checkSOPSConfigForTesting(t); err != nil {
+		t.Fatalf("%v", err)
 	}
 
 	// Test with a value that might trigger fallback parsing

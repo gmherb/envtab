@@ -16,7 +16,11 @@ import (
 )
 
 const sopsInstallURL = "https://github.com/getsops/sops"
-const sopsFilenameOverride = "envtab-stdin-override"
+
+// SOPSFilenameOverride is the filename override used for stdin operations in sops
+// This constant is exported for testing purposes to ensure tests use the correct sops rule
+// Tests require a .sops.yaml creation rule matching this value: path_regex: envtab-stdin-override
+const SOPSFilenameOverride = "envtab-stdin-override"
 
 // sopsVerbose controls whether --verbose flag is added to sops commands
 var sopsVerbose = os.Getenv("SOPS_VERBOSE") == "true"
@@ -40,7 +44,7 @@ func getFilenameOverride() string {
 	if envPath := os.Getenv("ENVTAB_SOPS_PATH_REGEX"); envPath != "" {
 		return envPath
 	}
-	return sopsFilenameOverride
+	return SOPSFilenameOverride
 }
 
 // checkSOPSAvailable checks if the sops command is available
@@ -83,6 +87,7 @@ func GetSOPSConfigPath() string {
 // SOPSEncryptFile encrypts a file using sops command-line tool
 // Returns the encrypted content as bytes
 // SOPS encrypts YAML files in-place, preserving structure and adding sops: metadata
+// Uses the file path to match sops creation rules (e.g., for prod vs dev environments)
 func SOPSEncryptFile(filePath string) ([]byte, error) {
 	slog.Debug("encrypting file with SOPS", "file", filePath)
 	if err := checkSOPSAvailable(); err != nil {
@@ -110,6 +115,7 @@ func SOPSEncryptFile(filePath string) ([]byte, error) {
 // SOPSDecryptFile decrypts a file using sops command-line tool
 // Returns the decrypted content as bytes
 // Handles key rotation errors gracefully
+// Uses the file path to match sops creation rules (e.g., for prod vs dev environments)
 func SOPSDecryptFile(filePath string) ([]byte, error) {
 	slog.Debug("decrypting file with SOPS", "file", filePath)
 	if err := checkSOPSAvailable(); err != nil {
@@ -164,6 +170,7 @@ func SOPSCanDecrypt(filePath string) bool {
 
 // SOPSReencryptFile re-encrypts a file with current keys
 // Useful when keys have been rotated
+// Uses the file path to match sops creation rules (e.g., for prod vs dev environments)
 func SOPSReencryptFile(filePath string) error {
 	slog.Debug("re-encrypting file with SOPS", "file", filePath)
 	if err := checkSOPSAvailable(); err != nil {
