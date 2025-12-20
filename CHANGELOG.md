@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.17-alpha] - 2025-12-12
+
+### Fixed
+
+- Fixed variable expansion inside PATH entries:
+  - Variables other than `$PATH` (e.g., `$HOME`, `$USER`) are now properly expanded within PATH entry values
+  - PATH entries like `$HOME/bin:$PATH` now correctly expand `$HOME` before processing `$PATH`
+  - Ensures all environment variables referenced in PATH entries are expanded during export
+
 ## [0.1.16-alpha] - 2025-12-12
 
 ### Added

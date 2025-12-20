@@ -219,7 +219,7 @@ func TestCheckSOPSAvailable(t *testing.T) {
 func TestSOPSEncryptValue(t *testing.T) {
 	// Skip if sops is not available or not configured correctly
 	if err := checkSOPSConfigForTesting(t); err != nil {
-		t.Fatalf("%v", err)
+		t.Skipf("Skipping test: %v", err)
 	}
 
 	tests := []struct {
@@ -264,7 +264,7 @@ func TestSOPSEncryptValue(t *testing.T) {
 func TestSOPSDecryptValue(t *testing.T) {
 	// Skip if sops is not available or not configured correctly
 	if err := checkSOPSConfigForTesting(t); err != nil {
-		t.Fatalf("%v", err)
+		t.Skipf("Skipping test: %v", err)
 	}
 
 	// Test decrypting a value we encrypt
@@ -561,7 +561,7 @@ entries:
 func TestSOPSEncryptDecryptRoundTrip(t *testing.T) {
 	// Skip if sops is not available or not configured correctly
 	if err := checkSOPSConfigForTesting(t); err != nil {
-		t.Fatalf("%v", err)
+		t.Skipf("Skipping test: %v", err)
 	}
 
 	originalValue := "round_trip_test_value_123"
@@ -587,7 +587,7 @@ func TestSOPSEncryptDecryptRoundTrip(t *testing.T) {
 func TestSOPSDecryptValueWithFallbackParsing(t *testing.T) {
 	// Skip if sops is not available or not configured correctly
 	if err := checkSOPSConfigForTesting(t); err != nil {
-		t.Fatalf("%v", err)
+		t.Skipf("Skipping test: %v", err)
 	}
 
 	// Test with a value that might trigger fallback parsing
