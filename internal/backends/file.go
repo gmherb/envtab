@@ -51,8 +51,8 @@ func AddEntryToLoadout(name string, key string, value string, tags []string) err
 }
 
 // AddEntryToLoadoutWithSOPS writes a key-value pair to a loadout
-// If useSOPS is true, encrypts the entire file with SOPS
-func AddEntryToLoadoutWithSOPS(name string, key string, value string, tags []string, useSOPS bool) error {
+// If fileEncrypted is true, encrypts the entire file with SOPS
+func AddEntryToLoadoutWithSOPS(name string, key string, value string, tags []string, fileEncrypted bool) error {
 
 	// Read the existing entries if file exists
 	lo, err := ReadLoadout(name)
@@ -65,7 +65,7 @@ func AddEntryToLoadoutWithSOPS(name string, key string, value string, tags []str
 	lo.UpdateEntry(key, value)
 	lo.UpdateTags(tags)
 
-	return WriteLoadoutWithEncryption(name, lo, useSOPS)
+	return WriteLoadoutWithEncryption(name, lo, fileEncrypted)
 }
 
 // Remove a loadout file
@@ -190,14 +190,14 @@ func RenameLoadout(oldName, newName string) error {
 }
 
 // Write a Loadout struct to file
-// If useSOPS is true, encrypts the entire file with SOPS
+// If fileEncrypted is true, encrypts the entire file with SOPS
 func WriteLoadout(name string, lo *loadout.Loadout) error {
 	return WriteLoadoutWithEncryption(name, lo, false)
 }
 
 // WriteLoadoutWithEncryption writes a Loadout struct to file
-// If useSOPS is true, encrypts the entire file with SOPS
-func WriteLoadoutWithEncryption(name string, lo *loadout.Loadout, useSOPS bool) error {
+// If fileEncrypted is true, encrypts the entire file with SOPS
+func WriteLoadoutWithEncryption(name string, lo *loadout.Loadout, fileEncrypted bool) error {
 
 	filePath := GetLoadoutFilePath(name)
 
@@ -206,7 +206,7 @@ func WriteLoadoutWithEncryption(name string, lo *loadout.Loadout, useSOPS bool) 
 		return err
 	}
 
-	if useSOPS {
+	if fileEncrypted {
 		encrypted, err := sops.SOPSEncryptFile(filePath)
 		if err != nil {
 			return err

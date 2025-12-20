@@ -256,7 +256,7 @@ func TestWriteLoadoutWithEncryption(t *testing.T) {
 	var testLo loadout.Loadout
 	err = yaml.Unmarshal(content, &testLo)
 	if err != nil {
-		t.Errorf("WriteLoadoutWithEncryption() with useSOPS=false should write readable YAML: %v", err)
+		t.Errorf("WriteLoadoutWithEncryption() with fileEncrypted=false should write readable YAML: %v", err)
 	}
 }
 
